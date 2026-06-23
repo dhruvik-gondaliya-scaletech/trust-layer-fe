@@ -4,8 +4,11 @@ import React from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useDashboardData } from "@/hooks/queries/useDashboardData";
+import { fadeIn, slideUp, staggerContainer } from "@/lib/motion";
+import { FRONTEND_ROUTES } from "@/lib/contants";
 import { DashboardHeader } from "../components/DashboardHeader";
 import { QuickActions } from "../components/QuickActions";
 import { RecentDeals } from "../components/RecentDeals";
@@ -15,9 +18,10 @@ import { WalletCard } from "../components/WalletCard";
 import { DashboardSkeleton } from "../components/DashboardSkeleton";
 import { DashboardError } from "../components/DashboardError";
 import { DashboardEmpty } from "../components/DashboardEmpty";
-import { fadeIn, slideUp, staggerContainer } from "@/lib/motion";
 
 export const DashboardContainer: React.FC = () => {
+  const router = useRouter();
+
   // Query hook to fetch simulated dashboard data
   const { data, isLoading, isError, error, refetch } = useDashboardData();
 
@@ -65,9 +69,7 @@ export const DashboardContainer: React.FC = () => {
   };
 
   const handleCreateNewDeal = () => {
-    toast.success("Create Deal Form Launched", {
-      description: "Configure your new escrow transaction details.",
-    });
+    router.push(FRONTEND_ROUTES.CREATE_DEAL);
   };
 
   // State Boundaries

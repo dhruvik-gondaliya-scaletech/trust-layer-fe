@@ -4,6 +4,8 @@ export const FRONTEND_ROUTES = {
     VERIFY: "/verify",
     LOGIN: "/login",
     DASHBOARD: "/dashboard",
+    CREATE_DEAL: "/create-deal",
+
 }
 
 export enum VerificationStep {
