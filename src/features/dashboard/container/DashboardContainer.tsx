@@ -101,86 +101,88 @@ export const DashboardContainer: React.FC = () => {
   }
 
   return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={staggerContainer}
-      className="w-full flex flex-col gap-6 pb-20 overflow-y-auto scrollbar-none"
-    >
-      {/* 1. Header Row */}
-      <motion.div variants={fadeIn}>
-        <DashboardHeader
-          name={data.user.name}
-          welcomeMessage={data.user.welcomeMessage}
-          emailVerified={data.user.emailVerified}
-          phoneVerified={data.user.phoneVerified}
-          notificationCount={data.user.notificationCount}
-          onNotificationClick={handleNotificationClick}
-        />
-      </motion.div>
+    <div className="relative w-full h-full flex flex-col overflow-hidden">
+      {/* Scrollable Container */}
+      <div className="flex-1 overflow-y-auto scrollbar-none pb-28">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer}
+          className="w-full flex flex-col gap-6 pt-6"
+        >
+          {/* 1. Header Row */}
+          <motion.div variants={fadeIn}>
+            <DashboardHeader
+              name={data.user.name}
+              welcomeMessage={data.user.welcomeMessage}
+              emailVerified={data.user.emailVerified}
+              phoneVerified={data.user.phoneVerified}
+              notificationCount={data.user.notificationCount}
+              onNotificationClick={handleNotificationClick}
+            />
+          </motion.div>
 
-      {/* 2. Actions Alert */}
-      <motion.div variants={slideUp}>
-        <QuickActions
-          actions={data.quickActions}
-          onActionClick={handleQuickActionClick}
-        />
-      </motion.div>
+          {/* 4. Quick Insights */}
+          <motion.div variants={slideUp}>
+            <QuickInsights
+              activeListings={data.insights.activeListings}
+              awaitingFunds={data.insights.awaitingFunds}
+              inTransit={data.insights.inTransit}
+              completedDeals={data.insights.completedDeals}
+            />
+          </motion.div>
 
-      {/* 3. Recent Deals */}
-      <motion.div variants={slideUp}>
-        <RecentDeals
-          deals={data.recentDeals}
-          onViewAllClick={handleViewAllDeals}
-          onDealClick={handleDealClick}
-        />
-      </motion.div>
+          {/* 2. Actions Alert */}
+          <motion.div variants={slideUp}>
+            <QuickActions
+              actions={data.quickActions}
+              onActionClick={handleQuickActionClick}
+            />
+          </motion.div>
 
-      {/* 4. Quick Insights */}
-      <motion.div variants={slideUp}>
-        <QuickInsights
-          activeListings={data.insights.activeListings}
-          awaitingFunds={data.insights.awaitingFunds}
-          inTransit={data.insights.inTransit}
-          completedDeals={data.insights.completedDeals}
-        />
-      </motion.div>
+          {/* 3. Recent Deals */}
+          <motion.div variants={slideUp}>
+            <RecentDeals
+              deals={data.recentDeals}
+              onViewAllClick={handleViewAllDeals}
+              onDealClick={handleDealClick}
+            />
+          </motion.div>
 
-      {/* 5. Buying/Selling Activity */}
-      <motion.div variants={slideUp}>
-        <YourActivity
-          sellingActive={data.activity.sellingActive}
-          buyingActive={data.activity.buyingActive}
-          onSellingClick={() => handleActivityClick("selling")}
-          onBuyingClick={() => handleActivityClick("buying")}
-        />
-      </motion.div>
+          {/* 5. Buying/Selling Activity */}
+          <motion.div variants={slideUp}>
+            <YourActivity
+              sellingActive={data.activity.sellingActive}
+              buyingActive={data.activity.buyingActive}
+              onSellingClick={() => handleActivityClick("selling")}
+              onBuyingClick={() => handleActivityClick("buying")}
+            />
+          </motion.div>
 
-      {/* 6. Wallet card */}
-      <motion.div variants={slideUp}>
-        <WalletCard
-          availableBalance={data.wallet.availableBalance}
-          inEscrow={data.wallet.inEscrow}
-          readyToWithdraw={data.wallet.readyToWithdraw}
-          onWithdrawClick={handleWithdrawClick}
-          onHistoryClick={handleHistoryClick}
-        />
-      </motion.div>
+          {/* 6. Wallet card */}
+          <motion.div variants={slideUp}>
+            <WalletCard
+              availableBalance={data.wallet.availableBalance}
+              inEscrow={data.wallet.inEscrow}
+              readyToWithdraw={data.wallet.readyToWithdraw}
+              onWithdrawClick={handleWithdrawClick}
+              onHistoryClick={handleHistoryClick}
+            />
+          </motion.div>
+        </motion.div>
+      </div>
 
-      {/* 7. Create New Deal Fixed/Bottom Action Button */}
-      <motion.div
-        variants={slideUp}
-        className="px-6 w-full flex items-center justify-center mt-2"
-      >
+      {/* 7. Sticky Bottom Actions Bar */}
+      <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-card via-card/95 to-transparent pt-12 pointer-events-none z-20">
         <Button
           onClick={handleCreateNewDeal}
           size="lg"
-          className="w-full bg-primary hover:bg-primary/95 text-primary-foreground font-extrabold rounded-2xl h-12 shadow-lg shadow-primary/15 flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+          className="w-full bg-primary hover:bg-primary/95 text-primary-foreground font-extrabold rounded-2xl h-12 shadow-lg shadow-primary/15 flex items-center justify-center gap-2 pointer-events-auto active:scale-[0.98] transition-all"
         >
           <Plus className="w-5 h-5" />
           <span>Create New Deal</span>
         </Button>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
