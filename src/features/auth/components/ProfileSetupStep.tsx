@@ -4,7 +4,11 @@ import React, { useState } from "react";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
 import { ProfileSetupInput } from "@/lib/validations/verify";
 import { Button } from "@/components/ui/button";
-import { Check, ChevronLeft, Loader2, User } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Check, ChevronLeft, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ProfileSetupStepProps {
   register: UseFormRegister<ProfileSetupInput>;
@@ -105,26 +109,27 @@ export const ProfileSetupStep: React.FC<ProfileSetupStepProps> = ({
         >
           {/* Username handle Field */}
           <div className="flex flex-col gap-1.5">
-            <label
+            <Label
               htmlFor="profile-username"
               className="text-xs font-bold text-foreground/80"
             >
               Username
-            </label>
+            </Label>
             <div className="relative">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted-foreground select-none">
                 @
               </span>
-              <input
+              <Input
                 id="profile-username"
                 type="text"
                 disabled={isPending}
                 placeholder="username"
-                className={`w-full pl-8 pr-3.5 py-2.5 text-sm bg-background border rounded-xl outline-none transition-all focus:ring-2 focus:ring-primary/20 ${
+                className={cn(
+                  "pl-8",
                   errors.username
-                    ? "border-destructive focus:border-destructive focus:ring-destructive/20"
-                    : "border-border/80 focus:border-primary"
-                }`}
+                    ? "border-destructive focus-visible:ring-destructive/20"
+                    : "border-border/80"
+                )}
                 aria-invalid={errors.username ? "true" : "false"}
                 aria-describedby={errors.username ? "username-error" : undefined}
                 {...register("username")}
@@ -147,22 +152,22 @@ export const ProfileSetupStep: React.FC<ProfileSetupStepProps> = ({
 
           {/* Short Bio Description Field */}
           <div className="flex flex-col gap-1.5">
-            <label
+            <Label
               htmlFor="profile-bio"
               className="text-xs font-bold text-foreground/80"
             >
               Short Bio (Optional)
-            </label>
-            <textarea
+            </Label>
+            <Textarea
               id="profile-bio"
               disabled={isPending}
               placeholder="Tell us a little bit about yourself..."
               rows={3}
-              className={`w-full px-3.5 py-2.5 text-sm bg-background border rounded-xl outline-none transition-all focus:ring-2 focus:ring-primary/20 resize-none ${
+              className={
                 errors.bio
-                  ? "border-destructive focus:border-destructive focus:ring-destructive/20"
-                  : "border-border/80 focus:border-primary"
-              }`}
+                  ? "border-destructive focus-visible:ring-destructive/20"
+                  : "border-border/80"
+              }
               aria-invalid={errors.bio ? "true" : "false"}
               aria-describedby={errors.bio ? "bio-error" : undefined}
               {...register("bio")}

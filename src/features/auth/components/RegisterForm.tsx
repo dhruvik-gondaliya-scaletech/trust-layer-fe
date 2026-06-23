@@ -4,6 +4,8 @@ import React from "react";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
 import { RegisterInput } from "@/lib/validations/register";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Loader2, Shield, Lock } from "lucide-react";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 import Link from "next/link";
@@ -54,22 +56,22 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           <div className="grid grid-cols-2 gap-4">
             {/* First Name */}
             <div className="flex flex-col gap-1.5">
-              <label
+              <Label
                 htmlFor="register-firstname"
                 className="text-xs font-semibold text-foreground/80"
               >
                 First Name
-              </label>
-              <input
+              </Label>
+              <Input
                 id="register-firstname"
                 type="text"
                 disabled={isPending}
                 placeholder="John"
-                className={`px-3.5 py-2 text-sm bg-background border rounded-xl outline-none transition-all focus:ring-2 focus:ring-primary/20 ${
+                className={
                   errors.firstName
-                    ? "border-destructive focus:border-destructive focus:ring-destructive/20"
-                    : "border-border/80 focus:border-primary"
-                }`}
+                    ? "border-destructive focus-visible:ring-destructive/20"
+                    : "border-border/80"
+                }
                 aria-invalid={errors.firstName ? "true" : "false"}
                 aria-describedby={
                   errors.firstName ? "firstname-error" : undefined
@@ -89,22 +91,22 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
             {/* Last Name */}
             <div className="flex flex-col gap-1.5">
-              <label
+              <Label
                 htmlFor="register-lastname"
                 className="text-xs font-semibold text-foreground/80"
               >
                 Last Name
-              </label>
-              <input
+              </Label>
+              <Input
                 id="register-lastname"
                 type="text"
                 disabled={isPending}
                 placeholder="Smith"
-                className={`px-3.5 py-2 text-sm bg-background border rounded-xl outline-none transition-all focus:ring-2 focus:ring-primary/20 ${
+                className={
                   errors.lastName
-                    ? "border-destructive focus:border-destructive focus:ring-destructive/20"
-                    : "border-border/80 focus:border-primary"
-                }`}
+                    ? "border-destructive focus-visible:ring-destructive/20"
+                    : "border-border/80"
+                }
                 aria-invalid={errors.lastName ? "true" : "false"}
                 aria-describedby={
                   errors.lastName ? "lastname-error" : undefined
@@ -125,22 +127,22 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
           {/* Email Address */}
           <div className="flex flex-col gap-1.5">
-            <label
+            <Label
               htmlFor="register-email"
               className="text-xs font-semibold text-foreground/80"
             >
               Email
-            </label>
-            <input
+            </Label>
+            <Input
               id="register-email"
               type="email"
               disabled={isPending}
               placeholder="john@example.com"
-              className={`px-3.5 py-2 text-sm bg-background border rounded-xl outline-none transition-all focus:ring-2 focus:ring-primary/20 ${
+              className={
                 errors.email
-                  ? "border-destructive focus:border-destructive focus:ring-destructive/20"
-                  : "border-border/80 focus:border-primary"
-              }`}
+                  ? "border-destructive focus-visible:ring-destructive/20"
+                  : "border-border/80"
+              }
               aria-invalid={errors.email ? "true" : "false"}
               aria-describedby={errors.email ? "email-error" : undefined}
               {...register("email")}
@@ -158,22 +160,22 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
           {/* Password */}
           <div className="flex flex-col gap-1.5">
-            <label
+            <Label
               htmlFor="register-password"
               className="text-xs font-semibold text-foreground/80"
             >
               Password
-            </label>
-            <input
+            </Label>
+            <Input
               id="register-password"
               type="password"
               disabled={isPending}
               placeholder="••••••••"
-              className={`px-3.5 py-2 text-sm bg-background border rounded-xl outline-none transition-all focus:ring-2 focus:ring-primary/20 ${
+              className={
                 errors.password
-                  ? "border-destructive focus:border-destructive focus:ring-destructive/20"
-                  : "border-border/80 focus:border-primary"
-              }`}
+                  ? "border-destructive focus-visible:ring-destructive/20"
+                  : "border-border/80"
+              }
               aria-invalid={errors.password ? "true" : "false"}
               aria-describedby={errors.password ? "password-error" : undefined}
               {...register("password")}
@@ -191,22 +193,22 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
           {/* Confirm Password */}
           <div className="flex flex-col gap-1.5">
-            <label
+            <Label
               htmlFor="register-confirm-password"
               className="text-xs font-semibold text-foreground/80"
             >
               Confirm Password
-            </label>
-            <input
+            </Label>
+            <Input
               id="register-confirm-password"
               type="password"
               disabled={isPending}
               placeholder="••••••••"
-              className={`px-3.5 py-2 text-sm bg-background border rounded-xl outline-none transition-all focus:ring-2 focus:ring-primary/20 ${
+              className={
                 errors.confirmPassword
-                  ? "border-destructive focus:border-destructive focus:ring-destructive/20"
-                  : "border-border/80 focus:border-primary"
-              }`}
+                  ? "border-destructive focus-visible:ring-destructive/20"
+                  : "border-border/80"
+              }
               aria-invalid={errors.confirmPassword ? "true" : "false"}
               aria-describedby={
                 errors.confirmPassword ? "confirmpassword-error" : undefined

@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
 import { PhoneVerifyInput } from "@/lib/validations/verify";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Smartphone, Check, Loader2, ChevronLeft } from "lucide-react";
 
 interface PhoneVerifyStepProps {
@@ -25,39 +27,11 @@ export const PhoneVerifyStep: React.FC<PhoneVerifyStepProps> = ({
   setValue,
   onBack,
 }) => {
-  const [pin, setPin] = useState(["", "", "", "", "", ""]);
-  const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
+  const [code, setCode] = useState("");
 
-  const handlePinChange = (value: string, index: number) => {
-    if (!/^\d*$/.test(value)) return;
-
-    const newPin = [...pin];
-    newPin[index] = value.slice(-1);
-    setPin(newPin);
-
-    const codeString = newPin.join("");
-    setValue("code", codeString, { shouldValidate: true });
-
-    if (value && index < 5) {
-      inputsRef.current[index + 1]?.focus();
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
-    if (e.key === "Backspace" && !pin[index] && index > 0) {
-      inputsRef.current[index - 1]?.focus();
-    }
-  };
-
-  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData("text").trim();
-    if (!/^\d{6}$/.test(pastedData)) return;
-
-    const digits = pastedData.split("");
-    setPin(digits);
-    setValue("code", pastedData, { shouldValidate: true });
-    inputsRef.current[5]?.focus();
+  const handleChange = (val: string) => {
+    setCode(val);
+    setValue("code", val, { shouldValidate: true });
   };
 
   return (
@@ -99,10 +73,10 @@ export const PhoneVerifyStep: React.FC<PhoneVerifyStepProps> = ({
             <Smartphone className="w-7 h-7 text-primary stroke-[1.5]" />
           </div>
           <div className="text-center flex flex-col gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground leading-tight tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground text-center leading-tight tracking-tight">
               Enter Phone Code
             </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-[285px] mx-auto">
+            <p className="text-xs sm:text-sm text-muted-foreground text-center leading-relaxed max-w-[285px] mx-auto">
               We sent a secure code via SMS
             </p>
           </div>
@@ -117,9 +91,9 @@ export const PhoneVerifyStep: React.FC<PhoneVerifyStepProps> = ({
           {/* PIN Group Input Container */}
           <div className="flex flex-col gap-2.5">
             <div className="flex justify-between items-center max-w-sm mx-auto w-full px-1">
-              <label className="text-xs font-bold text-foreground/80">
+              <Label className="text-xs font-bold text-foreground/80">
                 6-Digit Code
-              </label>
+              </Label>
               <button
                 type="button"
                 className="text-xs font-bold text-primary hover:underline"
@@ -127,27 +101,22 @@ export const PhoneVerifyStep: React.FC<PhoneVerifyStepProps> = ({
                 Resend Code
               </button>
             </div>
-            <div className="grid grid-cols-6 gap-2.5 max-w-sm mx-auto w-full">
-              {pin.map((digit, idx) => (
-                <input
-                  key={idx}
-                  type="text"
-                  pattern="[0-9]*"
-                  inputMode="numeric"
-                  maxLength={1}
-                  disabled={isPending}
-                  value={digit}
-                  ref={(el) => {
-                    inputsRef.current[idx] = el;
-                  }}
-                  onChange={(e) => handlePinChange(e.target.value, idx)}
-                  onKeyDown={(e) => handleKeyDown(e, idx)}
-                  onPaste={handlePaste}
-                  className={`w-full aspect-square text-center font-bold text-lg rounded-xl bg-background border outline-none focus:ring-2 focus:ring-primary/20 transition-all ${
-                    errors.code ? "border-destructive focus:ring-destructive/20" : "border-border/80 focus:border-primary"
-                  }`}
-                />
-              ))}
+            <div className="flex justify-center max-w-sm mx-auto w-full">
+              <InputOTP
+                maxLength={6}
+                value={code}
+                onChange={handleChange}
+                disabled={isPending}
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} className={errors.code ? "border-destructive focus-visible:ring-destructive/20" : ""} />
+                  <InputOTPSlot index={1} className={errors.code ? "border-destructive focus-visible:ring-destructive/20" : ""} />
+                  <InputOTPSlot index={2} className={errors.code ? "border-destructive focus-visible:ring-destructive/20" : ""} />
+                  <InputOTPSlot index={3} className={errors.code ? "border-destructive focus-visible:ring-destructive/20" : ""} />
+                  <InputOTPSlot index={4} className={errors.code ? "border-destructive focus-visible:ring-destructive/20" : ""} />
+                  <InputOTPSlot index={5} className={errors.code ? "border-destructive focus-visible:ring-destructive/20" : ""} />
+                </InputOTPGroup>
+              </InputOTP>
             </div>
             {errors.code && (
               <span className="text-[11px] font-medium text-destructive text-center mt-1">

@@ -8,6 +8,8 @@ import { zodResolver } from "@/lib/validations/resolver";
 import { useSignupMutation } from "@/hooks/queries/useSignup";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 interface AccountFormContainerProps {
@@ -61,21 +63,22 @@ export const AccountFormContainer: React.FC<AccountFormContainerProps> = ({
     >
       {/* Full Name */}
       <div className="flex flex-col gap-1.5">
-        <label
+        <Label
           htmlFor="signup-name"
           className="text-xs font-semibold text-foreground/80"
         >
           Full Name
-        </label>
-        <input
+        </Label>
+        <Input
           id="signup-name"
           type="text"
           disabled={isPending}
           placeholder="John Doe"
-          className={`px-3.5 py-2 text-sm bg-background border rounded-xl outline-none transition-all focus:ring-2 focus:ring-primary/20 ${errors.name
-              ? "border-destructive focus:border-destructive focus:ring-destructive/20"
-              : "border-border/80 focus:border-primary"
-            }`}
+          className={
+            errors.name
+              ? "border-destructive focus-visible:ring-destructive/20"
+              : "border-border/80"
+          }
           aria-invalid={errors.name ? "true" : "false"}
           aria-describedby={errors.name ? "name-error" : undefined}
           {...register("name")}
@@ -93,21 +96,22 @@ export const AccountFormContainer: React.FC<AccountFormContainerProps> = ({
 
       {/* Email Address */}
       <div className="flex flex-col gap-1.5">
-        <label
+        <Label
           htmlFor="signup-email"
           className="text-xs font-semibold text-foreground/80"
         >
           Email Address
-        </label>
-        <input
+        </Label>
+        <Input
           id="signup-email"
           type="email"
           disabled={isPending}
           placeholder="your@email.com"
-          className={`px-3.5 py-2 text-sm bg-background border rounded-xl outline-none transition-all focus:ring-2 focus:ring-primary/20 ${errors.email
-              ? "border-destructive focus:border-destructive focus:ring-destructive/20"
-              : "border-border/80 focus:border-primary"
-            }`}
+          className={
+            errors.email
+              ? "border-destructive focus-visible:ring-destructive/20"
+              : "border-border/80"
+          }
           aria-invalid={errors.email ? "true" : "false"}
           aria-describedby={errors.email ? "email-error" : undefined}
           {...register("email")}
@@ -125,23 +129,22 @@ export const AccountFormContainer: React.FC<AccountFormContainerProps> = ({
 
       {/* Password */}
       <div className="flex flex-col gap-1.5">
-        <label
+        <Label
           htmlFor="signup-password"
           className="text-xs font-semibold text-foreground/80"
         >
           Password
-        </label>
-        <input
+        </Label>
+        <Input
           id="signup-password"
           type="password"
           disabled={isPending}
           placeholder="••••••••"
-          className={cn(
-            "px-3.5 py-2 text-sm bg-background border rounded-xl outline-none transition-all focus:ring-2 focus:ring-primary/20",
+          className={
             errors.password
-              ? "border-destructive focus:border-destructive focus:ring-destructive/20"
-              : "border-border/80 focus:border-primary"
-          )}
+              ? "border-destructive focus-visible:ring-destructive/20"
+              : "border-border/80"
+          }
           aria-invalid={errors.password ? "true" : "false"}
           aria-describedby={errors.password ? "password-error" : undefined}
           {...register("password")}

@@ -4,6 +4,8 @@ import React from "react";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
 import { PhoneInputInput } from "@/lib/validations/verify";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Check, ChevronLeft, Loader2, Smartphone } from "lucide-react";
 
 interface PhoneInputStepProps {
@@ -82,26 +84,26 @@ export const PhoneInputStep: React.FC<PhoneInputStepProps> = ({
         >
           {/* Phone Number Field */}
           <div className="flex flex-col gap-1.5">
-            <label
+            <Label
               htmlFor="register-phone"
               className="text-xs font-bold text-foreground/80"
             >
               Phone Number
-            </label>
+            </Label>
             <div className="flex gap-2">
               <div className="w-16 bg-muted border border-border/80 rounded-xl flex items-center justify-center text-sm font-semibold text-muted-foreground select-none">
                 +1
               </div>
-              <input
+              <Input
                 id="register-phone"
                 type="tel"
                 disabled={isPending}
                 placeholder="(555) 000-0000"
-                className={`flex-1 px-3.5 py-2.5 text-sm bg-background border rounded-xl outline-none transition-all focus:ring-2 focus:ring-primary/20 ${
+                className={
                   errors.phoneNumber
-                    ? "border-destructive focus:border-destructive focus:ring-destructive/20"
-                    : "border-border/80 focus:border-primary"
-                }`}
+                    ? "border-destructive focus-visible:ring-destructive/20"
+                    : "border-border/80"
+                }
                 aria-invalid={errors.phoneNumber ? "true" : "false"}
                 aria-describedby={
                   errors.phoneNumber ? "phone-error" : undefined
