@@ -27,22 +27,16 @@ import { PhoneInputStep } from "../components/PhoneInputStep";
 import { PhoneVerifyStep } from "../components/PhoneVerifyStep";
 import { PhoneSuccessStep } from "../components/PhoneSuccessStep";
 import { ProfileSetupStep } from "../components/ProfileSetupStep";
-import { FRONTEND_ROUTES } from "@/lib/contants";
+import { FRONTEND_ROUTES, VerificationStep } from "@/lib/contants";
 
-type StepState =
-  | "email-verify"
-  | "email-success"
-  | "phone-input"
-  | "phone-verify"
-  | "phone-success"
-  | "profile-setup";
+
 
 export const VerifyContainer: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "alex@email.com";
 
-  const [step, setStep] = useState<StepState>("email-verify");
+  const [step, setStep] = useState<VerificationStep>(VerificationStep.EMAIL_VERIFY);
   const [phoneNumber, setPhoneNumber] = useState("");
 
   // Forms definition for each step
@@ -70,7 +64,7 @@ export const VerifyContainer: React.FC = () => {
   const verifyEmailMutation = useVerifyEmailMutation({
     onSuccess: () => {
       toast.success("Email verified successfully!");
-      setStep("email-success");
+      setStep(VerificationStep.EMAIL_SUCCESS);
     },
     onError: (err) => {
       toast.error(err.message || "Email verification failed.");
@@ -81,7 +75,7 @@ export const VerifyContainer: React.FC = () => {
     onSuccess: (data) => {
       toast.success("SMS verification code sent!");
       setPhoneNumber(data.phoneNumber);
-      setStep("phone-verify");
+      setStep(VerificationStep.PHONE_VERIFY);
     },
     onError: (err) => {
       toast.error(err.message || "Failed to send SMS code.");
@@ -91,7 +85,7 @@ export const VerifyContainer: React.FC = () => {
   const verifyPhoneMutation = useVerifyPhoneMutation({
     onSuccess: () => {
       toast.success("Phone verified successfully!");
-      setStep("phone-success");
+      setStep(VerificationStep.PHONE_SUCCESS);
     },
     onError: (err) => {
       toast.error(err.message || "Phone verification failed.");
@@ -110,20 +104,20 @@ export const VerifyContainer: React.FC = () => {
 
   // Back button event handlers
   const handleBack = () => {
-    if (step === "email-verify") {
+    if (step === VerificationStep.EMAIL_VERIFY) {
       router.push(FRONTEND_ROUTES.REGISTER);
-    } else if (step === "phone-input") {
-      setStep("email-verify");
-    } else if (step === "phone-verify") {
-      setStep("phone-input");
-    } else if (step === "profile-setup") {
-      setStep("phone-input");
+    } else if (step === VerificationStep.PHONE_INPUT) {
+      setStep(VerificationStep.EMAIL_VERIFY);
+    } else if (step === VerificationStep.PHONE_VERIFY) {
+      setStep(VerificationStep.PHONE_INPUT);
+    } else if (step === VerificationStep.PROFILE_SETUP) {
+      setStep(VerificationStep.PHONE_INPUT);
     }
   };
 
   return (
     <>
-      {step === "email-verify" && (
+      {step === VerificationStep.EMAIL_VERIFY && (
         <EmailVerifyStep
           register={emailForm.register}
           errors={emailForm.formState.errors}
@@ -135,14 +129,14 @@ export const VerifyContainer: React.FC = () => {
         />
       )}
 
-      {step === "email-success" && (
+      {step === VerificationStep.EMAIL_SUCCESS && (
         <EmailSuccessStep
           email={email}
-          onContinue={() => setStep("phone-input")}
+          onContinue={() => setStep(VerificationStep.PHONE_INPUT)}
         />
       )}
 
-      {step === "phone-input" && (
+      {step === VerificationStep.PHONE_INPUT && (
         <PhoneInputStep
           register={phoneInputForm.register}
           errors={phoneInputForm.formState.errors}
@@ -153,7 +147,7 @@ export const VerifyContainer: React.FC = () => {
         />
       )}
 
-      {step === "phone-verify" && (
+      {step === VerificationStep.PHONE_VERIFY && (
         <PhoneVerifyStep
           register={phoneVerifyForm.register}
           errors={phoneVerifyForm.formState.errors}
@@ -165,14 +159,14 @@ export const VerifyContainer: React.FC = () => {
         />
       )}
 
-      {step === "phone-success" && (
+      {step === VerificationStep.PHONE_SUCCESS && (
         <PhoneSuccessStep
           phoneNumber={`+1 ${phoneNumber}`}
-          onContinue={() => setStep("profile-setup")}
+          onContinue={() => setStep(VerificationStep.PROFILE_SETUP)}
         />
       )}
 
-      {step === "profile-setup" && (
+      {step === VerificationStep.PROFILE_SETUP && (
         <ProfileSetupStep
           register={profileSetupForm.register}
           errors={profileSetupForm.formState.errors}

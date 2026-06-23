@@ -5,3 +5,12 @@ export const FRONTEND_ROUTES = {
     LOGIN: "/login",
 
 }
+
+export enum VerificationStep {
+    EMAIL_VERIFY = "email-verify",
+    EMAIL_SUCCESS = "email-success",
+    PHONE_INPUT = "phone-input",
+    PHONE_VERIFY = "phone-verify",
+    PHONE_SUCCESS = "phone-success",
+    PROFILE_SETUP = "profile-setup",
+}
