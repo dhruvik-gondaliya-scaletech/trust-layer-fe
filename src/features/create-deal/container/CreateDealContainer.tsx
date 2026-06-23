@@ -250,19 +250,19 @@ export const CreateDealContainer: React.FC = () => {
           <Button
             type={
               step === 1 ? "submit" :
-              step === 3 ? "submit" :
-              step === 4 ? "submit" :
-              step === 5 && !isSuccess ? "submit" : "button"
+                step === 3 ? "submit" :
+                  step === 4 ? "submit" :
+                    step === 5 && !isSuccess ? "submit" : "button"
             }
             form={
               step === 1 ? "step1-form" :
-              step === 3 ? "step3-form" :
-              step === 4 ? "step4-form" :
-              step === 5 && !isSuccess ? "step5-form" : undefined
+                step === 3 ? "step3-form" :
+                  step === 4 ? "step4-form" :
+                    step === 5 && !isSuccess ? "step5-form" : undefined
             }
             onClick={
               step === 2 ? () => setStep(3) :
-              isSuccess ? () => router.push(FRONTEND_ROUTES.DASHBOARD) : undefined
+                isSuccess ? () => router.push(FRONTEND_ROUTES.DASHBOARD) : undefined
             }
             disabled={step === 5 && isSubmitting}
             className="flex-1 bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/10 rounded-2xl h-12 text-sm font-bold active:scale-[0.98] transition-all"
@@ -270,16 +270,11 @@ export const CreateDealContainer: React.FC = () => {
             {step === 5 && !isSuccess
               ? (isSubmitting ? "Publishing..." : "Publish Deal")
               : isSuccess
-              ? "Go to Dashboard"
-              : step === 2 && !mainPhoto
-              ? "Skip Verification"
-              : "Continue"}
+                ? "Go to Dashboard"
+                : step === 2 && !mainPhoto
+                  ? "Skip Verification"
+                  : "Continue"}
           </Button>
-        </div>
-        <div className="flex items-center justify-center pt-1">
-          <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
-            Secured by TrustLayer Escrow
-          </span>
         </div>
       </div>
     </div>

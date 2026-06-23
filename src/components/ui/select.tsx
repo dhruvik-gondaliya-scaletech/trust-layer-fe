@@ -9,6 +9,7 @@ const SelectContext = React.createContext<{
   onValueChange?: (val: string) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
+  containerRef: React.RefObject<HTMLDivElement | null>;
 } | null>(null);
 
 export const Select: React.FC<{
@@ -17,9 +18,10 @@ export const Select: React.FC<{
   children: React.ReactNode;
 }> = ({ value, onValueChange, children }) => {
   const [open, setOpen] = React.useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
   return (
-    <SelectContext.Provider value={{ value, onValueChange, open, setOpen }}>
-      <div className="relative w-full">{children}</div>
+    <SelectContext.Provider value={{ value, onValueChange, open, setOpen, containerRef }}>
+      <div ref={containerRef} className="relative w-full">{children}</div>
     </SelectContext.Provider>
   );
 };
@@ -37,8 +39,8 @@ export const SelectTrigger = React.forwardRef<
       type="button"
       onClick={() => context.setOpen(!context.open)}
       className={cn(
-        "flex h-12 w-full items-center justify-between rounded-2xl border border-border/80 bg-background px-4 py-3 text-sm font-semibold shadow-xs transition-colors hover:bg-muted/5 focus:outline-none focus:ring-1 focus:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-50 text-left",
-        context.open && "border-primary ring-1 ring-primary/40",
+        "flex h-12 w-full items-center justify-between rounded-2xl border border-border/80 bg-background px-4 py-3 text-sm font-semibold shadow-xs transition-all duration-200 hover:bg-muted/5 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-50 text-left cursor-pointer",
+        context.open && "border-primary ring-2 ring-primary/25",
         className
       )}
       {...props}
@@ -66,7 +68,6 @@ export const SelectContent: React.FC<{
   className?: string;
 }> = ({ children, className }) => {
   const context = React.useContext(SelectContext);
-  const containerRef = React.useRef<HTMLDivElement>(null);
 
   if (!context) throw new Error("SelectContent must be used within Select");
 
@@ -74,21 +75,20 @@ export const SelectContent: React.FC<{
     if (!context.open) return;
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
+        context.containerRef.current &&
+        !context.containerRef.current.contains(event.target as Node)
       ) {
         context.setOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [context.open]);
+  }, [context.open, context.containerRef]);
 
   if (!context.open) return null;
 
   return (
     <div
-      ref={containerRef}
       className={cn(
         "absolute top-full left-0 right-0 z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-2xl border border-border/80 bg-popover text-popover-foreground shadow-lg p-1.5 flex flex-col gap-0.5 animate-in fade-in-50 slide-in-from-top-1 duration-100",
         className

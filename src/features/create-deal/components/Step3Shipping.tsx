@@ -64,7 +64,7 @@ export const Step3Shipping: React.FC<Step3ShippingProps> = ({
             control={control}
             render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger className="rounded-2xl border border-border/80 h-12 text-sm font-semibold focus:ring-2 focus:ring-primary/20">
+                <SelectTrigger className="rounded-2xl border border-border/80 h-12 text-sm font-semibold">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl">
@@ -98,7 +98,7 @@ export const Step3Shipping: React.FC<Step3ShippingProps> = ({
               control={control}
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="rounded-2xl border border-border/80 h-12 text-sm font-semibold focus:ring-2 focus:ring-primary/20">
+                  <SelectTrigger className="rounded-2xl border border-border/80 h-12 text-sm font-semibold">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl">
@@ -122,7 +122,7 @@ export const Step3Shipping: React.FC<Step3ShippingProps> = ({
               control={control}
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="rounded-2xl border border-border/80 h-12 text-sm font-semibold focus:ring-2 focus:ring-primary/20">
+                  <SelectTrigger className="rounded-2xl border border-border/80 h-12 text-sm font-semibold">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl">
