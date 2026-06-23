@@ -32,8 +32,8 @@ export const LoginContainer: React.FC = () => {
         description: "You have signed in successfully.",
       });
       reset();
-      // Redirect to home route
-      router.push(FRONTEND_ROUTES.LANDING);
+      // Redirect to dashboard route
+      router.push(FRONTEND_ROUTES.DASHBOARD);
     },
     onError: (error) => {
       toast.error(error.message || "Failed to sign in. Please try again.");

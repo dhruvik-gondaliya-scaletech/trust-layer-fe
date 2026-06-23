@@ -3,7 +3,7 @@ export const FRONTEND_ROUTES = {
     REGISTER: "/register",
     VERIFY: "/verify",
     LOGIN: "/login",
-
+    DASHBOARD: "/dashboard",
 }
 
 export enum VerificationStep {

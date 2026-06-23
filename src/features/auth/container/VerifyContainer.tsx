@@ -95,7 +95,7 @@ export const VerifyContainer: React.FC = () => {
   const profileSetupMutation = useProfileSetupMutation({
     onSuccess: () => {
       toast.success("Profile setup complete! Welcome to TrustLayer!");
-      router.push(FRONTEND_ROUTES.LANDING);
+      router.push(FRONTEND_ROUTES.DASHBOARD);
     },
     onError: (err) => {
       toast.error(err.message || "Failed to save profile.");
