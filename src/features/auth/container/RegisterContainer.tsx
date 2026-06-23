@@ -21,12 +21,12 @@ export const RegisterContainer: React.FC = () => {
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      agreeTerms: false,
+      firstName: "Alex",
+      lastName: "Smith",
+      email: "alex@email.com",
+      password: "Password123!",
+      confirmPassword: "Password123!",
+      agreeTerms: true,
     },
   });
 

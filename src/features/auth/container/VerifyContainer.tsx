@@ -42,22 +42,22 @@ export const VerifyContainer: React.FC = () => {
   // Forms definition for each step
   const emailForm = useForm<EmailVerifyInput>({
     resolver: zodResolver(emailVerifySchema),
-    defaultValues: { code: "" },
+    defaultValues: { code: "123456" },
   });
 
   const phoneInputForm = useForm<PhoneInputInput>({
     resolver: zodResolver(phoneInputSchema),
-    defaultValues: { phoneNumber: "" },
+    defaultValues: { phoneNumber: "5555555555" },
   });
 
   const phoneVerifyForm = useForm<PhoneVerifyInput>({
     resolver: zodResolver(phoneVerifySchema),
-    defaultValues: { code: "" },
+    defaultValues: { code: "123456" },
   });
 
   const profileSetupForm = useForm<ProfileSetupInput>({
     resolver: zodResolver(profileSetupSchema),
-    defaultValues: { username: "", bio: "", avatar: "🐶" },
+    defaultValues: { username: "alex_trust", bio: "TrustLayer enthusiast", avatar: "🐶" },
   });
 
   // Mutations definition
@@ -126,6 +126,7 @@ export const VerifyContainer: React.FC = () => {
           handleSubmit={emailForm.handleSubmit}
           setValue={emailForm.setValue}
           onBack={handleBack}
+          defaultCode={emailForm.getValues("code")}
         />
       )}
 
@@ -156,6 +157,7 @@ export const VerifyContainer: React.FC = () => {
           handleSubmit={phoneVerifyForm.handleSubmit}
           setValue={phoneVerifyForm.setValue}
           onBack={handleBack}
+          defaultCode={phoneVerifyForm.getValues("code")}
         />
       )}
 

@@ -16,6 +16,7 @@ interface EmailVerifyStepProps {
   handleSubmit: any;
   setValue: any;
   onBack: () => void;
+  defaultCode?: string;
 }
 
 export const EmailVerifyStep: React.FC<EmailVerifyStepProps> = ({
@@ -26,8 +27,15 @@ export const EmailVerifyStep: React.FC<EmailVerifyStepProps> = ({
   handleSubmit,
   setValue,
   onBack,
+  defaultCode = "",
 }) => {
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(defaultCode);
+
+  React.useEffect(() => {
+    if (defaultCode) {
+      setValue("code", defaultCode, { shouldValidate: true });
+    }
+  }, [defaultCode, setValue]);
 
   const handleChange = (val: string) => {
     setCode(val);
