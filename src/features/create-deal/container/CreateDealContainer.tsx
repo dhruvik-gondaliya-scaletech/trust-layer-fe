@@ -5,11 +5,8 @@ import { ArrowLeft, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 import { StepIndicator } from "../components/StepIndicator";
-import { TrustScoreHeader } from "../components/TrustScoreHeader";
 import { Step1ItemDetails, Step1FormData } from "../components/Step1ItemDetails";
-import { Step2MainPhoto } from "../components/Step2MainPhoto";
-import { Step3ProductPhotos } from "../components/Step3ProductPhotos";
-import { Step4VideoVerification } from "../components/Step4VideoVerification";
+import { Step2ProofVerification } from "../components/Step2ProofVerification";
 import { Step5ReviewPublish } from "../components/Step5ReviewPublish";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -65,15 +62,7 @@ export const CreateDealContainer: React.FC = () => {
     trustScore += 30;
   }
 
-  // Determine current step helper text for the TrustScore header
-  let nextStepName = "Take Main Photo";
-  if (step === 2 && mainPhoto) {
-    nextStepName = "Upload Product Photos";
-  } else if (step === 3) {
-    nextStepName = "Record Video Verification";
-  } else if (step === 4) {
-    nextStepName = "Review and Publish Deal";
-  }
+
 
   const handleStep1Submit = (data: Step1FormData) => {
     setFormData(data);
@@ -104,10 +93,10 @@ export const CreateDealContainer: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-[440px] bg-background border border-border/80 rounded-3xl shadow-xl flex flex-col min-h-[92vh] max-h-[95vh] relative overflow-hidden select-none">
-      {/* Scrollable Container */}
-      <div className="flex-1 flex flex-col overflow-y-auto px-6 pt-6 pb-24 scrollbar-none">
-        
+    <div className="w-full max-w-[440px] flex flex-col min-h-[92vh] max-h-[95vh] relative overflow-hidden select-none">
+      {/* Scrollable Container (changed to overflow-hidden for sticky step layouts) */}
+      <div className="flex-1 flex flex-col overflow-hidden px-6 pt-6 relative">
+
         {/* Header Navigation */}
         <div className="flex items-center justify-between w-full mb-6 shrink-0">
           <button
@@ -116,7 +105,7 @@ export const CreateDealContainer: React.FC = () => {
           >
             <ArrowLeft className="w-5 h-5 text-muted-foreground" />
           </button>
-          
+
           <div className="flex items-center gap-1.5 font-extrabold text-foreground text-sm select-none">
             <Shield className="w-5 h-5 text-primary fill-primary/10" />
             <span>Create Deal</span>
@@ -127,19 +116,11 @@ export const CreateDealContainer: React.FC = () => {
 
         {/* Step Indicator Section */}
         <div className="mb-6 shrink-0">
-          <StepIndicator currentStep={step} />
-        </div>
-
-        {/* Trust Score Header Banner */}
-        <div className="mb-6 shrink-0">
-          <TrustScoreHeader
-            score={trustScore}
-            nextStepName={nextStepName}
-          />
+          <StepIndicator currentStep={step} totalSteps={3} />
         </div>
 
         {/* Render Steps with slide animation */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
@@ -147,7 +128,7 @@ export const CreateDealContainer: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -15 }}
               transition={{ duration: 0.22, ease: "easeInOut" }}
-              className="flex-1 flex flex-col"
+              className="flex-1 flex flex-col overflow-hidden"
             >
               {step === 1 && (
                 <Step1ItemDetails
@@ -156,30 +137,18 @@ export const CreateDealContainer: React.FC = () => {
                 />
               )}
               {step === 2 && (
-                <Step2MainPhoto
-                  capturedImage={mainPhoto}
-                  onCapture={handleCaptureMainPhoto}
+                <Step2ProofVerification
+                  mainPhoto={mainPhoto}
+                  productPhotos={productPhotos}
+                  verificationVideo={verificationVideo}
+                  onCaptureMainPhoto={handleCaptureMainPhoto}
+                  onCaptureProductPhotoSlot={handleCaptureProductPhotosSlot}
+                  onCaptureVideo={handleCaptureVideo}
                   onContinue={() => setStep(3)}
                   onBack={handleBack}
                 />
               )}
               {step === 3 && (
-                <Step3ProductPhotos
-                  capturedImages={productPhotos}
-                  onCaptureSlot={handleCaptureProductPhotosSlot}
-                  onContinue={() => setStep(4)}
-                  onBack={handleBack}
-                />
-              )}
-              {step === 4 && (
-                <Step4VideoVerification
-                  capturedVideo={verificationVideo}
-                  onCapture={handleCaptureVideo}
-                  onContinue={() => setStep(5)}
-                  onBack={handleBack}
-                />
-              )}
-              {step === 5 && (
                 <Step5ReviewPublish
                   formData={formData}
                   mainPhoto={mainPhoto}

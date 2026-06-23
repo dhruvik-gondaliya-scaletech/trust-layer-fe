@@ -105,12 +105,12 @@ export const DashboardContainer: React.FC = () => {
   return (
     <div className="relative w-full h-full flex flex-col overflow-hidden">
       {/* Scrollable Container */}
-      <div className="flex-1 overflow-y-auto scrollbar-none pb-28">
+      <div className="flex-1 overflow-y-auto scrollbar-none">
         <motion.div
           initial="hidden"
           animate="visible"
           variants={staggerContainer}
-          className="w-full flex flex-col gap-6 pt-6"
+          className="w-full flex flex-col gap-6 pt-6 pb-6"
         >
           {/* 1. Header Row */}
           <motion.div variants={fadeIn}>
@@ -175,11 +175,11 @@ export const DashboardContainer: React.FC = () => {
       </div>
 
       {/* 7. Sticky Bottom Actions Bar */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-card via-card/95 to-transparent pt-12 pointer-events-none z-20">
+      <div className="shrink-0 p-6 bg-card border-t border-border/40 z-20">
         <Button
           onClick={handleCreateNewDeal}
           size="lg"
-          className="w-full bg-primary hover:bg-primary/95 text-primary-foreground font-extrabold rounded-2xl h-12 shadow-lg shadow-primary/15 flex items-center justify-center gap-2 pointer-events-auto active:scale-[0.98] transition-all"
+          className="w-full bg-primary hover:bg-primary/95 text-primary-foreground font-extrabold rounded-2xl h-12 shadow-lg shadow-primary/15 flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
         >
           <Plus className="w-5 h-5" />
           <span>Create New Deal</span>
