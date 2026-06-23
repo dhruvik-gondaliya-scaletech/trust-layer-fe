@@ -1,14 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { Check, Mail, ShieldAlert, Sparkles, Copy, Calendar, Tag, Info, ArrowLeft, ArrowUpRight, PenSquare, ChevronDown, ChevronUp, Image as ImageIcon } from "lucide-react";
+import { Check, Mail, Copy, ChevronDown, ChevronUp, Image as ImageIcon, PenSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
-import { FRONTEND_ROUTES } from "@/lib/contants";
 
 interface Step5ReviewPublishProps {
   formData: {
@@ -41,6 +39,14 @@ interface Step5ReviewPublishProps {
   trustScore: number;
   onBack: () => void;
   onEdit: () => void;
+  buyerEmail: string;
+  setBuyerEmail: (email: string) => void;
+  agreedTerms: boolean;
+  setAgreedTerms: (agreed: boolean) => void;
+  isSubmitting: boolean;
+  isSuccess: boolean;
+  dealId: string;
+  handlePublish: (e: React.FormEvent) => void;
 }
 
 export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
@@ -51,43 +57,22 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
   productPhotos,
   verificationVideo,
   trustScore,
-  onBack,
   onEdit,
+  buyerEmail,
+  setBuyerEmail,
+  agreedTerms,
+  setAgreedTerms,
+  dealId,
+  isSuccess,
+  handlePublish,
 }) => {
-  const router = useRouter();
-  const [buyerEmail, setBuyerEmail] = useState("");
-  const [agreedTerms, setAgreedTerms] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [dealId, setDealId] = useState("");
   const [showBreakdown, setShowBreakdown] = useState(false);
-
-  const handlePublish = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!agreedTerms) {
-      toast.error("Please agree to the escrow terms of service");
-      return;
-    }
-
-    setIsSubmitting(true);
-    // Simulate API Deal creation
-    setTimeout(() => {
-      setIsSubmitting(false);
-      const generatedId = Math.random().toString(36).substring(2, 10).toUpperCase();
-      setDealId(generatedId);
-      setIsSuccess(true);
-      toast.success("Escrow deal successfully created!");
-    }, 1500);
-  };
 
   const copyDealLink = () => {
     const link = `https://trustlayer.escrow/deals/${dealId}`;
     navigator.clipboard.writeText(link);
     toast.success("Deal invitation link copied to clipboard!");
   };
-
-  // Convert video blob to local URL for preview
-  const videoUrl = verificationVideo ? URL.createObjectURL(verificationVideo) : null;
 
   if (isSuccess) {
     return (
@@ -99,7 +84,7 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
           className="flex-1 flex flex-col h-full justify-between bg-background relative overflow-hidden"
         >
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto pr-0.5 flex flex-col items-center justify-center text-center scrollbar-none pb-6">
+          <div className="flex-1 overflow-y-auto pr-0.5 flex flex-col items-center justify-center text-center scrollbar-none pb-28 pt-4">
             <div className="absolute top-10 left-10 w-3 h-3 rounded-full bg-primary/20 animate-ping" />
             <div className="absolute bottom-16 right-12 w-4 h-4 rounded-full bg-emerald-500/20 animate-bounce" />
 
@@ -147,17 +132,6 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
               </Button>
             </div>
           </div>
-
-          {/* Sticky bottom CTA */}
-          <div className="shrink-0 pt-4 pb-10 bg-background border-t border-border/40">
-            <Button
-              onClick={() => router.push(FRONTEND_ROUTES.DASHBOARD)}
-              size="lg"
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/10 rounded-2xl h-12 text-sm font-bold active:scale-[0.98] transition-all"
-            >
-              Go to Dashboard
-            </Button>
-          </div>
         </motion.div>
       </AnimatePresence>
     );
@@ -167,26 +141,21 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
 
   // Determine tier and color scheme for premium card
   let tier = "GETTING STARTED";
-  let tierColor = "text-muted-foreground bg-muted/40 border-muted-foreground/20";
   if (trustScore >= 20 && trustScore < 40) {
     tier = "LOW";
-    tierColor = "text-red-400 bg-red-500/10 border-red-500/20";
   } else if (trustScore >= 40 && trustScore < 70) {
     tier = "MEDIUM";
-    tierColor = "text-amber-400 bg-amber-500/10 border-amber-500/20";
   } else if (trustScore >= 70 && trustScore < 100) {
     tier = "GOOD";
-    tierColor = "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
   } else if (trustScore === 100) {
     tier = "EXCELLENT";
-    tierColor = "text-green-400 bg-green-500/20 border-green-500/30";
   }
 
   return (
     <div className="flex flex-col h-full flex-1 overflow-hidden text-left select-none">
-      <form onSubmit={handlePublish} className="flex-1 flex flex-col overflow-hidden">
+      <form id="step5-form" onSubmit={handlePublish} className="flex-1 flex flex-col overflow-hidden">
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto pr-0.5 space-y-6 scrollbar-none pb-6">
+        <div className="flex-1 overflow-y-auto pr-0.5 space-y-6 scrollbar-none pb-28">
           <div className="flex flex-col gap-1">
             <h2 className="text-xl font-extrabold text-foreground tracking-tight">Review deal</h2>
           </div>
@@ -199,7 +168,7 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
             <div className="flex items-start justify-between relative z-10">
               <div className="flex flex-col gap-1">
                 <span className="text-lg font-extrabold tracking-tight">Trust Score</span>
-                <span className={`text-[9px] font-black px-2 py-0.5 rounded-md border-none uppercase tracking-wider w-fit mt-1 bg-white/20 text-white`}>
+                <span className="text-[9px] font-black px-2 py-0.5 rounded-md border-none uppercase tracking-wider w-fit mt-1 bg-white/20 text-white">
                   {tier}
                 </span>
               </div>
@@ -209,7 +178,7 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
               </div>
             </div>
 
-            {/* Sleek Progress Bar */}
+            {/* Progress Bar */}
             <div className="w-full relative z-10">
               <div className="w-full h-2.5 bg-blue-950/45 rounded-full overflow-hidden">
                 <div
@@ -408,17 +377,6 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
               </span>
             </div>
           </label>
-        </div>
-
-        {/* Sticky bottom CTA */}
-        <div className="shrink-0 pt-4 pb-10 bg-background border-t border-border/40">
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/10 rounded-2xl h-12 text-sm font-bold active:scale-[0.98] transition-all"
-          >
-            {isSubmitting ? "Publishing deal..." : "Publish Deal"}
-          </Button>
         </div>
       </form>
     </div>

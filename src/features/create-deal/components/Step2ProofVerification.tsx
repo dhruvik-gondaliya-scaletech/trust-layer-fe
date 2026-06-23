@@ -85,7 +85,7 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
   return (
     <div className="flex flex-col h-full flex-1 overflow-hidden text-left select-none">
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto pr-0.5 space-y-6 scrollbar-none pb-6">
+      <div className="flex-1 overflow-y-auto pr-0.5 space-y-6 scrollbar-none pb-28">
         <div className="flex flex-col gap-1">
           <h2 className="text-xl font-extrabold text-foreground tracking-tight">Proof & Verification</h2>
           <p className="text-xs text-muted-foreground leading-relaxed">
@@ -313,24 +313,7 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
         </Accordion>
       </div>
 
-      {/* Sticky Bottom Actions */}
-      <div className="shrink-0 pt-4 pb-10 bg-background border-t border-border/40 flex gap-3">
-        <Button
-          type="button"
-          onClick={onBack}
-          variant="outline"
-          className="flex-1 border-border/80 rounded-2xl h-12 text-sm font-bold active:scale-[0.98] transition-all"
-        >
-          Back
-        </Button>
-        <Button
-          type="button"
-          onClick={onContinue}
-          className="flex-1 bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/10 rounded-2xl h-12 text-sm font-bold active:scale-[0.98] transition-all"
-        >
-          {mainPhoto ? "Continue" : "Skip Verification (Low Score)"}
-        </Button>
-      </div>
+
 
       {/* Guidelines Bottom Sheet */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>

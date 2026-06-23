@@ -5,7 +5,6 @@ import { useForm, Controller } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -56,12 +55,13 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
 
   return (
     <form
+      id="step1-form"
       onSubmit={handleSubmit(onContinue)}
       className="flex flex-col h-full flex-1 overflow-hidden text-left"
       noValidate
     >
       {/* Scrollable Form Content */}
-      <div className="flex-1 overflow-y-auto pr-0.5 space-y-5 scrollbar-none pb-6">
+      <div className="flex-1 overflow-y-auto pr-0.5 space-y-5 scrollbar-none pb-28">
         {/* Title */}
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="item-title" className="text-xs font-semibold text-foreground/80">
@@ -264,17 +264,6 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
             {...register("description")}
           />
         </div>
-      </div>
-
-      {/* Sticky Bottom Actions */}
-      <div className="shrink-0 pt-4 pb-10 bg-background border-t border-border/40">
-        <Button
-          type="submit"
-          size="lg"
-          className="w-full bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/10 rounded-2xl h-12 text-sm font-bold active:scale-[0.98] transition-all"
-        >
-          Continue
-        </Button>
       </div>
     </form>
   );

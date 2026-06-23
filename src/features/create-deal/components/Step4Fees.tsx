@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronUp, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -80,11 +79,12 @@ export const Step4Fees: React.FC<Step4FeesProps> = ({
 
   return (
     <form
+      id="step4-form"
       onSubmit={handleFormSubmit}
       className="flex flex-col h-full flex-1 overflow-hidden text-left"
     >
       {/* Scrollable Form Content */}
-      <div className="flex-1 overflow-y-auto pr-0.5 space-y-5 scrollbar-none pb-6">
+      <div className="flex-1 overflow-y-auto pr-0.5 space-y-5 scrollbar-none pb-28">
         <div className="flex flex-col gap-1">
           <h2 className="text-xl font-extrabold text-foreground tracking-tight">Fees</h2>
         </div>
@@ -179,17 +179,6 @@ export const Step4Fees: React.FC<Step4FeesProps> = ({
             )}
           </AnimatePresence>
         </div>
-      </div>
-
-      {/* Sticky Bottom Actions */}
-      <div className="shrink-0 pt-4 pb-10 bg-background border-t border-border/40">
-        <Button
-          type="submit"
-          size="lg"
-          className="w-full bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/10 rounded-2xl h-12 text-sm font-bold active:scale-[0.98] transition-all"
-        >
-          Continue
-        </Button>
       </div>
     </form>
   );
