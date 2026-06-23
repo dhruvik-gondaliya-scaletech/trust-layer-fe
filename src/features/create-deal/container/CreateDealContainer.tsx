@@ -7,6 +7,8 @@ import { FRONTEND_ROUTES } from "@/lib/contants";
 import { StepIndicator } from "../components/StepIndicator";
 import { Step1ItemDetails, Step1FormData } from "../components/Step1ItemDetails";
 import { Step2ProofVerification } from "../components/Step2ProofVerification";
+import { Step3Shipping, Step3ShippingData } from "../components/Step3Shipping";
+import { Step4Fees, Step4FeesData } from "../components/Step4Fees";
 import { Step5ReviewPublish } from "../components/Step5ReviewPublish";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -41,6 +43,17 @@ export const CreateDealContainer: React.FC = () => {
 
   const [verificationVideo, setVerificationVideo] = useState<Blob | null>(null);
 
+  const [shippingData, setShippingData] = useState<Step3ShippingData>({
+    handlingTime: "Ship within 1–2 business days",
+    carrier: "USPS",
+    shippingType: "Standard",
+    isInsured: false,
+  });
+
+  const [feesData, setFeesData] = useState<Step4FeesData>({
+    feeStructure: "Buyer Pays",
+  });
+
   // Dynamic Trust Score Calculation
   // Step 1 Completed = 25
   // Main Photo = +20 (45)
@@ -62,8 +75,6 @@ export const CreateDealContainer: React.FC = () => {
     trustScore += 30;
   }
 
-
-
   const handleStep1Submit = (data: Step1FormData) => {
     setFormData(data);
     setStep(2);
@@ -82,6 +93,16 @@ export const CreateDealContainer: React.FC = () => {
 
   const handleCaptureVideo = (videoBlob: Blob) => {
     setVerificationVideo(videoBlob);
+  };
+
+  const handleStep3Submit = (data: Step3ShippingData) => {
+    setShippingData(data);
+    setStep(4);
+  };
+
+  const handleStep4Submit = (data: Step4FeesData) => {
+    setFeesData(data);
+    setStep(5);
   };
 
   const handleBack = () => {
@@ -116,7 +137,7 @@ export const CreateDealContainer: React.FC = () => {
 
         {/* Step Indicator Section */}
         <div className="mb-6 shrink-0">
-          <StepIndicator currentStep={step} totalSteps={3} />
+          <StepIndicator currentStep={step} totalSteps={5} />
         </div>
 
         {/* Render Steps with slide animation */}
@@ -149,13 +170,29 @@ export const CreateDealContainer: React.FC = () => {
                 />
               )}
               {step === 3 && (
+                <Step3Shipping
+                  initialData={shippingData}
+                  onContinue={handleStep3Submit}
+                />
+              )}
+              {step === 4 && (
+                <Step4Fees
+                  price={formData.price}
+                  initialData={feesData}
+                  onContinue={handleStep4Submit}
+                />
+              )}
+              {step === 5 && (
                 <Step5ReviewPublish
                   formData={formData}
+                  shippingData={shippingData}
+                  feesData={feesData}
                   mainPhoto={mainPhoto}
                   productPhotos={productPhotos}
                   verificationVideo={verificationVideo}
                   trustScore={trustScore}
                   onBack={handleBack}
+                  onEdit={() => setStep(1)}
                 />
               )}
             </motion.div>
