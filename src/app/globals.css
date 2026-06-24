@@ -123,4 +123,17 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Ensure standard inputs and textareas have proper left/right padding */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  textarea {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
 }

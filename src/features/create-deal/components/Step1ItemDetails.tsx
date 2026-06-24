@@ -61,7 +61,7 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
       noValidate
     >
       {/* Scrollable Form Content */}
-      <div className="flex-1 overflow-y-auto pr-0.5 space-y-5 scrollbar-none pb-28">
+      <div className="flex-1 overflow-y-auto px-0.5 space-y-5 scrollbar-none pb-28">
         {/* Title */}
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="item-title" className="text-xs font-semibold text-foreground/80">

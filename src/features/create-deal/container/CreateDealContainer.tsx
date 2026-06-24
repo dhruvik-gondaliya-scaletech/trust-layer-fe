@@ -235,7 +235,7 @@ export const CreateDealContainer: React.FC = () => {
       </div>
 
       {/* Central Persistent Sticky Footer */}
-      <div className="absolute bottom-0 left-0 right-0 pt-4 pb-6 px-6 bg-gradient-to-t from-background via-background/95 to-background/80 border-t border-border/40 flex flex-col gap-3 z-30 shadow-lg">
+      <div className="absolute bottom-0 left-0 right-0 py-4 px-6 bg-card border-t border-border/40 flex flex-col gap-3 z-30 shadow-lg">
         <div className="flex gap-3">
           {step > 1 && !isSuccess && (
             <Button

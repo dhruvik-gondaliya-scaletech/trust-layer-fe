@@ -84,7 +84,7 @@ export const Step4Fees: React.FC<Step4FeesProps> = ({
       className="flex flex-col h-full flex-1 overflow-hidden text-left"
     >
       {/* Scrollable Form Content */}
-      <div className="flex-1 overflow-y-auto pr-0.5 space-y-5 scrollbar-none pb-28">
+      <div className="flex-1 overflow-y-auto px-0.5 space-y-5 scrollbar-none pb-28">
         <div className="flex flex-col gap-1">
           <h2 className="text-xl font-extrabold text-foreground tracking-tight">Fees</h2>
         </div>
@@ -106,7 +106,7 @@ export const Step4Fees: React.FC<Step4FeesProps> = ({
                   <span className="text-sm font-bold text-foreground">{opt.title}</span>
                   <span className="text-xs text-muted-foreground mt-0.5">{opt.subtitle}</span>
                 </div>
-                
+
                 {/* Radio Circle */}
                 <div
                   className={cn(
@@ -138,7 +138,7 @@ export const Step4Fees: React.FC<Step4FeesProps> = ({
                 )}
               </div>
             </div>
-            
+
             <span className="text-lg font-black text-primary">
               ${sellerEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
