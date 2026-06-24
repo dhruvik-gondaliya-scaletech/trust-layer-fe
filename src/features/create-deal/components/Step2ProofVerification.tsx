@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sheet";
 import { CameraCapture } from "./CameraCapture";
 import { Badge } from "@/components/ui/badge";
+import { TrustScoreHeader } from "./TrustScoreHeader";
 
 interface Step2ProofVerificationProps {
   mainPhoto: string | null;
@@ -33,13 +34,15 @@ interface Step2ProofVerificationProps {
   onCaptureVideo: (videoBlob: Blob) => void;
   onContinue: () => void;
   onBack: () => void;
+  trustScore?: number;
+  nextStepName?: string;
 }
 
 const PHOTO_SLOTS = [
-  { id: "back", label: "Back View", desc: "Back side of product" },
-  { id: "leftSide", label: "Left Side View", desc: "Left panel details" },
-  { id: "rightSide", label: "Right Side View", desc: "Right panel details" },
-  { id: "detail", label: "Serial / Detail", desc: "Markings or engraving" },
+  { id: "back", label: "Front View", desc: "Front side of product" },
+  { id: "leftSide", label: "Back View", desc: "Back side of product" },
+  { id: "rightSide", label: "Side View", desc: "Side panel details" },
+  { id: "detail", label: "Detail View", desc: "Serial or markings" },
 ] as const;
 
 export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
@@ -51,6 +54,8 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
   onCaptureVideo,
   onContinue,
   onBack,
+  trustScore,
+  nextStepName,
 }) => {
   // Accordion active item state
   const [activeAccordion, setActiveAccordion] = useState<string>("main-photo");
@@ -86,10 +91,17 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
     <div className="flex flex-col h-full flex-1 overflow-hidden text-left select-none">
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto pr-0.5 space-y-6 scrollbar-none pb-28">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-extrabold text-foreground tracking-tight">Proof & Verification</h2>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            Provide the required photo and video proofs. All captures must be live to verify possession and quality.
+
+        {/* Trust Score card — scrolls with content */}
+        {typeof trustScore === "number" && (
+          <TrustScoreHeader score={trustScore} nextStepName={nextStepName} />
+        )}
+
+        <div className="flex flex-col gap-2">
+          <h2 className="text-2xl font-extrabold text-foreground tracking-tight">Proof & Verification</h2>
+          <h3 className="text-base font-bold text-foreground">Verification Journey</h3>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Complete these steps to build your Trust Score.
           </p>
         </div>
 
@@ -116,17 +128,19 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                   {mainPhoto ? <Check className="w-4.5 h-4.5 stroke-[2.5]" /> : <Camera className="w-4.5 h-4.5" />}
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xs font-extrabold text-foreground">1. Main Photo</span>
-                  <span className="text-[10px] text-muted-foreground font-medium">Cover photo for deal</span>
+                  <span className="text-sm font-extrabold text-foreground">1. Main Photo</span>
+                  <span className={`text-xs font-semibold ${mainPhoto ? "text-emerald-500" : "text-destructive/80"}`}>
+                    {mainPhoto ? "Completed" : "Required"}
+                  </span>
                 </div>
               </div>
               <div className="ml-auto mr-3">
                 {mainPhoto ? (
-                  <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 border-none font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider">
-                    Completed
+                  <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 border-none font-bold text-[11px] px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    Done
                   </Badge>
                 ) : (
-                  <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-bold text-[11px] px-2 py-0.5 rounded-full uppercase tracking-wider">
                     Required
                   </Badge>
                 )}
@@ -181,15 +195,17 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                   {isProductPhotosComplete ? <Check className="w-4.5 h-4.5 stroke-[2.5]" /> : <Image className="w-4.5 h-4.5" />}
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xs font-extrabold text-foreground">2. Product Angles</span>
-                  <span className="text-[10px] text-muted-foreground font-medium">Verify surface & profiles</span>
+                  <span className="text-sm font-extrabold text-foreground">2. Additional Photos</span>
+                  <span className={`text-xs font-semibold ${isProductPhotosComplete ? "text-emerald-500" : "text-muted-foreground"}`}>
+                    {capturedPhotosCount}/4 Completed
+                  </span>
                 </div>
               </div>
               <div className="ml-auto mr-3">
-                <Badge variant="secondary" className={`border-none font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                <Badge variant="secondary" className={`border-none font-bold text-[11px] px-2 py-0.5 rounded-full uppercase tracking-wider ${
                   isProductPhotosComplete ? "bg-emerald-500/10 text-emerald-500" : "bg-muted/60 text-muted-foreground"
                 }`}>
-                  {capturedPhotosCount}/4 Completed
+                  {capturedPhotosCount}/4
                 </Badge>
               </div>
             </AccordionTrigger>
@@ -231,13 +247,13 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                         </>
                       ) : (
                         <>
-                          <div className="w-7 h-7 rounded-full bg-background border border-border/50 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform mb-1.5">
-                            <Camera className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+                          <div className="w-8 h-8 rounded-full bg-background border border-border/50 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform mb-2">
+                            <Camera className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                           </div>
-                          <span className="text-[9.5px] font-bold text-foreground text-center group-hover:text-primary transition-colors">
+                          <span className="text-xs font-bold text-foreground text-center group-hover:text-primary transition-colors">
                             {slot.label}
                           </span>
-                          <span className="text-[7.5px] text-muted-foreground text-center leading-normal mt-0.5 max-w-[100px] truncate">
+                          <span className="text-[10px] text-muted-foreground text-center leading-normal mt-0.5 max-w-[100px] truncate">
                             {slot.desc}
                           </span>
                         </>
@@ -264,18 +280,20 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                   {verificationVideo ? <Check className="w-4.5 h-4.5 stroke-[2.5]" /> : <Video className="w-4.5 h-4.5" />}
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xs font-extrabold text-foreground">3. Video Verification</span>
-                  <span className="text-[10px] text-muted-foreground font-medium">3D Possession Check</span>
+                  <span className="text-sm font-extrabold text-foreground">3. Product Video</span>
+                  <span className={`text-xs font-semibold ${verificationVideo ? "text-emerald-500" : "text-primary"}`}>
+                    {verificationVideo ? "Completed" : "+30 Trust Score"}
+                  </span>
                 </div>
               </div>
               <div className="ml-auto mr-3">
                 {verificationVideo ? (
-                  <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 border-none font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider">
-                    Completed
+                  <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 border-none font-bold text-[11px] px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    Done
                   </Badge>
                 ) : (
-                  <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider">
-                    +30 Trust Score
+                  <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-bold text-[11px] px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    +30
                   </Badge>
                 )}
               </div>
@@ -305,7 +323,7 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                   onClick={() => handleOpenGuidelines("video")}
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/10 rounded-xl h-10 text-xs font-bold active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                 >
-                  <Video className="w-4 h-4" /> Start Video Verification
+                  <Video className="w-4 h-4" /> Start Product Video
                 </Button>
               )}
             </AccordionContent>
@@ -323,7 +341,7 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
               {sheetType === "video" ? (
                 <>
                   <Video className="w-5 h-5 text-primary fill-primary/10" />
-                  <span>Video Verification Instructions</span>
+                  <span>Product Video Instructions</span>
                 </>
               ) : (
                 <>

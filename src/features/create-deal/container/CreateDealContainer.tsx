@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowLeft, Shield } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 import { StepIndicator } from "../components/StepIndicator";
@@ -69,15 +69,23 @@ export const CreateDealContainer: React.FC = () => {
     trustScore += 25;
   }
   if (mainPhoto) {
-    trustScore += 20;
+    trustScore += 15;
   }
   const extraPhotosCount = Object.values(productPhotos).filter(Boolean).length;
   if (extraPhotosCount > 0) {
-    trustScore += Math.round((extraPhotosCount / 4) * 25);
+    trustScore += Math.round((extraPhotosCount / 4) * 15);
   }
   if (verificationVideo) {
     trustScore += 30;
   }
+
+  const nextStepName = !mainPhoto
+    ? "Take Main Photo"
+    : extraPhotosCount < 4
+    ? "Add Additional Photos"
+    : !verificationVideo
+    ? "Record Product Video"
+    : "Review & Publish";
 
   const handleStep1Submit = (data: Step1FormData) => {
     setFormData(data);
@@ -141,7 +149,7 @@ export const CreateDealContainer: React.FC = () => {
       <div className="flex-1 flex flex-col overflow-hidden px-6 pt-6 relative">
 
         {/* Header Navigation */}
-        <div className="flex items-center justify-between w-full mb-6 shrink-0">
+        <div className="flex items-center justify-between w-full mb-5 shrink-0">
           {!isSuccess && (
             <button
               onClick={handleBack}
@@ -151,9 +159,8 @@ export const CreateDealContainer: React.FC = () => {
             </button>
           )}
 
-          <div className="flex items-center gap-1.5 font-extrabold text-foreground text-sm select-none mx-auto">
-            <Shield className="w-5 h-5 text-primary fill-primary/10" />
-            <span>Create Deal</span>
+          <div className="font-extrabold text-foreground text-base select-none mx-auto">
+            New deal
           </div>
 
           {!isSuccess && <div className="w-10" />} {/* Spacer */}
@@ -161,7 +168,7 @@ export const CreateDealContainer: React.FC = () => {
 
         {/* Step Indicator Section */}
         {!isSuccess && (
-          <div className="mb-6 shrink-0">
+          <div className="mb-5 shrink-0">
             <StepIndicator currentStep={step} totalSteps={5} />
           </div>
         )}
@@ -181,6 +188,8 @@ export const CreateDealContainer: React.FC = () => {
                 <Step1ItemDetails
                   initialData={formData}
                   onContinue={handleStep1Submit}
+                  trustScore={trustScore}
+                  nextStepName={nextStepName}
                 />
               )}
               {step === 2 && (
@@ -193,6 +202,8 @@ export const CreateDealContainer: React.FC = () => {
                   onCaptureVideo={handleCaptureVideo}
                   onContinue={() => setStep(3)}
                   onBack={handleBack}
+                  trustScore={trustScore}
+                  nextStepName={nextStepName}
                 />
               )}
               {step === 3 && (
@@ -242,7 +253,7 @@ export const CreateDealContainer: React.FC = () => {
               type="button"
               onClick={handleBack}
               variant="outline"
-              className="flex-1 border-border/80 rounded-2xl h-12 text-sm font-bold active:scale-[0.98] transition-all"
+              className="flex-1 border-border/80 rounded-2xl h-14 text-base font-bold active:scale-[0.98] transition-all"
             >
               Back
             </Button>
@@ -265,7 +276,7 @@ export const CreateDealContainer: React.FC = () => {
                 isSuccess ? () => router.push(FRONTEND_ROUTES.DASHBOARD) : undefined
             }
             disabled={step === 5 && isSubmitting}
-            className="flex-1 bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/10 rounded-2xl h-12 text-sm font-bold active:scale-[0.98] transition-all"
+            className="flex-1 bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/10 rounded-2xl h-14 text-base font-bold active:scale-[0.98] transition-all"
           >
             {step === 5 && !isSuccess
               ? (isSubmitting ? "Publishing..." : "Publish Deal")

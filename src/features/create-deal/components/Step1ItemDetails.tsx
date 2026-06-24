@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { TrustScoreHeader } from "./TrustScoreHeader";
 
 export interface Step1FormData {
   title: string;
@@ -23,6 +24,8 @@ export interface Step1FormData {
 interface Step1ItemDetailsProps {
   initialData?: Partial<Step1FormData>;
   onContinue: (data: Step1FormData) => void;
+  trustScore?: number;
+  nextStepName?: string;
 }
 
 const CATEGORIES = ["Trading Cards", "Sports Cards", "Toys", "Plush", "Figures"];
@@ -31,6 +34,8 @@ const CONDITIONS = ["Mint", "Near Mint", "Excellent", "Very Good", "Good", "Fair
 export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
   initialData,
   onContinue,
+  trustScore,
+  nextStepName,
 }) => {
   const {
     register,
@@ -62,22 +67,31 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
     >
       {/* Scrollable Form Content */}
       <div className="flex-1 overflow-y-auto px-0.5 space-y-5 scrollbar-none pb-28">
+
+        {/* Trust Score card — scrolls with content */}
+        {typeof trustScore === "number" && (
+          <TrustScoreHeader score={trustScore} nextStepName={nextStepName} />
+        )}
+
+        {/* Step heading */}
+        <h2 className="text-2xl font-extrabold text-foreground tracking-tight">Item details</h2>
+
         {/* Title */}
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="item-title" className="text-xs font-semibold text-foreground/80">
+          <Label htmlFor="item-title" className="text-sm font-semibold text-foreground/80">
             Title
           </Label>
           <Input
             id="item-title"
             placeholder="Charizard Holo 1999 Base Set"
             className={cn(
-              "rounded-2xl h-12 px-4 border text-sm font-semibold bg-background",
+              "rounded-2xl h-12 px-4 border text-base font-semibold bg-background",
               errors.title ? "border-destructive focus-visible:ring-destructive/20" : "border-border/80"
             )}
             {...register("title", { required: "Item title is required" })}
           />
           {errors.title && (
-            <span className="text-[11px] font-medium text-destructive mt-0.5" role="alert">
+            <span className="text-xs font-medium text-destructive mt-0.5" role="alert">
               {errors.title.message}
             </span>
           )}
@@ -85,7 +99,7 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
 
         {/* Price */}
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="item-price" className="text-xs font-semibold text-foreground/80">
+          <Label htmlFor="item-price" className="text-sm font-semibold text-foreground/80">
             Price (USD)
           </Label>
           <div className="relative">
@@ -94,7 +108,7 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
               type="number"
               placeholder="4300"
               className={cn(
-                "rounded-2xl h-12 px-4 border text-sm font-semibold bg-background",
+                "rounded-2xl h-12 px-4 border text-base font-semibold bg-background",
                 errors.price ? "border-destructive focus-visible:ring-destructive/20" : "border-border/80"
               )}
               {...register("price", {
@@ -105,7 +119,7 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
             />
           </div>
           {errors.price && (
-            <span className="text-[11px] font-medium text-destructive mt-0.5" role="alert">
+            <span className="text-xs font-medium text-destructive mt-0.5" role="alert">
               {errors.price.message}
             </span>
           )}
@@ -114,7 +128,7 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
         {/* Product Type & Condition Dropdowns Side-by-Side */}
         <div className="grid grid-cols-[1.3fr_1fr] gap-3">
           <div className="flex flex-col gap-1.5">
-            <Label className="text-xs font-semibold text-foreground/80">
+            <Label className="text-sm font-semibold text-foreground/80">
               Product Type
             </Label>
             <Controller
@@ -138,7 +152,7 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label className="text-xs font-semibold text-foreground/80">
+            <Label className="text-sm font-semibold text-foreground/80">
               Condition
             </Label>
             <Controller
@@ -164,7 +178,7 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
 
         {/* Order Type Dropdown */}
         <div className="flex flex-col gap-1.5">
-          <Label className="text-xs font-semibold text-foreground/80">
+          <Label className="text-sm font-semibold text-foreground/80">
             Order Type
           </Label>
           <Controller
@@ -212,7 +226,7 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
                     </svg>
                   )}
                 </div>
-                <span className="text-sm font-bold text-foreground">Graded Product</span>
+                <span className="text-base font-bold text-foreground">Graded Product</span>
               </div>
             )}
           />
@@ -227,14 +241,14 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
                 transition={{ duration: 0.22, ease: "easeInOut" }}
                 className="overflow-hidden flex flex-col gap-1.5"
               >
-                <Label htmlFor="item-serial" className="text-xs font-semibold text-foreground/80">
+                <Label htmlFor="item-serial" className="text-sm font-semibold text-foreground/80">
                   Serial Number
                 </Label>
                 <Input
                   id="item-serial"
                   placeholder="Enter serial number..."
                   className={cn(
-                    "rounded-2xl h-12 px-4 border text-sm font-semibold bg-background",
+                    "rounded-2xl h-12 px-4 border text-base font-semibold bg-background",
                     errors.gradedSerial ? "border-destructive focus-visible:ring-destructive/20" : "border-border/80"
                   )}
                   {...register("gradedSerial", {
@@ -242,7 +256,7 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
                   })}
                 />
                 {errors.gradedSerial && (
-                  <span className="text-[11px] font-medium text-destructive mt-0.5" role="alert">
+                  <span className="text-xs font-medium text-destructive mt-0.5" role="alert">
                     {errors.gradedSerial.message}
                   </span>
                 )}
@@ -253,14 +267,14 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
 
         {/* Description */}
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="item-desc" className="text-xs font-semibold text-foreground/80">
+          <Label htmlFor="item-desc" className="text-sm font-semibold text-foreground/80">
             Description
           </Label>
           <Textarea
             id="item-desc"
             placeholder="Mint condition. Kept in sleeve."
             rows={3}
-            className="border-border/80 resize-none rounded-2xl p-4 text-sm font-semibold bg-background"
+            className="border-border/80 resize-none rounded-2xl p-4 text-base font-semibold bg-background"
             {...register("description")}
           />
         </div>

@@ -19,7 +19,7 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
           return (
             <div
               key={idx}
-              className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
+              className={`h-2 flex-1 rounded-full transition-all duration-300 ${
                 isActive ? "bg-primary" : "bg-muted-foreground/15"
               }`}
             />
@@ -28,7 +28,7 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
       </div>
 
       {/* Label */}
-      <span className="text-[10px] font-extrabold text-primary uppercase tracking-wider">
+      <span className="text-xs font-bold text-primary uppercase tracking-wider">
         STEP {currentStep} OF {totalSteps}
       </span>
     </div>

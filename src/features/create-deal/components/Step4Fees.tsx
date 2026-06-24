@@ -86,7 +86,7 @@ export const Step4Fees: React.FC<Step4FeesProps> = ({
       {/* Scrollable Form Content */}
       <div className="flex-1 overflow-y-auto px-0.5 space-y-5 scrollbar-none pb-28">
         <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-extrabold text-foreground tracking-tight">Fees</h2>
+          <h2 className="text-2xl font-extrabold text-foreground tracking-tight">Fees</h2>
         </div>
 
         {/* Radio Option Cards */}
@@ -129,7 +129,7 @@ export const Step4Fees: React.FC<Step4FeesProps> = ({
           >
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-bold text-foreground">Estimated Earnings</span>
-              <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-semibold">
+              <div className="flex items-center gap-1 text-xs text-muted-foreground font-semibold">
                 <span>Tap for breakdown</span>
                 {showBreakdown ? (
                   <ChevronUp className="w-3.5 h-3.5" />

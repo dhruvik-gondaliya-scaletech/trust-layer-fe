@@ -51,12 +51,12 @@ export const Step3Shipping: React.FC<Step3ShippingProps> = ({
       {/* Scrollable Form Content */}
       <div className="flex-1 overflow-y-auto px-0.5 space-y-5 scrollbar-none pb-28">
         <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-extrabold text-foreground tracking-tight">Shipping</h2>
+          <h2 className="text-2xl font-extrabold text-foreground tracking-tight">Shipping</h2>
         </div>
 
         {/* Handling Time */}
         <div className="flex flex-col gap-1.5">
-          <Label className="text-xs font-semibold text-foreground/85">
+          <Label className="text-sm font-semibold text-foreground/85">
             Handling Time
           </Label>
           <Controller
@@ -79,7 +79,7 @@ export const Step3Shipping: React.FC<Step3ShippingProps> = ({
           />
 
           {/* Amber Info Box */}
-          <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-500 text-[11px] leading-relaxed">
+          <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-500 text-xs leading-relaxed">
             <Info className="w-4 h-4 shrink-0 mt-0.5" />
             <span>
               If you do not ship within the selected handling time, the transaction may be automatically cancelled.
@@ -90,7 +90,7 @@ export const Step3Shipping: React.FC<Step3ShippingProps> = ({
         {/* Carrier & Shipping Type side-by-side */}
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
-            <Label className="text-xs font-semibold text-foreground/85">
+            <Label className="text-sm font-semibold text-foreground/85">
               Carrier
             </Label>
             <Controller
@@ -114,7 +114,7 @@ export const Step3Shipping: React.FC<Step3ShippingProps> = ({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label className="text-xs font-semibold text-foreground/85">
+            <Label className="text-sm font-semibold text-foreground/85">
               Shipping Type
             </Label>
             <Controller
@@ -158,7 +158,7 @@ export const Step3Shipping: React.FC<Step3ShippingProps> = ({
           </div>
           <div className="flex flex-col gap-0.5">
             <span className="text-sm font-bold text-foreground leading-none">Insured Shipment</span>
-            <span className="text-[10px] text-muted-foreground leading-normal mt-1">
+            <span className="text-xs text-muted-foreground leading-normal mt-1">
               Insurance amount will be entered later during tracking upload.
             </span>
           </div>

@@ -141,12 +141,12 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
 
   // Determine tier and color scheme for premium card
   let tier = "GETTING STARTED";
-  if (trustScore >= 20 && trustScore < 40) {
+  if (trustScore >= 1 && trustScore < 60) {
     tier = "LOW";
-  } else if (trustScore >= 40 && trustScore < 70) {
+  } else if (trustScore >= 60 && trustScore < 80) {
     tier = "MEDIUM";
-  } else if (trustScore >= 70 && trustScore < 100) {
-    tier = "GOOD";
+  } else if (trustScore >= 80 && trustScore < 100) {
+    tier = "HIGH";
   } else if (trustScore === 100) {
     tier = "EXCELLENT";
   }
@@ -217,9 +217,9 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
                         <div className={`w-4.5 h-4.5 rounded-full flex items-center justify-center border ${mainPhoto ? "bg-white/20 border-white text-white" : "border-white/20 text-white/40"}`}>
                           <Check className="w-2.5 h-2.5 stroke-[3]" />
                         </div>
-                        <span>Main Product Photo</span>
+                        <span>Main Photo</span>
                       </div>
-                      <span className={mainPhoto ? "text-white font-extrabold" : "text-white/40"}>+20 pts</span>
+                      <span className={mainPhoto ? "text-white font-extrabold" : "text-white/40"}>+15 pts</span>
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -227,10 +227,10 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
                         <div className={`w-4.5 h-4.5 rounded-full flex items-center justify-center border ${extraPhotosCount > 0 ? "bg-white/20 border-white text-white" : "border-white/20 text-white/40"}`}>
                           <Check className="w-2.5 h-2.5 stroke-[3]" />
                         </div>
-                        <span>Multi-Angle Photos ({extraPhotosCount}/4 verified)</span>
+                        <span>Additional Photos ({extraPhotosCount}/4 verified)</span>
                       </div>
                       <span className={extraPhotosCount > 0 ? "text-white font-extrabold" : "text-white/40"}>
-                        +{Math.round((extraPhotosCount / 4) * 25)} pts
+                        +{Math.round((extraPhotosCount / 4) * 15)} pts
                       </span>
                     </div>
 
@@ -239,7 +239,7 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
                         <div className={`w-4.5 h-4.5 rounded-full flex items-center justify-center border ${verificationVideo ? "bg-white/20 border-white text-white" : "border-white/20 text-white/40"}`}>
                           <Check className="w-2.5 h-2.5 stroke-[3]" />
                         </div>
-                        <span>Video Verification</span>
+                        <span>Product Video</span>
                       </div>
                       <span className={verificationVideo ? "text-white font-extrabold" : "text-white/40"}>+30 pts</span>
                     </div>
