@@ -124,14 +124,15 @@ Rules:
 
 ---
 
-## 8️⃣ Responsiveness
+## 8️⃣ Responsiveness & Layout Constraint
 
-- Mobile-first
+- Mobile-first constrained layout
+- **Mobile Constraint Wrapper:** Must wrap views in a centered container (`mx-auto`) with a max-width of `430px`, minimum height of `100vh`, relative positioning, shadow-2xl, background color `#F8FAFC`, and no horizontal overflow (`overflow-x-hidden`).
 - No fixed layouts
 - No horizontal overflow
 - Flexible grid & flex
-- 8px spacing system
-- Works 320px → 2xl
+- 4px spacing system (aligned with `trust-layer-frontend` spacing tokens)
+- Works 320px → 430px (constrained display width)
 
 ---
 
@@ -177,12 +178,13 @@ Accessibility overrides aesthetics.
 
 ---
 
-## 1️⃣4️⃣ Neumorphism
+## 1️⃣4️⃣ Visual Styling Aesthetics
 
-- Soft shadows
+- Modern, premium flat design with soft gradients
+- Soft shadows (`shadow-soft`: `0 4px 20px -2px rgba(0, 0, 0, 0.05)`)
 - Subtle elevation
-- Minimal usage
-- Must not reduce contrast
+- Minimal usage of heavy borders or solid black outlines
+- Must not reduce contrast; verify accessibility contrast
 
 ---
 
@@ -302,34 +304,49 @@ Performance must be measured continuously.
 
 ## 2️⃣1️⃣ Design Token System
 
-All styling must use tokens.
+All styling must use tokens matching the `trust-layer-frontend` configuration.
 
-### Color Tokens
-- primary
-- secondary
-- accent
-- success
-- warning
-- error
-- muted
-- background
-- foreground
-- border
+### Typography (Inter Font Family)
+- **Font Family:** `font-family: 'Inter', system-ui, -apple-system, sans-serif;` with `font-feature-settings: "rlig" 1, "calt" 1;`
+- **Typography Scale:** Use specific pixel-based custom classes: `text-[11px]`, `text-[12px]`, `text-[13px]`, `text-[14px]`, `text-[15px]`, `text-[16px]`, `text-[18px]`, `text-[20px]`, `text-[22px]`, `text-[40px]`, etc.
+- **Font Weights:** `font-regular` (400) to `font-extrabold` (800).
 
-Never hardcode hex values.
+### Color Tokens (HSL Palette)
+- **primary:** `hsl(221, 83%, 53%)` / `#0066FF` (`hsl(216, 100%, 50%)`)
+- **secondary:** `hsl(210, 40%, 96.1%)` / `#E5F0FF` (`hsl(216, 100%, 95%)`)
+- **background:** `hsl(210, 40%, 98%)` (default page background `#F8FAFC`, body background `#E2E8F0` for framing)
+- **foreground:** `hsl(222.2, 84%, 4.9%)`
+- **destructive:** `hsl(0, 84.2%, 60.2%)`
+- **success:** `hsl(142.1, 76.2%, 36.3%)`
+- **muted:** `hsl(210, 40%, 96.1%)` (foreground: `hsl(215.4, 16.3%, 46.9%)`)
+- **accent:** `hsl(210, 40%, 96.1%)` (foreground: `hsl(222.2, 47.4%, 11.2%)`)
+- **border:** `hsl(214.3, 31.8%, 91.4%)`
+- **input:** `hsl(214.3, 31.8%, 91.4%)`
+- **ring:** `hsl(221, 83%, 53%)`
 
-### Spacing Scale (8px grid)
-- space-1 → space-16
+Never hardcode hex values unless mapping them inside tailwind configuration/global CSS files.
 
-### Typography Scale
-- text-xs → text-5xl
-- font-regular → font-bold
+### Spacing Scale (4px-based tailwind spacing)
+- **1:** `4px`
+- **2:** `8px`
+- **3:** `12px`
+- **4:** `16px`
+- **5:** `20px`
+- **6:** `24px`
+- **8:** `32px`
+- **10:** `40px`
+- **12:** `48px`
+- **16:** `64px`
 
 ### Radius Tokens
-- radius-sm → radius-2xl
+- **radius-sm (sm):** `8px` (smaller elements)
+- **radius-md (md):** `14px` (inputs, buttons)
+- **radius-lg (lg):** `20px` (cards)
+- **radius-xl (xl):** `24px` (bottom sheets)
 
 ### Shadow Tokens
-- shadow-xs → shadow-xl
+- **shadow-soft:** `0 4px 20px -2px rgba(0, 0, 0, 0.05)` (for cards, inputs, buttons)
+- **shadow-2xl:** (for mobile-constraint container)
 
 ---
 

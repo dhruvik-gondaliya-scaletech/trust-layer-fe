@@ -4,11 +4,11 @@ import React from "react";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
 import { LoginInput } from "@/lib/validations/login";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Loader2, Shield } from "lucide-react";
+import { Shield, Loader2 } from "lucide-react";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 import Link from "next/link";
+import { BottomActionBar } from "@/components/ui/bottom-action-bar";
 
 interface LoginFormProps {
   register: UseFormRegister<LoginInput>;
@@ -26,138 +26,81 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   handleSubmit,
 }) => {
   return (
-    <div className="flex-1 flex flex-col justify-between px-6 pb-8 pt-8">
-      <div className="flex-1 flex flex-col justify-center gap-8">
-        {/* Logo and Header */}
-        <div className="flex flex-col items-center gap-6">
-          <div className="flex items-center gap-2 text-primary font-bold text-lg select-none">
-            <Shield className="w-6 h-6 fill-primary/10 stroke-[2]" />
-            <span>TrustLayer</span>
-          </div>
+    <div className="flex flex-col min-h-screen bg-background pb-[140px]">
+      {/* Top Header */}
+      <div className="flex items-center justify-center p-6 bg-background">
+        <div className="flex items-center gap-2 text-primary font-bold text-lg select-none">
+          <Shield className="h-6 w-6" />
+          <span>TrustLayer</span>
         </div>
+      </div>
 
-        {/* Title */}
-        <div className="flex flex-col gap-1 text-left">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground leading-tight tracking-tight">
-            Sign In
-          </h1>
-        </div>
+      <div className="flex-1 px-5 pt-10 max-w-sm mx-auto w-full">
+        <h1 className="text-[28px] font-extrabold mb-8 text-foreground leading-tight tracking-tight">
+          Sign In
+        </h1>
 
-        {/* Form Fields */}
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-4 text-left"
-          noValidate
-        >
-          {/* Email Address */}
-          <div className="flex flex-col gap-1.5">
-            <Label
-              htmlFor="login-email"
-              className="text-xs font-semibold text-foreground/80"
-            >
-              Email
-            </Label>
+        <form id="login-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+          <div className="space-y-2">
+            <label className="text-[13px] font-medium text-foreground">Email</label>
             <Input
-              id="login-email"
+              required
               type="email"
               disabled={isPending}
               placeholder="john@example.com"
-              className={
-                errors.email
-                  ? "border-destructive focus-visible:ring-destructive/20"
-                  : "border-border/80"
-              }
-              aria-invalid={errors.email ? "true" : "false"}
-              aria-describedby={errors.email ? "email-error" : undefined}
+              className={errors.email ? "border-destructive focus-visible:ring-destructive/20" : ""}
               {...register("email")}
             />
             {errors.email && (
-              <span
-                id="email-error"
-                className="text-[11px] font-medium text-destructive mt-0.5"
-                role="alert"
-              >
-                {errors.email.message}
-              </span>
+              <p className="text-red-500 text-[12px] font-medium">{errors.email.message}</p>
             )}
           </div>
 
-          {/* Password */}
-          <div className="flex flex-col gap-1.5">
-            <Label
-              htmlFor="login-password"
-              className="text-xs font-semibold text-foreground/80"
-            >
-              Password
-            </Label>
+          <div className="space-y-2">
+            <label className="text-[13px] font-medium text-foreground">Password</label>
             <Input
-              id="login-password"
+              required
               type="password"
               disabled={isPending}
               placeholder="••••••••"
-              className={
-                errors.password
-                  ? "border-destructive focus-visible:ring-destructive/20"
-                  : "border-border/80"
-              }
-              aria-invalid={errors.password ? "true" : "false"}
-              aria-describedby={errors.password ? "password-error" : undefined}
+              className={errors.password ? "border-destructive focus-visible:ring-destructive/20" : ""}
               {...register("password")}
             />
             {errors.password && (
-              <span
-                id="password-error"
-                className="text-[11px] font-medium text-destructive mt-0.5"
-                role="alert"
-              >
-                {errors.password.message}
-              </span>
+              <p className="text-red-500 text-[12px] font-medium">{errors.password.message}</p>
             )}
-
-            {/* Forgot Password */}
-            <div className="flex justify-end mt-1">
-              <Link
-                href="#"
-                className="text-xs font-semibold text-primary hover:underline"
-              >
-                Forgot Password?
-              </Link>
-            </div>
           </div>
 
-          {/* Navigation link */}
-          <div className="text-center mt-4">
-            <span className="text-xs text-muted-foreground">
-              Don't have an account?{" "}
-              <Link
-                href={FRONTEND_ROUTES.REGISTER}
-                className="font-semibold text-primary hover:underline"
-              >
-                Create Account
-              </Link>
-            </span>
-          </div>
-
-          {/* Action Button at bottom */}
-          <div className="mt-8">
-            <Button
-              type="submit"
-              disabled={isPending}
-              size="lg"
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/10 rounded-2xl h-12 text-sm font-bold active:scale-[0.98] transition-all"
+          <div className="flex justify-end pt-1">
+            <Link
+              href="#"
+              className="text-[14px] font-bold text-primary hover:underline"
             >
-              {isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Signing In...
-                </>
-              ) : (
-                "Sign In"
-              )}
-            </Button>
+              Forgot Password?
+            </Link>
           </div>
         </form>
+
+        <p className="text-center text-[14px] text-muted-foreground mt-8">
+          Don't have an account?{" "}
+          <Link href={FRONTEND_ROUTES.REGISTER} className="text-primary font-bold hover:underline">
+            Create Account
+          </Link>
+        </p>
       </div>
+
+      <BottomActionBar>
+        <Button form="login-form" type="submit" disabled={isPending} className="w-full h-14 text-[16px]">
+          {isPending ? (
+            <span className="flex items-center justify-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Signing In...
+            </span>
+          ) : (
+            "Sign In"
+          )}
+        </Button>
+      </BottomActionBar>
     </div>
   );
 };
