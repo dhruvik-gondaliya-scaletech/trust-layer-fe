@@ -18,11 +18,11 @@ const MAX_RECORDING_SECONDS = 60;
 const BLUR_THRESHOLD = 1.8;
 
 function computeBlurScore(video: HTMLVideoElement): number {
-  const size = 150;
+  const size = 80;
   const canvas = document.createElement("canvas");
   canvas.width = size;
   canvas.height = size;
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
   if (!ctx) return 999;
   const vW = video.videoWidth || 640;
   const vH = video.videoHeight || 480;
@@ -201,42 +201,43 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
     const canvas = canvasRef.current;
     const video = videoRef.current;
     if (!canvas || !video) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
+    const S = 80; // analysis resolution — keep small for speed
     let active = true;
 
     const analyzeFrame = () => {
       if (!active || !videoRef.current || videoRef.current.paused || videoRef.current.ended) return;
       const vW = video.videoWidth || 640;
       const vH = video.videoHeight || 480;
-      canvas.width = 150;
-      canvas.height = 150;
+      canvas.width = S;
+      canvas.height = S;
       const crop = Math.min(vW, vH) * 0.6;
       const sx = (vW - crop) / 2;
       const sy = (vH - crop) / 2;
       try {
-        ctx.drawImage(video, sx, sy, crop, crop, 0, 0, 150, 150);
-        const pixels = ctx.getImageData(0, 0, 150, 150).data;
+        ctx.drawImage(video, sx, sy, crop, crop, 0, 0, S, S);
+        const pixels = ctx.getImageData(0, 0, S, S).data;
         let brightness = 0;
         for (let i = 0; i < pixels.length; i += 4) brightness += (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
         const avgBrightness = brightness / (pixels.length / 4);
 
-        const gray = new Float32Array(150 * 150);
+        const gray = new Float32Array(S * S);
         for (let i = 0; i < pixels.length; i += 4) {
           gray[i / 4] = 0.299 * pixels[i] + 0.587 * pixels[i + 1] + 0.114 * pixels[i + 2];
         }
         let lapSum = 0;
         let edgePx = 0;
-        for (let y = 1; y < 149; y++) {
-          for (let x = 1; x < 149; x++) {
-            const idx = y * 150 + x;
-            const v = Math.abs(gray[idx - 150] + gray[idx - 1] - 4 * gray[idx] + gray[idx + 1] + gray[idx + 150]);
+        for (let y = 1; y < S - 1; y++) {
+          for (let x = 1; x < S - 1; x++) {
+            const idx = y * S + x;
+            const v = Math.abs(gray[idx - S] + gray[idx - 1] - 4 * gray[idx] + gray[idx + 1] + gray[idx + S]);
             lapSum += v;
             if (v > 15) edgePx++;
           }
         }
-        const avgLap = lapSum / (150 * 150);
-        const edgeDensity = edgePx / (150 * 150);
+        const avgLap = lapSum / (S * S);
+        const edgeDensity = edgePx / (S * S);
 
         if (avgBrightness < 35) { setFeedback("Too dark — find better lighting"); setFeedbackColor("text-amber-500"); }
         else if (avgBrightness > 225) { setFeedback("Too bright — avoid direct glare"); setFeedbackColor("text-amber-500"); }
