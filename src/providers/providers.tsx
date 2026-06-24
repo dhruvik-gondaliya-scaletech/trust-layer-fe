@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ConfettiProvider } from "./confetti-provider";
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -13,7 +14,7 @@ export default function Providers({ children }: ProvidersProps) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 60 * 1000, // 1 minute stale time standard
+            staleTime: 60 * 1000,
             refetchOnWindowFocus: false,
           },
         },
@@ -22,7 +23,9 @@ export default function Providers({ children }: ProvidersProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <ConfettiProvider>
+        {children}
+      </ConfettiProvider>
     </QueryClientProvider>
   );
 }

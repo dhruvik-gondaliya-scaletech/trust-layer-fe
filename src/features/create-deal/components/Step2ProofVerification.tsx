@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/sheet";
 import { CameraCapture } from "./CameraCapture";
 import { Badge } from "@/components/ui/badge";
-import { TrustScoreHeader } from "./TrustScoreHeader";
+import { TrustScoreHeader, TrustScoreBreakdown } from "./TrustScoreHeader";
 
 interface Step2ProofVerificationProps {
   mainPhoto: string | null;
@@ -36,6 +36,7 @@ interface Step2ProofVerificationProps {
   onBack: () => void;
   trustScore?: number;
   nextStepName?: string;
+  breakdown?: TrustScoreBreakdown;
 }
 
 const PHOTO_SLOTS = [
@@ -56,6 +57,7 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
   onBack,
   trustScore,
   nextStepName,
+  breakdown,
 }) => {
   // Accordion active item state
   const [activeAccordion, setActiveAccordion] = useState<string>("main-photo");
@@ -94,7 +96,7 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
 
         {/* Trust Score card — scrolls with content */}
         {typeof trustScore === "number" && (
-          <TrustScoreHeader score={trustScore} nextStepName={nextStepName} />
+          <TrustScoreHeader score={trustScore} nextStepName={nextStepName} breakdown={breakdown} />
         )}
 
         <div className="flex flex-col gap-2">

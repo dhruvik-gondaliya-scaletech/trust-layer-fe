@@ -212,37 +212,64 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
                   className="overflow-hidden"
                 >
                   <div className="flex flex-col gap-2.5 pt-3 border-t border-white/10 relative z-10 text-xs text-blue-100/90 font-semibold">
+
+                    {/* Verified Seller Profile — always earned */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className={`w-4.5 h-4.5 rounded-full flex items-center justify-center border ${mainPhoto ? "bg-white/20 border-white text-white" : "border-white/20 text-white/40"}`}>
+                        <div className="w-4 h-4 rounded-full bg-white/20 border border-white flex items-center justify-center shrink-0">
                           <Check className="w-2.5 h-2.5 stroke-[3]" />
                         </div>
-                        <span>Main Photo</span>
+                        <span>Verified Seller Profile</span>
                       </div>
-                      <span className={mainPhoto ? "text-white font-extrabold" : "text-white/40"}>+15 pts</span>
+                      <span className="text-white font-extrabold">+20 pts</span>
                     </div>
 
+                    {/* Item Details — always true in step 5 */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className={`w-4.5 h-4.5 rounded-full flex items-center justify-center border ${extraPhotosCount > 0 ? "bg-white/20 border-white text-white" : "border-white/20 text-white/40"}`}>
+                        <div className="w-4 h-4 rounded-full bg-white/20 border border-white flex items-center justify-center shrink-0">
                           <Check className="w-2.5 h-2.5 stroke-[3]" />
                         </div>
-                        <span>Additional Photos ({extraPhotosCount}/4 verified)</span>
+                        <span>Item Details</span>
                       </div>
-                      <span className={extraPhotosCount > 0 ? "text-white font-extrabold" : "text-white/40"}>
+                      <span className="text-white font-extrabold">+20 pts</span>
+                    </div>
+
+                    {/* Main Photo */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-4 h-4 rounded-full flex items-center justify-center border shrink-0 ${mainPhoto ? "bg-white/20 border-white" : "border-white/25"}`}>
+                          <Check className={`w-2.5 h-2.5 stroke-[3] ${mainPhoto ? "" : "opacity-30"}`} />
+                        </div>
+                        <span className={mainPhoto ? "" : "opacity-50"}>Main Photo</span>
+                      </div>
+                      <span className={mainPhoto ? "text-white font-extrabold" : "opacity-40"}>+15 pts</span>
+                    </div>
+
+                    {/* Additional Photos */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-4 h-4 rounded-full flex items-center justify-center border shrink-0 ${extraPhotosCount > 0 ? "bg-white/20 border-white" : "border-white/25"}`}>
+                          <Check className={`w-2.5 h-2.5 stroke-[3] ${extraPhotosCount > 0 ? "" : "opacity-30"}`} />
+                        </div>
+                        <span className={extraPhotosCount > 0 ? "" : "opacity-50"}>Additional Photos ({extraPhotosCount}/4)</span>
+                      </div>
+                      <span className={extraPhotosCount > 0 ? "text-white font-extrabold" : "opacity-40"}>
                         +{Math.round((extraPhotosCount / 4) * 15)} pts
                       </span>
                     </div>
 
+                    {/* Product Video */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className={`w-4.5 h-4.5 rounded-full flex items-center justify-center border ${verificationVideo ? "bg-white/20 border-white text-white" : "border-white/20 text-white/40"}`}>
-                          <Check className="w-2.5 h-2.5 stroke-[3]" />
+                        <div className={`w-4 h-4 rounded-full flex items-center justify-center border shrink-0 ${verificationVideo ? "bg-white/20 border-white" : "border-white/25"}`}>
+                          <Check className={`w-2.5 h-2.5 stroke-[3] ${verificationVideo ? "" : "opacity-30"}`} />
                         </div>
-                        <span>Product Video</span>
+                        <span className={verificationVideo ? "" : "opacity-50"}>Product Video</span>
                       </div>
-                      <span className={verificationVideo ? "text-white font-extrabold" : "text-white/40"}>+30 pts</span>
+                      <span className={verificationVideo ? "text-white font-extrabold" : "opacity-40"}>+30 pts</span>
                     </div>
+
                   </div>
                 </motion.div>
               )}

@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { TrustScoreHeader } from "./TrustScoreHeader";
+import { TrustScoreHeader, TrustScoreBreakdown } from "./TrustScoreHeader";
 
 export interface Step1FormData {
   title: string;
@@ -26,6 +26,7 @@ interface Step1ItemDetailsProps {
   onContinue: (data: Step1FormData) => void;
   trustScore?: number;
   nextStepName?: string;
+  breakdown?: TrustScoreBreakdown;
 }
 
 const CATEGORIES = ["Trading Cards", "Sports Cards", "Toys", "Plush", "Figures"];
@@ -36,6 +37,7 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
   onContinue,
   trustScore,
   nextStepName,
+  breakdown,
 }) => {
   const {
     register,
@@ -70,7 +72,7 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
 
         {/* Trust Score card — scrolls with content */}
         {typeof trustScore === "number" && (
-          <TrustScoreHeader score={trustScore} nextStepName={nextStepName} />
+          <TrustScoreHeader score={trustScore} nextStepName={nextStepName} breakdown={breakdown} />
         )}
 
         {/* Step heading */}

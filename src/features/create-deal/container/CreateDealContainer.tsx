@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useConfetti } from "@/providers/confetti-provider";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 import { StepIndicator } from "../components/StepIndicator";
 import { Step1ItemDetails, Step1FormData } from "../components/Step1ItemDetails";
@@ -64,20 +65,14 @@ export const CreateDealContainer: React.FC = () => {
   const [dealId, setDealId] = useState("");
 
   // Dynamic Trust Score Calculation
-  let trustScore = 0;
-  if (step > 1 || formData.title) {
-    trustScore += 25;
-  }
-  if (mainPhoto) {
-    trustScore += 15;
-  }
+  const hasItemDetails = step > 1 || !!formData.title;
   const extraPhotosCount = Object.values(productPhotos).filter(Boolean).length;
-  if (extraPhotosCount > 0) {
-    trustScore += Math.round((extraPhotosCount / 4) * 15);
-  }
-  if (verificationVideo) {
-    trustScore += 30;
-  }
+
+  let trustScore = 20; // Verified Seller Profile — always +20
+  if (hasItemDetails) trustScore += 20;
+  if (mainPhoto) trustScore += 15;
+  if (extraPhotosCount > 0) trustScore += Math.round((extraPhotosCount / 4) * 15);
+  if (verificationVideo) trustScore += 30;
 
   const nextStepName = !mainPhoto
     ? "Take Main Photo"
@@ -86,6 +81,27 @@ export const CreateDealContainer: React.FC = () => {
     : !verificationVideo
     ? "Record Product Video"
     : "Review & Publish";
+
+  const breakdown = {
+    hasItemDetails,
+    hasMainPhoto: !!mainPhoto,
+    additionalPhotosCount: extraPhotosCount,
+    hasVideo: !!verificationVideo,
+  };
+
+  // Confetti when trust score first hits 100
+  const { fire: fireConfetti } = useConfetti();
+  const confettiFiredRef = useRef(false);
+
+  useEffect(() => {
+    if (trustScore === 100 && !confettiFiredRef.current) {
+      confettiFiredRef.current = true;
+      fireConfetti();
+    }
+    if (trustScore < 100) {
+      confettiFiredRef.current = false;
+    }
+  }, [trustScore, fireConfetti]);
 
   const handleStep1Submit = (data: Step1FormData) => {
     setFormData(data);
@@ -190,6 +206,7 @@ export const CreateDealContainer: React.FC = () => {
                   onContinue={handleStep1Submit}
                   trustScore={trustScore}
                   nextStepName={nextStepName}
+                  breakdown={breakdown}
                 />
               )}
               {step === 2 && (
@@ -204,6 +221,7 @@ export const CreateDealContainer: React.FC = () => {
                   onBack={handleBack}
                   trustScore={trustScore}
                   nextStepName={nextStepName}
+                  breakdown={breakdown}
                 />
               )}
               {step === 3 && (
