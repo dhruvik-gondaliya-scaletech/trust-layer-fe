@@ -45,6 +45,7 @@ export const CreateDealContainer: React.FC = () => {
   });
 
   const [verificationVideo, setVerificationVideo] = useState<Blob | null>(null);
+  const [certPhoto, setCertPhoto] = useState<string | null>(null);
 
   const [shippingData, setShippingData] = useState<Step3ShippingData>({
     handlingTime: "Ship within 1–2 business days",
@@ -72,7 +73,9 @@ export const CreateDealContainer: React.FC = () => {
   if (hasItemDetails) trustScore += 20;
   if (mainPhoto) trustScore += 15;
   if (extraPhotosCount > 0) trustScore += Math.round((extraPhotosCount / 4) * 15);
-  if (verificationVideo) trustScore += 30;
+  // When graded: video worth 20 pts + cert photo worth 10 pts (same total max)
+  if (verificationVideo) trustScore += formData.isGraded ? 20 : 30;
+  if (certPhoto && formData.isGraded) trustScore += 10;
 
   const nextStepName = !mainPhoto
     ? "Take Main Photo"
@@ -80,6 +83,8 @@ export const CreateDealContainer: React.FC = () => {
     ? "Add Additional Photos"
     : !verificationVideo
     ? "Record Product Video"
+    : formData.isGraded && !certPhoto
+    ? "Upload Certificate"
     : "Review & Publish";
 
   const breakdown = {
@@ -87,6 +92,8 @@ export const CreateDealContainer: React.FC = () => {
     hasMainPhoto: !!mainPhoto,
     additionalPhotosCount: extraPhotosCount,
     hasVideo: !!verificationVideo,
+    hasCertPhoto: !!certPhoto,
+    isGraded: formData.isGraded,
   };
 
   // Confetti when trust score first hits 100
@@ -121,6 +128,10 @@ export const CreateDealContainer: React.FC = () => {
 
   const handleCaptureVideo = (videoBlob: Blob) => {
     setVerificationVideo(videoBlob);
+  };
+
+  const handleCaptureCertPhoto = (dataUrl: string) => {
+    setCertPhoto(dataUrl);
   };
 
   const handleStep3Submit = (data: Step3ShippingData) => {
@@ -214,9 +225,12 @@ export const CreateDealContainer: React.FC = () => {
                   mainPhoto={mainPhoto}
                   productPhotos={productPhotos}
                   verificationVideo={verificationVideo}
+                  certPhoto={certPhoto}
+                  isGraded={formData.isGraded}
                   onCaptureMainPhoto={handleCaptureMainPhoto}
                   onCaptureProductPhotoSlot={handleCaptureProductPhotosSlot}
                   onCaptureVideo={handleCaptureVideo}
+                  onCaptureCertPhoto={handleCaptureCertPhoto}
                   onContinue={() => setStep(3)}
                   onBack={handleBack}
                   trustScore={trustScore}
