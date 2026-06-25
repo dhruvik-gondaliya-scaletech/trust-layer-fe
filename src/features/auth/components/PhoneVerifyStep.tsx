@@ -5,6 +5,7 @@ import { UseFormRegister, FieldErrors } from "react-hook-form";
 import { PhoneVerifyInput } from "@/lib/validations/verify";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { Label } from "@/components/ui/label";
 import { Smartphone, Check, Loader2, ChevronLeft } from "lucide-react";
 import { BottomActionBar } from "@/components/ui/bottom-action-bar";
 import { toast } from "sonner";
@@ -18,6 +19,9 @@ interface PhoneVerifyStepProps {
   setValue: any;
   onBack: () => void;
   defaultCode?: string;
+  onResend?: (onSuccess: () => void) => void;
+  isResending?: boolean;
+  renderTracker?: () => React.ReactNode;
 }
 
 export const PhoneVerifyStep: React.FC<PhoneVerifyStepProps> = ({
@@ -29,6 +33,9 @@ export const PhoneVerifyStep: React.FC<PhoneVerifyStepProps> = ({
   setValue,
   onBack,
   defaultCode = "",
+  onResend,
+  isResending = false,
+  renderTracker,
 }) => {
   const [code, setCode] = useState(defaultCode);
   const [resendCountdown, setResendCountdown] = useState(0);
@@ -52,11 +59,13 @@ export const PhoneVerifyStep: React.FC<PhoneVerifyStepProps> = ({
   };
 
   const handleResend = () => {
-    if (resendCountdown === 0) {
-      setResendCountdown(30);
-      toast.success("Verification code resent via SMS!");
+    if (resendCountdown === 0 && onResend) {
+      onResend(() => {
+        setResendCountdown(30);
+      });
     }
   };
+
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-[160px]">
@@ -74,19 +83,7 @@ export const PhoneVerifyStep: React.FC<PhoneVerifyStepProps> = ({
 
       <div className="flex-1 px-5 pt-2 max-w-sm mx-auto w-full">
         {/* Progress Tracker */}
-        <div className="flex items-center justify-center gap-2 mb-8 select-none">
-          <div className="flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-[13px] font-bold border border-green-100">
-            <Check className="w-3.5 h-3.5 text-green-600" strokeWidth={3} /> Email
-          </div>
-          <div className="h-px w-4 bg-gray-200" />
-          <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-[13px] font-bold border border-blue-100">
-            <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" /> Phone
-          </div>
-          <div className="h-px w-4 bg-gray-200" />
-          <div className="flex items-center gap-2 text-gray-400 px-4 py-2 rounded-full text-[13px] font-bold border border-gray-200">
-            Profile
-          </div>
-        </div>
+        {renderTracker?.()}
 
         {/* Hero Section */}
         <div className="flex justify-center mb-6">
@@ -109,7 +106,7 @@ export const PhoneVerifyStep: React.FC<PhoneVerifyStepProps> = ({
         <div className="bg-white rounded-[24px] p-5 shadow-xl shadow-blue-900/5 border border-gray-100">
           <form id="verify-phone-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
             <div className="space-y-3">
-              <label className="text-[13px] font-bold text-foreground ml-1">6-Digit Code</label>
+              <Label className="text-[13px] font-bold text-foreground ml-1">6-Digit Code</Label>
               <div className="flex justify-center">
                 <InputOTP
                   maxLength={6}
@@ -153,9 +150,18 @@ export const PhoneVerifyStep: React.FC<PhoneVerifyStepProps> = ({
             type="button"
             className="w-full h-14 border-border text-foreground hover:bg-gray-50 text-[16px] font-bold"
             onClick={handleResend}
-            disabled={resendCountdown > 0 || isPending}
+            disabled={resendCountdown > 0 || isPending || isResending}
           >
-            {resendCountdown > 0 ? `Code sent! (${resendCountdown}s)` : "Resend Code"}
+            {isResending ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Resending...
+              </span>
+            ) : resendCountdown > 0 ? (
+              `Code sent! (${resendCountdown}s)`
+            ) : (
+              "Resend Code"
+            )}
           </Button>
         </div>
       </BottomActionBar>

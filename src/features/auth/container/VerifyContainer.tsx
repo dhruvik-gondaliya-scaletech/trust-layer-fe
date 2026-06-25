@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { Check } from "lucide-react";
 import { zodResolver } from "@/lib/validations/resolver";
 import {
   emailVerifySchema,
@@ -20,16 +21,13 @@ import {
   useSendPhoneMutation,
   useVerifyPhoneMutation,
   useProfileSetupMutation,
+  useResendOtpMutation,
 } from "@/hooks/queries/useVerify";
 import { EmailVerifyStep } from "../components/EmailVerifyStep";
-import { EmailSuccessStep } from "../components/EmailSuccessStep";
 import { PhoneInputStep } from "../components/PhoneInputStep";
 import { PhoneVerifyStep } from "../components/PhoneVerifyStep";
-import { PhoneSuccessStep } from "../components/PhoneSuccessStep";
 import { ProfileSetupStep } from "../components/ProfileSetupStep";
 import { FRONTEND_ROUTES, VerificationStep } from "@/lib/contants";
-
-
 
 export const VerifyContainer: React.FC = () => {
   const router = useRouter();
@@ -38,6 +36,31 @@ export const VerifyContainer: React.FC = () => {
 
   const [step, setStep] = useState<VerificationStep>(VerificationStep.EMAIL_VERIFY);
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [profileComplete, setProfileComplete] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    try {
+      const emailVal = localStorage.getItem("tl_email_verified") === "true";
+      const phoneVal = localStorage.getItem("tl_phone_verified") === "true";
+      const profileVal = localStorage.getItem("tl_profile_complete") === "true";
+
+      setEmailVerified(emailVal);
+      setPhoneVerified(phoneVal);
+      setProfileComplete(profileVal);
+
+      if (emailVal && phoneVal) {
+        setStep(VerificationStep.PROFILE_SETUP);
+      } else if (emailVal) {
+        setStep(VerificationStep.PHONE_INPUT);
+      } else {
+        setStep(VerificationStep.EMAIL_VERIFY);
+      }
+    } catch {}
+  }, []);
 
   // Forms definition for each step
   const emailForm = useForm<EmailVerifyInput>({
@@ -64,7 +87,8 @@ export const VerifyContainer: React.FC = () => {
   const verifyEmailMutation = useVerifyEmailMutation({
     onSuccess: () => {
       toast.success("Email verified successfully!");
-      setStep(VerificationStep.EMAIL_SUCCESS);
+      setEmailVerified(true);
+      setStep(VerificationStep.PHONE_INPUT);
     },
     onError: (err) => {
       toast.error(err.message || "Email verification failed.");
@@ -85,7 +109,8 @@ export const VerifyContainer: React.FC = () => {
   const verifyPhoneMutation = useVerifyPhoneMutation({
     onSuccess: () => {
       toast.success("Phone verified successfully!");
-      setStep(VerificationStep.PHONE_SUCCESS);
+      setPhoneVerified(true);
+      setStep(VerificationStep.PROFILE_SETUP);
     },
     onError: (err) => {
       toast.error(err.message || "Phone verification failed.");
@@ -95,12 +120,42 @@ export const VerifyContainer: React.FC = () => {
   const profileSetupMutation = useProfileSetupMutation({
     onSuccess: () => {
       toast.success("Profile setup complete! Welcome to TrustLayer!");
+      setProfileComplete(true);
       router.push(FRONTEND_ROUTES.DASHBOARD);
     },
     onError: (err) => {
       toast.error(err.message || "Failed to save profile.");
     },
   });
+
+  const resendOtpMutation = useResendOtpMutation({
+    onSuccess: (_, type) => {
+      const message =
+        type === "email_verification"
+          ? "Verification code resent via email!"
+          : "Verification code resent via SMS!";
+      toast.success(message);
+    },
+    onError: (err) => {
+      toast.error(err.message || "Failed to resend verification code.");
+    },
+  });
+
+  const handleResendEmail = (onSuccessCallback: () => void) => {
+    resendOtpMutation.mutate("email_verification", {
+      onSuccess: () => {
+        onSuccessCallback();
+      },
+    });
+  };
+
+  const handleResendPhone = (onSuccessCallback: () => void) => {
+    resendOtpMutation.mutate("phone_verification", {
+      onSuccess: () => {
+        onSuccessCallback();
+      },
+    });
+  };
 
   // Back button event handlers
   const handleBack = () => {
@@ -115,6 +170,92 @@ export const VerifyContainer: React.FC = () => {
     }
   };
 
+  const renderTracker = () => {
+    return (
+      <div className="flex items-center justify-center gap-2 mb-8 select-none">
+        {/* Email Tab */}
+        <button
+          type="button"
+          onClick={() => {
+            setStep(VerificationStep.EMAIL_VERIFY);
+          }}
+          className={`flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold border transition-all ${
+            step === VerificationStep.EMAIL_VERIFY
+              ? "bg-blue-50 text-blue-700 border-blue-100"
+              : emailVerified
+              ? "bg-green-50 text-green-700 border-green-100 hover:bg-green-100/50"
+              : "text-gray-400 border-gray-200 hover:bg-gray-50"
+          }`}
+        >
+          {emailVerified ? (
+            <Check className="w-3.5 h-3.5 text-green-600" strokeWidth={3} />
+          ) : (
+            step === VerificationStep.EMAIL_VERIFY && <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
+          )}
+          Email
+        </button>
+
+        <div className="h-px w-4 bg-gray-200" />
+
+        {/* Phone Tab */}
+        <button
+          type="button"
+          onClick={() => {
+            setStep(VerificationStep.PHONE_INPUT);
+          }}
+          className={`flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold border transition-all ${
+            step === VerificationStep.PHONE_INPUT || step === VerificationStep.PHONE_VERIFY
+              ? "bg-blue-50 text-blue-700 border-blue-100"
+              : phoneVerified
+              ? "bg-green-50 text-green-700 border-green-100 hover:bg-green-100/50"
+              : "text-gray-400 border-gray-200 hover:bg-gray-50"
+          }`}
+        >
+          {phoneVerified ? (
+            <Check className="w-3.5 h-3.5 text-green-600" strokeWidth={3} />
+          ) : (
+            (step === VerificationStep.PHONE_INPUT || step === VerificationStep.PHONE_VERIFY) && (
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
+            )
+          )}
+          Phone
+        </button>
+
+        <div className="h-px w-4 bg-gray-200" />
+
+        {/* Profile Tab */}
+        <button
+          type="button"
+          onClick={() => {
+            if (emailVerified && phoneVerified) {
+              setStep(VerificationStep.PROFILE_SETUP);
+            } else {
+              toast.error("Please verify your email and phone first.");
+            }
+          }}
+          className={`flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold border transition-all ${
+            step === VerificationStep.PROFILE_SETUP
+              ? "bg-blue-50 text-blue-700 border-blue-100"
+              : profileComplete
+              ? "bg-green-50 text-green-700 border-green-100 hover:bg-green-100/50"
+              : "text-gray-400 border-gray-200 hover:bg-gray-50"
+          }`}
+        >
+          {profileComplete ? (
+            <Check className="w-3.5 h-3.5 text-green-600" strokeWidth={3} />
+          ) : (
+            step === VerificationStep.PROFILE_SETUP && <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
+          )}
+          Profile
+        </button>
+      </div>
+    );
+  };
+
+  if (!isMounted) {
+    return null;
+  }
+
   return (
     <>
       {step === VerificationStep.EMAIL_VERIFY && (
@@ -127,17 +268,15 @@ export const VerifyContainer: React.FC = () => {
           setValue={emailForm.setValue}
           onBack={handleBack}
           defaultCode={emailForm.getValues("code")}
-        />
-      )}
-
-      {step === VerificationStep.EMAIL_SUCCESS && (
-        <EmailSuccessStep
-          email={email}
+          onResend={handleResendEmail}
+          isResending={resendOtpMutation.isPending}
+          emailVerified={emailVerified}
           onContinue={() => setStep(VerificationStep.PHONE_INPUT)}
+          renderTracker={renderTracker}
         />
       )}
 
-      {step === VerificationStep.PHONE_INPUT && (
+      {(step === VerificationStep.PHONE_INPUT) && (
         <PhoneInputStep
           register={phoneInputForm.register}
           errors={phoneInputForm.formState.errors}
@@ -145,6 +284,9 @@ export const VerifyContainer: React.FC = () => {
           onSubmit={(data) => sendPhoneMutation.mutate(data)}
           handleSubmit={phoneInputForm.handleSubmit}
           onBack={handleBack}
+          phoneVerified={phoneVerified}
+          onContinue={() => setStep(VerificationStep.PROFILE_SETUP)}
+          renderTracker={renderTracker}
         />
       )}
 
@@ -158,13 +300,9 @@ export const VerifyContainer: React.FC = () => {
           setValue={phoneVerifyForm.setValue}
           onBack={handleBack}
           defaultCode={phoneVerifyForm.getValues("code")}
-        />
-      )}
-
-      {step === VerificationStep.PHONE_SUCCESS && (
-        <PhoneSuccessStep
-          phoneNumber={phoneNumber}
-          onContinue={() => setStep(VerificationStep.PROFILE_SETUP)}
+          onResend={handleResendPhone}
+          isResending={resendOtpMutation.isPending}
+          renderTracker={renderTracker}
         />
       )}
 
@@ -177,6 +315,7 @@ export const VerifyContainer: React.FC = () => {
           handleSubmit={profileSetupForm.handleSubmit}
           setValue={profileSetupForm.setValue}
           onBack={handleBack}
+          renderTracker={renderTracker}
         />
       )}
     </>

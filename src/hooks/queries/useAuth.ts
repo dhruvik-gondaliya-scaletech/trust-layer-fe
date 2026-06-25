@@ -62,11 +62,17 @@ export function useRegisterMutation({
           localStorage.setItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN, data.registrationToken);
           localStorage.removeItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
           localStorage.removeItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
+          localStorage.setItem("tl_email_verified", "false");
+          localStorage.setItem("tl_phone_verified", "false");
+          localStorage.setItem("tl_profile_complete", "false");
         } catch {}
       } else if (data.accessToken) {
         storeTokens(data.accessToken, data.refreshToken);
         try {
           localStorage.removeItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
+          localStorage.removeItem("tl_email_verified");
+          localStorage.removeItem("tl_phone_verified");
+          localStorage.removeItem("tl_profile_complete");
         } catch {}
       }
       // Invalidate so AuthProvider's useCurrentUser re-fetches immediately
@@ -102,12 +108,18 @@ export function useLoginMutation({
         storeTokens(data.accessToken, data.refreshToken);
         try {
           localStorage.removeItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
+          localStorage.removeItem("tl_email_verified");
+          localStorage.removeItem("tl_phone_verified");
+          localStorage.removeItem("tl_profile_complete");
         } catch {}
       } else if (data.registrationToken) {
         try {
           localStorage.setItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN, data.registrationToken);
           localStorage.removeItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
           localStorage.removeItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
+          localStorage.setItem("tl_email_verified", String(data.emailVerified ?? false));
+          localStorage.setItem("tl_phone_verified", String(data.phoneVerified ?? false));
+          localStorage.setItem("tl_profile_complete", String(data.profileComplete ?? false));
         } catch {}
       }
       // Invalidate so AuthProvider's useCurrentUser re-fetches immediately

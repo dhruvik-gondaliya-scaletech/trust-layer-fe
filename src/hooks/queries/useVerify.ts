@@ -9,6 +9,7 @@ import type {
   PhoneVerifyInput,
   ProfileSetupInput,
 } from "@/lib/validations/verify";
+import type { OtpType } from "@/types/api.types";
 
 function storeTokens(accessToken: string, refreshToken?: string) {
   try {
@@ -17,6 +18,32 @@ function storeTokens(accessToken: string, refreshToken?: string) {
       localStorage.setItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
     }
   } catch {}
+}
+
+export function useResendOtpMutation({
+  onSuccess,
+  onError,
+}: {
+  onSuccess?: (data: any, type: OtpType) => void;
+  onError?: (error: Error) => void;
+} = {}) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (type: OtpType) => {
+      return authService.resendOtp({ type });
+    },
+    onSuccess: (data, type) => {
+      if (data.registrationToken) {
+        try {
+          localStorage.setItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN, data.registrationToken);
+        } catch {}
+      }
+      queryClient.invalidateQueries({ queryKey: userKeys.me() });
+      onSuccess?.(data, type);
+    },
+    onError,
+  });
 }
 
 export function useVerifyEmailMutation({
@@ -40,10 +67,14 @@ export function useVerifyEmailMutation({
         storeTokens(data.accessToken, data.refreshToken);
         try {
           localStorage.removeItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
+          localStorage.removeItem("tl_email_verified");
+          localStorage.removeItem("tl_phone_verified");
+          localStorage.removeItem("tl_profile_complete");
         } catch {}
       } else if (data.registrationToken) {
         try {
           localStorage.setItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN, data.registrationToken);
+          localStorage.setItem("tl_email_verified", "true");
         } catch {}
       }
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
@@ -116,6 +147,15 @@ export function useVerifyPhoneMutation({
         storeTokens(data.accessToken, data.refreshToken);
         try {
           localStorage.removeItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
+          localStorage.removeItem("tl_email_verified");
+          localStorage.removeItem("tl_phone_verified");
+          localStorage.removeItem("tl_profile_complete");
+        } catch {}
+      } else if (data.registrationToken) {
+        try {
+          localStorage.setItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN, data.registrationToken);
+          localStorage.setItem("tl_email_verified", "true");
+          localStorage.setItem("tl_phone_verified", "true");
         } catch {}
       }
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
@@ -143,6 +183,11 @@ export function useProfileSetupMutation({
       });
     },
     onSuccess: (data) => {
+      try {
+        localStorage.removeItem("tl_email_verified");
+        localStorage.removeItem("tl_phone_verified");
+        localStorage.removeItem("tl_profile_complete");
+      } catch {}
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
       onSuccess?.(data);
     },

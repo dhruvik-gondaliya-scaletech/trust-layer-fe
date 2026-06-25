@@ -92,14 +92,28 @@ class HttpService {
             (config: InternalAxiosRequestConfig) => {
                 if (typeof window !== "undefined") {
                     try {
-                        let token = window.localStorage.getItem(
-                            AUTH_STORAGE_KEYS.ACCESS_TOKEN
+                        let token: string | null = null;
+                        const isVerificationOrResend = config.url && (
+                            config.url.endsWith("/auth/verify-otp") ||
+                            config.url.endsWith("/auth/resend-otp") ||
+                            config.url.endsWith("/auth/send-phone-otp")
                         );
-                        if (!token) {
+
+                        if (isVerificationOrResend) {
                             token = window.localStorage.getItem(
                                 AUTH_STORAGE_KEYS.REGISTRATION_TOKEN
                             );
+                        } else {
+                            token = window.localStorage.getItem(
+                                AUTH_STORAGE_KEYS.ACCESS_TOKEN
+                            );
+                            if (!token) {
+                                token = window.localStorage.getItem(
+                                    AUTH_STORAGE_KEYS.REGISTRATION_TOKEN
+                                );
+                            }
                         }
+
                         if (token) {
                             config.headers.Authorization = `Bearer ${token}`;
                         }

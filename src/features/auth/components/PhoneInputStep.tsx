@@ -5,6 +5,7 @@ import { UseFormRegister, FieldErrors } from "react-hook-form";
 import { PhoneInputInput } from "@/lib/validations/verify";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Check, ChevronLeft, Loader2, Smartphone, Shield } from "lucide-react";
 import { BottomActionBar } from "@/components/ui/bottom-action-bar";
 
@@ -15,6 +16,9 @@ interface PhoneInputStepProps {
   onSubmit: (data: PhoneInputInput) => void;
   handleSubmit: any;
   onBack: () => void;
+  phoneVerified?: boolean;
+  onContinue?: () => void;
+  renderTracker?: () => React.ReactNode;
 }
 
 export const PhoneInputStep: React.FC<PhoneInputStepProps> = ({
@@ -24,7 +28,69 @@ export const PhoneInputStep: React.FC<PhoneInputStepProps> = ({
   onSubmit,
   handleSubmit,
   onBack,
+  phoneVerified = false,
+  onContinue,
+  renderTracker,
 }) => {
+  if (phoneVerified) {
+    return (
+      <div className="flex flex-col min-h-screen bg-background pb-[160px]">
+        {/* Top Header */}
+        <div className="flex items-center justify-center p-4 relative bg-background border-none">
+          <button
+            onClick={onBack}
+            type="button"
+            className="absolute left-4 p-2 -ml-2 rounded-full text-foreground hover:bg-gray-100 transition-colors"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+          <h1 className="text-[16px] font-semibold text-foreground">Step 2 of 3</h1>
+        </div>
+
+        <div className="flex-1 px-5 pt-2 max-w-sm mx-auto w-full">
+          {/* Progress Tracker */}
+          {renderTracker?.()}
+
+          {/* Hero Section */}
+          <div className="flex justify-center mb-6">
+            <div className="w-20 h-20 bg-gradient-to-br from-green-50 to-green-100/50 rounded-full flex items-center justify-center border-4 border-white shadow-sm relative">
+              <div className="absolute inset-0 rounded-full border border-green-100/50" />
+              <Check className="w-8 h-8 text-green-600" strokeWidth={3} />
+            </div>
+          </div>
+
+          <div className="text-center mb-8">
+            <h1 className="text-[28px] font-extrabold mb-2 text-foreground leading-tight tracking-tight">
+              Phone Verified
+            </h1>
+            <p className="text-[15px] text-muted-foreground font-medium">
+              Your phone number is already verified
+            </p>
+          </div>
+
+          {/* Premium Card Container */}
+          <div className="bg-white rounded-[24px] p-6 shadow-xl shadow-blue-900/5 border border-gray-100 text-center space-y-6">
+            <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto border border-green-100">
+              <Check className="w-8 h-8 text-green-600" strokeWidth={3} />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-xl font-bold text-foreground">Verified Successfully</h2>
+              <p className="text-sm text-muted-foreground">
+                Your phone has been successfully verified. Please continue to proceed to the next step.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <BottomActionBar>
+          <Button onClick={onContinue} className="w-full h-14 text-[16px] font-bold">
+            Continue
+          </Button>
+        </BottomActionBar>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-background pb-[160px]">
       {/* Top Header */}
@@ -41,19 +107,7 @@ export const PhoneInputStep: React.FC<PhoneInputStepProps> = ({
 
       <div className="flex-1 px-5 pt-2 max-w-sm mx-auto w-full">
         {/* Progress Tracker */}
-        <div className="flex items-center justify-center gap-2 mb-8 select-none">
-          <div className="flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-[13px] font-bold border border-green-100">
-            <Check className="w-3.5 h-3.5 text-green-600" strokeWidth={3} /> Email
-          </div>
-          <div className="h-px w-4 bg-gray-200" />
-          <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-[13px] font-bold border border-blue-100">
-            <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" /> Phone
-          </div>
-          <div className="h-px w-4 bg-gray-200" />
-          <div className="flex items-center gap-2 text-gray-400 px-4 py-2 rounded-full text-[13px] font-bold border border-gray-200">
-            Profile
-          </div>
-        </div>
+        {renderTracker?.()}
 
         {/* Hero Section */}
         <div className="flex justify-center mb-6">
@@ -79,7 +133,7 @@ export const PhoneInputStep: React.FC<PhoneInputStepProps> = ({
         <div className="bg-white rounded-[24px] p-5 shadow-xl shadow-blue-900/5 border border-gray-100">
           <form id="phone-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
             <div className="space-y-3">
-              <label className="text-[13px] font-bold text-foreground ml-1">Phone Number</label>
+              <Label htmlFor="register-phone" className="text-[13px] font-bold text-foreground ml-1">Phone Number</Label>
               <div className="flex gap-2">
                 <Input
                   id="register-phone"
