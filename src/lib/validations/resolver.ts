@@ -12,8 +12,8 @@ export const zodResolver = <TFieldValues extends FieldValues>(
         errors: {},
       };
     } catch (error: any) {
-      if (error && error.errors) {
-        const errors = error.errors.reduce((allErrors: any, currentError: any) => {
+      if (error && error.issues) {
+        const errors = error.issues.reduce((allErrors: any, currentError: any) => {
           const path = currentError.path[0];
           if (path) {
             allErrors[path] = {
