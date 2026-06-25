@@ -5,6 +5,7 @@ import axios, {
     InternalAxiosRequestConfig,
 } from "axios";
 import { API_CONFIG, AUTH_STORAGE_KEYS, FRONTEND_ROUTES } from "./contants";
+import { getStorageItem, removeStorageItems } from "./storage";
 
 
 // ─── API Response Types ───────────────────────────────────────────────────────
@@ -100,17 +101,11 @@ class HttpService {
                         );
 
                         if (isVerificationOrResend) {
-                            token = window.localStorage.getItem(
-                                AUTH_STORAGE_KEYS.REGISTRATION_TOKEN
-                            );
+                            token = getStorageItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
                         } else {
-                            token = window.localStorage.getItem(
-                                AUTH_STORAGE_KEYS.ACCESS_TOKEN
-                            );
+                            token = getStorageItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
                             if (!token) {
-                                token = window.localStorage.getItem(
-                                    AUTH_STORAGE_KEYS.REGISTRATION_TOKEN
-                                );
+                                token = getStorageItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
                             }
                         }
 
@@ -190,9 +185,11 @@ class HttpService {
                         if (!isPublicRoute) {
                             // Remove stored tokens
                             try {
-                                window.localStorage.removeItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
-                                window.localStorage.removeItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
-                                window.localStorage.removeItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
+                                removeStorageItems([
+                                    AUTH_STORAGE_KEYS.ACCESS_TOKEN,
+                                    AUTH_STORAGE_KEYS.REFRESH_TOKEN,
+                                    AUTH_STORAGE_KEYS.REGISTRATION_TOKEN
+                                ]);
                             } catch {
                                 // ignore
                             }

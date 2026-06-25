@@ -2,6 +2,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import authService from "@/services/auth.service";
 import usersService from "@/services/users.service";
 import { AUTH_STORAGE_KEYS } from "@/lib/contants";
+import {
+  setStorageItem,
+  setStorageItems,
+  removeStorageItems,
+} from "@/lib/storage";
 import { userKeys } from "@/hooks/queries/useUsers";
 import type {
   EmailVerifyInput,
@@ -12,12 +17,10 @@ import type {
 import type { OtpType } from "@/types/api.types";
 
 function storeTokens(accessToken: string, refreshToken?: string) {
-  try {
-    localStorage.setItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN, accessToken);
-    if (refreshToken) {
-      localStorage.setItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
-    }
-  } catch {}
+  setStorageItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN, accessToken);
+  if (refreshToken) {
+    setStorageItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+  }
 }
 
 export function useResendOtpMutation({
@@ -35,9 +38,7 @@ export function useResendOtpMutation({
     },
     onSuccess: (data, type) => {
       if (data.registrationToken) {
-        try {
-          localStorage.setItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN, data.registrationToken);
-        } catch {}
+        setStorageItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN, data.registrationToken);
       }
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
       onSuccess?.(data, type);
@@ -65,17 +66,17 @@ export function useVerifyEmailMutation({
     onSuccess: (data) => {
       if (data.accessToken) {
         storeTokens(data.accessToken, data.refreshToken);
-        try {
-          localStorage.removeItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
-          localStorage.removeItem("tl_email_verified");
-          localStorage.removeItem("tl_phone_verified");
-          localStorage.removeItem("tl_profile_complete");
-        } catch {}
+        removeStorageItems([
+          AUTH_STORAGE_KEYS.REGISTRATION_TOKEN,
+          AUTH_STORAGE_KEYS.EMAIL_VERIFIED,
+          AUTH_STORAGE_KEYS.PHONE_VERIFIED,
+          AUTH_STORAGE_KEYS.PROFILE_COMPLETE,
+        ]);
       } else if (data.registrationToken) {
-        try {
-          localStorage.setItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN, data.registrationToken);
-          localStorage.setItem("tl_email_verified", "true");
-        } catch {}
+        setStorageItems({
+          [AUTH_STORAGE_KEYS.REGISTRATION_TOKEN]: data.registrationToken,
+          [AUTH_STORAGE_KEYS.EMAIL_VERIFIED]: "true",
+        });
       }
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
       onSuccess?.(data);
@@ -115,9 +116,7 @@ export function useSendPhoneMutation({
     },
     onSuccess: (data) => {
       if (data.registrationToken) {
-        try {
-          localStorage.setItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN, data.registrationToken);
-        } catch {}
+        setStorageItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN, data.registrationToken);
       }
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
       onSuccess?.({ success: true, phoneNumber: data.formattedPhone });
@@ -145,18 +144,18 @@ export function useVerifyPhoneMutation({
     onSuccess: (data) => {
       if (data.accessToken) {
         storeTokens(data.accessToken, data.refreshToken);
-        try {
-          localStorage.removeItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
-          localStorage.removeItem("tl_email_verified");
-          localStorage.removeItem("tl_phone_verified");
-          localStorage.removeItem("tl_profile_complete");
-        } catch {}
+        removeStorageItems([
+          AUTH_STORAGE_KEYS.REGISTRATION_TOKEN,
+          AUTH_STORAGE_KEYS.EMAIL_VERIFIED,
+          AUTH_STORAGE_KEYS.PHONE_VERIFIED,
+          AUTH_STORAGE_KEYS.PROFILE_COMPLETE,
+        ]);
       } else if (data.registrationToken) {
-        try {
-          localStorage.setItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN, data.registrationToken);
-          localStorage.setItem("tl_email_verified", "true");
-          localStorage.setItem("tl_phone_verified", "true");
-        } catch {}
+        setStorageItems({
+          [AUTH_STORAGE_KEYS.REGISTRATION_TOKEN]: data.registrationToken,
+          [AUTH_STORAGE_KEYS.EMAIL_VERIFIED]: "true",
+          [AUTH_STORAGE_KEYS.PHONE_VERIFIED]: "true",
+        });
       }
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
       onSuccess?.(data);
@@ -183,11 +182,11 @@ export function useProfileSetupMutation({
       });
     },
     onSuccess: (data) => {
-      try {
-        localStorage.removeItem("tl_email_verified");
-        localStorage.removeItem("tl_phone_verified");
-        localStorage.removeItem("tl_profile_complete");
-      } catch {}
+      removeStorageItems([
+        AUTH_STORAGE_KEYS.EMAIL_VERIFIED,
+        AUTH_STORAGE_KEYS.PHONE_VERIFIED,
+        AUTH_STORAGE_KEYS.PROFILE_COMPLETE,
+      ]);
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
       onSuccess?.(data);
     },

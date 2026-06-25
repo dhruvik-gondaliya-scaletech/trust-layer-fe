@@ -2,6 +2,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import authService from "@/services/auth.service";
 import { AUTH_STORAGE_KEYS, FRONTEND_ROUTES } from "@/lib/contants";
+import {
+  setStorageItem,
+  setStorageItems,
+  removeStorageItem,
+  removeStorageItems,
+} from "@/lib/storage";
 import { userKeys } from "@/hooks/queries/useUsers";
 import { useRouter } from "next/navigation";
 import type {
@@ -16,24 +22,18 @@ import type {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function storeTokens(accessToken: string, refreshToken?: string) {
-  try {
-    localStorage.setItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN, accessToken);
-    if (refreshToken) {
-      localStorage.setItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
-    }
-  } catch {
-    // Silently ignore storage errors (e.g. private browsing)
+  setStorageItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN, accessToken);
+  if (refreshToken) {
+    setStorageItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
   }
 }
 
 function clearTokens() {
-  try {
-    localStorage.removeItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
-    localStorage.removeItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
-    localStorage.removeItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
-  } catch {
-    // ignore
-  }
+  removeStorageItems([
+    AUTH_STORAGE_KEYS.ACCESS_TOKEN,
+    AUTH_STORAGE_KEYS.REFRESH_TOKEN,
+    AUTH_STORAGE_KEYS.REGISTRATION_TOKEN,
+  ]);
 }
 
 // ─── useRegisterMutation ──────────────────────────────────────────────────────
@@ -58,22 +58,24 @@ export function useRegisterMutation({
     },
     onSuccess: (data, variables) => {
       if (data.registrationToken) {
-        try {
-          localStorage.setItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN, data.registrationToken);
-          localStorage.removeItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
-          localStorage.removeItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
-          localStorage.setItem("tl_email_verified", "false");
-          localStorage.setItem("tl_phone_verified", "false");
-          localStorage.setItem("tl_profile_complete", "false");
-        } catch {}
+        setStorageItems({
+          [AUTH_STORAGE_KEYS.REGISTRATION_TOKEN]: data.registrationToken,
+          [AUTH_STORAGE_KEYS.EMAIL_VERIFIED]: "false",
+          [AUTH_STORAGE_KEYS.PHONE_VERIFIED]: "false",
+          [AUTH_STORAGE_KEYS.PROFILE_COMPLETE]: "false",
+        });
+        removeStorageItems([
+          AUTH_STORAGE_KEYS.ACCESS_TOKEN,
+          AUTH_STORAGE_KEYS.REFRESH_TOKEN,
+        ]);
       } else if (data.accessToken) {
         storeTokens(data.accessToken, data.refreshToken);
-        try {
-          localStorage.removeItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
-          localStorage.removeItem("tl_email_verified");
-          localStorage.removeItem("tl_phone_verified");
-          localStorage.removeItem("tl_profile_complete");
-        } catch {}
+        removeStorageItems([
+          AUTH_STORAGE_KEYS.REGISTRATION_TOKEN,
+          AUTH_STORAGE_KEYS.EMAIL_VERIFIED,
+          AUTH_STORAGE_KEYS.PHONE_VERIFIED,
+          AUTH_STORAGE_KEYS.PROFILE_COMPLETE,
+        ]);
       }
       // Invalidate so AuthProvider's useCurrentUser re-fetches immediately
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
@@ -106,21 +108,23 @@ export function useLoginMutation({
     onSuccess: (data, variables) => {
       if (data.accessToken) {
         storeTokens(data.accessToken, data.refreshToken);
-        try {
-          localStorage.removeItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
-          localStorage.removeItem("tl_email_verified");
-          localStorage.removeItem("tl_phone_verified");
-          localStorage.removeItem("tl_profile_complete");
-        } catch {}
+        removeStorageItems([
+          AUTH_STORAGE_KEYS.REGISTRATION_TOKEN,
+          AUTH_STORAGE_KEYS.EMAIL_VERIFIED,
+          AUTH_STORAGE_KEYS.PHONE_VERIFIED,
+          AUTH_STORAGE_KEYS.PROFILE_COMPLETE,
+        ]);
       } else if (data.registrationToken) {
-        try {
-          localStorage.setItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN, data.registrationToken);
-          localStorage.removeItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
-          localStorage.removeItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
-          localStorage.setItem("tl_email_verified", String(data.emailVerified ?? false));
-          localStorage.setItem("tl_phone_verified", String(data.phoneVerified ?? false));
-          localStorage.setItem("tl_profile_complete", String(data.profileComplete ?? false));
-        } catch {}
+        setStorageItems({
+          [AUTH_STORAGE_KEYS.REGISTRATION_TOKEN]: data.registrationToken,
+          [AUTH_STORAGE_KEYS.EMAIL_VERIFIED]: String(data.emailVerified ?? false),
+          [AUTH_STORAGE_KEYS.PHONE_VERIFIED]: String(data.phoneVerified ?? false),
+          [AUTH_STORAGE_KEYS.PROFILE_COMPLETE]: String(data.profileComplete ?? false),
+        });
+        removeStorageItems([
+          AUTH_STORAGE_KEYS.ACCESS_TOKEN,
+          AUTH_STORAGE_KEYS.REFRESH_TOKEN,
+        ]);
       }
       // Invalidate so AuthProvider's useCurrentUser re-fetches immediately
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
@@ -154,9 +158,7 @@ export function useVerifyOtpMutation({
       toast.success(data.message ?? "Verification successful!");
       if (data.accessToken) {
         storeTokens(data.accessToken, data.refreshToken);
-        try {
-          localStorage.removeItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
-        } catch {}
+        removeStorageItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
       }
       // Invalidate user profile so it reflects the new verified state
       queryClient.invalidateQueries({ queryKey: userKeys.me() });

@@ -54,4 +54,7 @@ export const AUTH_STORAGE_KEYS = {
     ACCESS_TOKEN: "tl_access_token",
     REFRESH_TOKEN: "tl_refresh_token",
     REGISTRATION_TOKEN: "tl_registration_token",
+    EMAIL_VERIFIED: "tl_email_verified",
+    PHONE_VERIFIED: "tl_phone_verified",
+    PROFILE_COMPLETE: "tl_profile_complete",
 } as const;

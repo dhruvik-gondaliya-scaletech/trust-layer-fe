@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import usersService from "@/services/users.service";
+import { AUTH_STORAGE_KEYS } from "@/lib/contants";
+import { getStorageItem } from "@/lib/storage";
 import type { UpdateProfileDto } from "@/types/api.types";
 
 // ─── Query Keys ───────────────────────────────────────────────────────────────
@@ -17,7 +19,7 @@ function hasStoredToken(): boolean {
   try {
     return (
       typeof window !== "undefined" &&
-      !!localStorage.getItem("tl_access_token")
+      !!getStorageItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN)
     );
   } catch {
     return false;

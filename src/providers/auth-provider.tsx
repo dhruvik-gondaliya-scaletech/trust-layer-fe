@@ -16,6 +16,7 @@ import {
 } from "@/hooks/queries/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
 import { AUTH_STORAGE_KEYS } from "@/lib/contants";
+import { getStorageItem } from "@/lib/storage";
 import type { User } from "@/types/api.types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -54,7 +55,7 @@ function hasStoredToken(): boolean {
   try {
     return (
       typeof window !== "undefined" &&
-      !!localStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN)
+      !!getStorageItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN)
     );
   } catch {
     return false;

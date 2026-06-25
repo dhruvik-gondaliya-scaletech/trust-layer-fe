@@ -27,7 +27,8 @@ import { EmailVerifyStep } from "../components/EmailVerifyStep";
 import { PhoneInputStep } from "../components/PhoneInputStep";
 import { PhoneVerifyStep } from "../components/PhoneVerifyStep";
 import { ProfileSetupStep } from "../components/ProfileSetupStep";
-import { FRONTEND_ROUTES, VerificationStep } from "@/lib/contants";
+import { FRONTEND_ROUTES, VerificationStep, AUTH_STORAGE_KEYS } from "@/lib/contants";
+import { getStorageItem } from "@/lib/storage";
 
 export const VerifyContainer: React.FC = () => {
   const router = useRouter();
@@ -44,9 +45,9 @@ export const VerifyContainer: React.FC = () => {
   useEffect(() => {
     setIsMounted(true);
     try {
-      const emailVal = localStorage.getItem("tl_email_verified") === "true";
-      const phoneVal = localStorage.getItem("tl_phone_verified") === "true";
-      const profileVal = localStorage.getItem("tl_profile_complete") === "true";
+      const emailVal = getStorageItem(AUTH_STORAGE_KEYS.EMAIL_VERIFIED) === "true";
+      const phoneVal = getStorageItem(AUTH_STORAGE_KEYS.PHONE_VERIFIED) === "true";
+      const profileVal = getStorageItem(AUTH_STORAGE_KEYS.PROFILE_COMPLETE) === "true";
 
       setEmailVerified(emailVal);
       setPhoneVerified(phoneVal);
