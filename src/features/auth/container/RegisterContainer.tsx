@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { registerSchema, RegisterInput } from "@/lib/validations/register";
 import { zodResolver } from "@/lib/validations/resolver";
-import { useRegisterMutation } from "@/hooks/queries/useRegister";
+import { useRegisterMutation } from "@/hooks/queries/useAuth";
 import { RegisterForm } from "../components/RegisterForm";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 
@@ -21,23 +21,23 @@ export const RegisterContainer: React.FC = () => {
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      firstName: "Alex",
-      lastName: "Smith",
-      email: "alex@email.com",
-      password: "Password123!",
-      confirmPassword: "Password123!",
-      agreeTerms: true,
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      agreeTerms: false,
     },
   });
 
   const mutation = useRegisterMutation({
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       toast.success("Account created successfully!", {
-        description: `Welcome to TrustLayer, ${data.user.firstName}! Let's verify your email.`,
+        description: `Welcome to TrustLayer, ${variables.firstName}! Let's verify your email.`,
       });
       reset();
       // Redirect to verification wizard
-      router.push(`${FRONTEND_ROUTES.VERIFY}?email=${encodeURIComponent(data.user.email)}`);
+      router.push(`${FRONTEND_ROUTES.VERIFY}?email=${encodeURIComponent(variables.email)}`);
     },
     onError: (error) => {
       toast.error(error.message || "Failed to create account. Please try again.");

@@ -92,9 +92,14 @@ class HttpService {
             (config: InternalAxiosRequestConfig) => {
                 if (typeof window !== "undefined") {
                     try {
-                        const token = window.localStorage.getItem(
+                        let token = window.localStorage.getItem(
                             AUTH_STORAGE_KEYS.ACCESS_TOKEN
                         );
+                        if (!token) {
+                            token = window.localStorage.getItem(
+                                AUTH_STORAGE_KEYS.REGISTRATION_TOKEN
+                            );
+                        }
                         if (token) {
                             config.headers.Authorization = `Bearer ${token}`;
                         }
@@ -173,6 +178,7 @@ class HttpService {
                             try {
                                 window.localStorage.removeItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
                                 window.localStorage.removeItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
+                                window.localStorage.removeItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
                             } catch {
                                 // ignore
                             }

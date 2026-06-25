@@ -154,8 +154,12 @@ export interface SendPhoneOtpDto {
 }
 
 export interface AuthTokenResponse {
-  accessToken: string;
-  refreshToken: string;
+  accessToken?: string;
+  refreshToken?: string;
+  registrationToken?: string;
+  emailVerified?: boolean;
+  phoneVerified?: boolean;
+  profileComplete?: boolean;
 }
 
 export interface RegisterResponse extends AuthTokenResponse {
@@ -164,6 +168,9 @@ export interface RegisterResponse extends AuthTokenResponse {
 
 export interface MessageResponse {
   message: string;
+  registrationToken?: string;
+  accessToken?: string;
+  refreshToken?: string;
 }
 
 // ─── User DTOs ────────────────────────────────────────────────────────────────
@@ -174,6 +181,7 @@ export interface UpdateProfileDto {
   username?: string;
   bio?: string;
   location?: string;
+  profilePhotoUrl?: string;
 }
 
 // ─── Deal DTOs ────────────────────────────────────────────────────────────────

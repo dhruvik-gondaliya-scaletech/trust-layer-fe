@@ -28,6 +28,7 @@ function clearTokens() {
   try {
     localStorage.removeItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
     localStorage.removeItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
+    localStorage.removeItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
   } catch {
     // ignore
   }
@@ -43,19 +44,32 @@ export function useRegisterMutation({
   onSuccess,
   onError,
 }: {
-  onSuccess?: () => void;
+  onSuccess?: (data: any, variables: RegisterDto) => void;
   onError?: (error: Error) => void;
 } = {}) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (dto: RegisterDto) => authService.register(dto),
-    onSuccess: (data) => {
-      storeTokens(data.accessToken, data.refreshToken);
+    mutationFn: (dto: RegisterDto) => {
+      const { firstName, lastName, email, password } = dto;
+      return authService.register({ firstName, lastName, email, password });
+    },
+    onSuccess: (data, variables) => {
+      if (data.registrationToken) {
+        try {
+          localStorage.setItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN, data.registrationToken);
+          localStorage.removeItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
+          localStorage.removeItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
+        } catch {}
+      } else if (data.accessToken && data.refreshToken) {
+        storeTokens(data.accessToken, data.refreshToken);
+        try {
+          localStorage.removeItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
+        } catch {}
+      }
       // Invalidate so AuthProvider's useCurrentUser re-fetches immediately
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
-      toast.success("Account created! Please verify your email.");
-      onSuccess?.();
+      onSuccess?.(data, variables);
     },
     onError: (error: Error) => {
       toast.error(error.message ?? "Registration failed. Please try again.");
@@ -74,19 +88,29 @@ export function useLoginMutation({
   onSuccess,
   onError,
 }: {
-  onSuccess?: () => void;
+  onSuccess?: (data: any, variables: LoginDto) => void;
   onError?: (error: Error) => void;
 } = {}) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (dto: LoginDto) => authService.login(dto),
-    onSuccess: (data) => {
-      storeTokens(data.accessToken, data.refreshToken);
+    onSuccess: (data, variables) => {
+      if (data.accessToken && data.refreshToken) {
+        storeTokens(data.accessToken, data.refreshToken);
+        try {
+          localStorage.removeItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
+        } catch {}
+      } else if (data.registrationToken) {
+        try {
+          localStorage.setItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN, data.registrationToken);
+          localStorage.removeItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
+          localStorage.removeItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
+        } catch {}
+      }
       // Invalidate so AuthProvider's useCurrentUser re-fetches immediately
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
-      toast.success("Welcome back!");
-      onSuccess?.();
+      onSuccess?.(data, variables);
     },
     onError: (error: Error) => {
       toast.error(error.message ?? "Login failed. Please check your credentials.");

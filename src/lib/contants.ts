@@ -53,4 +53,5 @@ export enum VerificationStep {
 export const AUTH_STORAGE_KEYS = {
     ACCESS_TOKEN: "tl_access_token",
     REFRESH_TOKEN: "tl_refresh_token",
+    REGISTRATION_TOKEN: "tl_registration_token",
 } as const;

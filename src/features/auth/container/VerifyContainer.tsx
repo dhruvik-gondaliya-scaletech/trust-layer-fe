@@ -34,7 +34,7 @@ import { FRONTEND_ROUTES, VerificationStep } from "@/lib/contants";
 export const VerifyContainer: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const email = searchParams.get("email") || "alex@email.com";
+  const email = searchParams.get("email") || "";
 
   const [step, setStep] = useState<VerificationStep>(VerificationStep.EMAIL_VERIFY);
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -42,22 +42,22 @@ export const VerifyContainer: React.FC = () => {
   // Forms definition for each step
   const emailForm = useForm<EmailVerifyInput>({
     resolver: zodResolver(emailVerifySchema),
-    defaultValues: { code: "123456" },
+    defaultValues: { code: "" },
   });
 
   const phoneInputForm = useForm<PhoneInputInput>({
     resolver: zodResolver(phoneInputSchema),
-    defaultValues: { phoneNumber: "5555555555" },
+    defaultValues: { phoneNumber: "" },
   });
 
   const phoneVerifyForm = useForm<PhoneVerifyInput>({
     resolver: zodResolver(phoneVerifySchema),
-    defaultValues: { code: "123456" },
+    defaultValues: { code: "" },
   });
 
   const profileSetupForm = useForm<ProfileSetupInput>({
     resolver: zodResolver(profileSetupSchema),
-    defaultValues: { username: "alex_trust", bio: "TrustLayer enthusiast", avatar: "🐶" },
+    defaultValues: { username: "", bio: "", avatar: "🐶" },
   });
 
   // Mutations definition
