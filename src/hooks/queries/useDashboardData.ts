@@ -110,9 +110,14 @@ const MOCK_DASHBOARD_DATA: DashboardData = {
   },
 };
 
+export const dashboardKeys = {
+  all: ["dashboardData"] as const,
+  byState: (stateOverride?: string) => [...dashboardKeys.all, stateOverride] as const,
+};
+
 export function useDashboardData(stateOverride?: "success" | "loading" | "error" | "empty") {
   return useQuery<DashboardData, Error>({
-    queryKey: ["dashboardData", stateOverride],
+    queryKey: dashboardKeys.byState(stateOverride),
     queryFn: async () => {
       // Determine the simulated state
       let state: string | null = stateOverride || null;
