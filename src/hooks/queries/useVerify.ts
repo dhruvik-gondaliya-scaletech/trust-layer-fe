@@ -57,18 +57,32 @@ export function useSendPhoneMutation({
 
   return useMutation({
     mutationFn: async (data: PhoneInputInput) => {
-      return authService.sendPhoneOtp({
-        phone: data.phoneNumber,
+      let clean = data.phoneNumber.replace(/[^\d+]/g, "");
+      if (!clean.startsWith("+")) {
+        if (clean.length === 11 && clean.startsWith("1")) {
+          clean = `+${clean}`;
+        } else if (clean.length === 10) {
+          clean = `+1${clean}`;
+        } else {
+          clean = `+${clean}`;
+        }
+      }
+      const res = await authService.sendPhoneOtp({
+        phone: clean,
       });
+      return {
+        ...res,
+        formattedPhone: clean,
+      };
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (data) => {
       if (data.registrationToken) {
         try {
           localStorage.setItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN, data.registrationToken);
         } catch {}
       }
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
-      onSuccess?.({ success: true, phoneNumber: variables.phoneNumber });
+      onSuccess?.({ success: true, phoneNumber: data.formattedPhone });
     },
     onError,
   });

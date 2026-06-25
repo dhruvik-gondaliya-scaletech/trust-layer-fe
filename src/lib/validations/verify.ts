@@ -12,9 +12,9 @@ export type EmailVerifyInput = z.infer<typeof emailVerifySchema>;
 export const phoneInputSchema = z.object({
   phoneNumber: z
     .string()
-    .min(10, { message: "Phone number must be at least 10 digits" })
-    .regex(/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/, {
-      message: "Please enter a valid phone number",
+    .min(10, { message: "Phone number must be at least 10 characters" })
+    .regex(/^\+?[0-9\s\-()]+$/, {
+      message: "Please enter a valid phone number (e.g., +1 (202) 555-1234)",
     }),
 });
 

@@ -16,6 +16,8 @@ export const RegisterContainer: React.FC = () => {
   const {
     register,
     handleSubmit,
+    setValue,
+    getValues,
     reset,
     formState: { errors },
   } = useForm<RegisterInput>({
@@ -48,13 +50,33 @@ export const RegisterContainer: React.FC = () => {
     mutation.mutate(data);
   };
 
+  const handlePreSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    // Sync browser-autofilled values that might not have triggered react-hook-form change events
+    const fields: Array<keyof RegisterInput> = [
+      "firstName",
+      "lastName",
+      "email",
+      "password",
+      "confirmPassword",
+    ];
+    fields.forEach((field) => {
+      const el = document.getElementsByName(field)[0] as HTMLInputElement | undefined;
+      if (el && el.value && !getValues(field)) {
+        setValue(field, el.value, { shouldValidate: true });
+      }
+    });
+
+    handleSubmit(onSubmit)(e);
+  };
+
   return (
     <RegisterForm
       register={register}
       errors={errors}
       isPending={mutation.isPending}
-      onSubmit={onSubmit}
-      handleSubmit={handleSubmit}
+      onSubmit={handlePreSubmit}
     />
   );
 };

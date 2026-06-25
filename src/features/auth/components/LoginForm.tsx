@@ -1,11 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
 import { LoginInput } from "@/lib/validations/login";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Shield, Loader2 } from "lucide-react";
+import { Shield, Loader2, Eye, EyeOff } from "lucide-react";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 import Link from "next/link";
 import { BottomActionBar } from "@/components/ui/bottom-action-bar";
@@ -14,8 +14,7 @@ interface LoginFormProps {
   register: UseFormRegister<LoginInput>;
   errors: FieldErrors<LoginInput>;
   isPending: boolean;
-  onSubmit: (data: LoginInput) => void;
-  handleSubmit: any;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({
@@ -23,8 +22,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   errors,
   isPending,
   onSubmit,
-  handleSubmit,
 }) => {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <div className="flex flex-col min-h-screen bg-background pb-[140px]">
       {/* Top Header */}
@@ -40,10 +40,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           Sign In
         </h1>
 
-        <form id="login-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+        <form id="login-form" onSubmit={onSubmit} className="space-y-4" noValidate>
           <div className="space-y-2">
-            <label className="text-[13px] font-medium text-foreground">Email</label>
+            <label htmlFor="email" className="text-[13px] font-medium text-foreground">Email</label>
             <Input
+              id="email"
+              autoComplete="email"
               required
               type="email"
               disabled={isPending}
@@ -57,15 +59,27 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           </div>
 
           <div className="space-y-2">
-            <label className="text-[13px] font-medium text-foreground">Password</label>
-            <Input
-              required
-              type="password"
-              disabled={isPending}
-              placeholder="••••••••"
-              className={errors.password ? "border-destructive focus-visible:ring-destructive/20" : ""}
-              {...register("password")}
-            />
+            <label htmlFor="password" className="text-[13px] font-medium text-foreground">Password</label>
+            <div className="relative">
+              <Input
+                id="password"
+                autoComplete="current-password"
+                required
+                type={showPassword ? "text" : "password"}
+                disabled={isPending}
+                placeholder="••••••••"
+                className={`pr-10 ${errors.password ? "border-destructive focus-visible:ring-destructive/20" : ""}`}
+                {...register("password")}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                disabled={isPending}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
             {errors.password && (
               <p className="text-red-500 text-[12px] font-medium">{errors.password.message}</p>
             )}

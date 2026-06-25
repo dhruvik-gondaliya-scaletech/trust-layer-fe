@@ -163,7 +163,7 @@ export const VerifyContainer: React.FC = () => {
 
       {step === VerificationStep.PHONE_SUCCESS && (
         <PhoneSuccessStep
-          phoneNumber={`+1 ${phoneNumber}`}
+          phoneNumber={phoneNumber}
           onContinue={() => setStep(VerificationStep.PROFILE_SETUP)}
         />
       )}

@@ -81,15 +81,12 @@ export const PhoneInputStep: React.FC<PhoneInputStepProps> = ({
             <div className="space-y-3">
               <label className="text-[13px] font-bold text-foreground ml-1">Phone Number</label>
               <div className="flex gap-2">
-                <div className="flex items-center justify-center w-16 h-14 rounded-xl border border-gray-200 bg-gray-50/50 text-[16px] font-bold text-foreground">
-                  +1
-                </div>
                 <Input
                   id="register-phone"
                   type="tel"
                   disabled={isPending}
-                  placeholder="(555) 000-0000"
-                  className={`h-14 flex-1 text-[16px] font-bold bg-gray-50/50 border-gray-200 focus-visible:ring-primary/20 ${errors.phoneNumber ? "border-destructive focus-visible:ring-destructive/20" : ""}`}
+                  placeholder="+1 (555) 000-0000"
+                  className={`h-14 w-full text-[16px] font-bold bg-gray-50/50 border-gray-200 focus-visible:ring-primary/20 ${errors.phoneNumber ? "border-destructive focus-visible:ring-destructive/20" : ""}`}
                   {...register("phoneNumber")}
                 />
               </div>

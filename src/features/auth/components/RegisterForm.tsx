@@ -1,11 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
 import { RegisterInput } from "@/lib/validations/register";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Shield, Loader2 } from "lucide-react";
+import { Shield, Loader2, Eye, EyeOff } from "lucide-react";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 import Link from "next/link";
 import { BottomActionBar } from "@/components/ui/bottom-action-bar";
@@ -14,8 +14,7 @@ interface RegisterFormProps {
   register: UseFormRegister<RegisterInput>;
   errors: FieldErrors<RegisterInput>;
   isPending: boolean;
-  onSubmit: (data: RegisterInput) => void;
-  handleSubmit: any;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 }
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({
@@ -23,8 +22,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   errors,
   isPending,
   onSubmit,
-  handleSubmit,
 }) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   return (
     <div className="flex flex-col min-h-screen bg-background pb-[160px]">
       {/* Top Header */}
@@ -43,11 +44,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           Create your account to start trusted transactions.
         </p>
 
-        <form id="register-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+        <form id="register-form" onSubmit={onSubmit} className="space-y-4" noValidate>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-[13px] font-medium text-foreground">First Name</label>
+              <label htmlFor="firstName" className="text-[13px] font-medium text-foreground">First Name</label>
               <Input
+                id="firstName"
+                autoComplete="given-name"
                 required
                 disabled={isPending}
                 placeholder="John"
@@ -59,8 +62,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
               )}
             </div>
             <div className="space-y-2">
-              <label className="text-[13px] font-medium text-foreground">Last Name</label>
+              <label htmlFor="lastName" className="text-[13px] font-medium text-foreground">Last Name</label>
               <Input
+                id="lastName"
+                autoComplete="family-name"
                 required
                 disabled={isPending}
                 placeholder="Smith"
@@ -74,8 +79,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           </div>
 
           <div className="space-y-2">
-            <label className="text-[13px] font-medium text-foreground">Email</label>
+            <label htmlFor="email" className="text-[13px] font-medium text-foreground">Email</label>
             <Input
+              id="email"
+              autoComplete="email"
               required
               type="email"
               disabled={isPending}
@@ -89,30 +96,54 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           </div>
 
           <div className="space-y-2">
-            <label className="text-[13px] font-medium text-foreground">Password</label>
-            <Input
-              required
-              type="password"
-              disabled={isPending}
-              placeholder="••••••••"
-              className={errors.password ? "border-destructive focus-visible:ring-destructive/20" : ""}
-              {...register("password")}
-            />
+            <label htmlFor="password" className="text-[13px] font-medium text-foreground">Password</label>
+            <div className="relative">
+              <Input
+                id="password"
+                autoComplete="new-password"
+                required
+                type={showPassword ? "text" : "password"}
+                disabled={isPending}
+                placeholder="••••••••"
+                className={`pr-10 ${errors.password ? "border-destructive focus-visible:ring-destructive/20" : ""}`}
+                {...register("password")}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                disabled={isPending}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
             {errors.password && (
               <p className="text-red-500 text-[12px] font-medium">{errors.password.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <label className="text-[13px] font-medium text-foreground">Confirm Password</label>
-            <Input
-              required
-              type="password"
-              disabled={isPending}
-              placeholder="••••••••"
-              className={errors.confirmPassword ? "border-destructive focus-visible:ring-destructive/20" : ""}
-              {...register("confirmPassword")}
-            />
+            <label htmlFor="confirmPassword" className="text-[13px] font-medium text-foreground">Confirm Password</label>
+            <div className="relative">
+              <Input
+                id="confirmPassword"
+                autoComplete="new-password"
+                required
+                type={showConfirmPassword ? "text" : "password"}
+                disabled={isPending}
+                placeholder="••••••••"
+                className={`pr-10 ${errors.confirmPassword ? "border-destructive focus-visible:ring-destructive/20" : ""}`}
+                {...register("confirmPassword")}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                disabled={isPending}
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
             {errors.confirmPassword && (
               <p className="text-red-500 text-[12px] font-medium">{errors.confirmPassword.message}</p>
             )}
