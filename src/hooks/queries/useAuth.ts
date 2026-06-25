@@ -15,10 +15,12 @@ import type {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function storeTokens(accessToken: string, refreshToken: string) {
+function storeTokens(accessToken: string, refreshToken?: string) {
   try {
     localStorage.setItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN, accessToken);
-    localStorage.setItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+    if (refreshToken) {
+      localStorage.setItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+    }
   } catch {
     // Silently ignore storage errors (e.g. private browsing)
   }
@@ -61,7 +63,7 @@ export function useRegisterMutation({
           localStorage.removeItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
           localStorage.removeItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
         } catch {}
-      } else if (data.accessToken && data.refreshToken) {
+      } else if (data.accessToken) {
         storeTokens(data.accessToken, data.refreshToken);
         try {
           localStorage.removeItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
@@ -96,7 +98,7 @@ export function useLoginMutation({
   return useMutation({
     mutationFn: (dto: LoginDto) => authService.login(dto),
     onSuccess: (data, variables) => {
-      if (data.accessToken && data.refreshToken) {
+      if (data.accessToken) {
         storeTokens(data.accessToken, data.refreshToken);
         try {
           localStorage.removeItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
@@ -129,7 +131,7 @@ export function useVerifyOtpMutation({
   onSuccess,
   onError,
 }: {
-  onSuccess?: () => void;
+  onSuccess?: (data: any) => void;
   onError?: (error: Error) => void;
 } = {}) {
   const queryClient = useQueryClient();
@@ -138,9 +140,15 @@ export function useVerifyOtpMutation({
     mutationFn: (dto: VerifyOtpDto) => authService.verifyOtp(dto),
     onSuccess: (data) => {
       toast.success(data.message ?? "Verification successful!");
+      if (data.accessToken) {
+        storeTokens(data.accessToken, data.refreshToken);
+        try {
+          localStorage.removeItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
+        } catch {}
+      }
       // Invalidate user profile so it reflects the new verified state
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
-      onSuccess?.();
+      onSuccess?.(data);
     },
     onError: (error: Error) => {
       toast.error(error.message ?? "Verification failed. Please try again.");

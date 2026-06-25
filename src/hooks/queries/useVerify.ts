@@ -10,10 +10,12 @@ import type {
   ProfileSetupInput,
 } from "@/lib/validations/verify";
 
-function storeTokens(accessToken: string, refreshToken: string) {
+function storeTokens(accessToken: string, refreshToken?: string) {
   try {
     localStorage.setItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN, accessToken);
-    localStorage.setItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+    if (refreshToken) {
+      localStorage.setItem(AUTH_STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+    }
   } catch {}
 }
 
@@ -34,7 +36,12 @@ export function useVerifyEmailMutation({
       });
     },
     onSuccess: (data) => {
-      if (data.registrationToken) {
+      if (data.accessToken) {
+        storeTokens(data.accessToken, data.refreshToken);
+        try {
+          localStorage.removeItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
+        } catch {}
+      } else if (data.registrationToken) {
         try {
           localStorage.setItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN, data.registrationToken);
         } catch {}
@@ -105,7 +112,7 @@ export function useVerifyPhoneMutation({
       });
     },
     onSuccess: (data) => {
-      if (data.accessToken && data.refreshToken) {
+      if (data.accessToken) {
         storeTokens(data.accessToken, data.refreshToken);
         try {
           localStorage.removeItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
