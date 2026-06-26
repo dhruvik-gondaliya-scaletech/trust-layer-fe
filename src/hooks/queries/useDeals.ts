@@ -7,7 +7,7 @@ import type { CreateDealDto, UpdateDealDto, MediaType } from "@/types/api.types"
 
 export const dealKeys = {
   all: ["deals"] as const,
-  myDeals: () => [...dealKeys.all, "my"] as const,
+  myDeals: (role?: string) => [...dealKeys.all, "my", role ?? "all"] as const,
   byDealNumber: (dealNumber: string) => [...dealKeys.all, "detail", dealNumber] as const,
 };
 
@@ -15,13 +15,13 @@ export const dealKeys = {
 
 /**
  * Query: GET /deals/my
- * Fetches all deals belonging to the authenticated user (as seller).
+ * Fetches all deals belonging to the authenticated user.
  * Cached for 30 seconds.
  */
-export function useMyDeals() {
+export function useMyDeals(role?: "seller" | "buyer" | "all") {
   return useQuery({
-    queryKey: dealKeys.myDeals(),
-    queryFn: () => dealsService.getMyDeals(),
+    queryKey: dealKeys.myDeals(role),
+    queryFn: () => dealsService.getMyDeals(role),
     staleTime: 30_000,
     retry: 1,
   });
@@ -192,22 +192,32 @@ export function useUploadDealMedia({
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       dealId,
       file,
-      type,
+      sortOrder,
     }: {
       dealId: string;
-      file: File;
-      type: MediaType;
-    }) => dealsService.uploadMedia(dealId, file, type),
+      file: File | Blob;
+      sortOrder: number;
+    }) => {
+      // 1. Get presigned URL
+      const { presignedUrl, key } = await dealsService.presignMedia(
+        dealId,
+        file.type
+      );
+      // 2. Put file directly to S3
+      await dealsService.uploadToS3(presignedUrl, file);
+      // 3. Confirm to backend
+      return await dealsService.confirmMedia(dealId, {
+        key,
+        mimeType: file.type,
+        sizeBytes: file.size,
+        sortOrder,
+      });
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: dealKeys.myDeals() });
-      if (dealNumber) {
-        queryClient.invalidateQueries({
-          queryKey: dealKeys.byDealNumber(dealNumber),
-        });
-      }
+      queryClient.invalidateQueries({ queryKey: dealKeys.all });
       toast.success("Media uploaded successfully.");
       onSuccess?.();
     },

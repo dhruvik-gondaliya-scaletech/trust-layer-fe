@@ -14,6 +14,41 @@ import { Step5ReviewPublish } from "../components/Step5ReviewPublish";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import dealsService from "@/services/deals.service";
+import type { ProductType, OrderType, HandlingTime, Carrier, ShippingType, FeePayer } from "@/types/api.types";
+
+const mapCategoryToProductType = (category: string): ProductType => {
+  switch (category) {
+    case "Trading Cards":
+      return "trading_cards";
+    case "Sports Cards":
+      return "sports_cards";
+    case "Toys":
+      return "toy";
+    case "Plush":
+      return "plush";
+    case "Figures":
+      return "figure";
+    default:
+      return "other";
+  }
+};
+
+const mapOrderType = (ot: string): OrderType => {
+  return ot === "In-Person Transaction" ? "in_person" : "online";
+};
+
+const dataURLtoBlob = (dataUrl: string): Blob => {
+  const arr = dataUrl.split(",");
+  const mime = arr[0].match(/:(.*?);/)?.[1] || "image/jpeg";
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new Blob([u8arr], { type: mime });
+};
 
 export const CreateDealContainer: React.FC = () => {
   const router = useRouter();
@@ -152,14 +187,113 @@ export const CreateDealContainer: React.FC = () => {
     }
 
     setIsSubmitting(true);
-    // Simulate API Deal creation
-    setTimeout(() => {
+
+    try {
+      // 1. Create deal first
+      const productType = mapCategoryToProductType(formData.category);
+      const ot = mapOrderType(formData.orderType);
+      const ht = shippingData.handlingTime === "Ship within 1–2 business days" ? "1-2" : "3-5";
+      const carrierMapped = shippingData.carrier === "DHL" ? "Other" : (shippingData.carrier as any);
+      const st = shippingData.shippingType === "Standard" ? "standard" : "priority";
+      const feePayerMapped = feesData.feeStructure === "Split 50/50" ? "split" : (feesData.feeStructure === "Buyer Pays" ? "buyer" : "seller");
+
+      const deal = await dealsService.createDeal({
+        title: formData.title,
+        price: formData.price,
+        productType,
+        orderType: ot,
+        isGraded: formData.isGraded,
+        serialNumber: formData.gradedSerial || undefined,
+        description: formData.description || undefined,
+        condition: formData.condition || undefined,
+        handlingTime: ht as HandlingTime,
+        carrier: carrierMapped as Carrier,
+        shippingType: st as ShippingType,
+        isInsured: shippingData.isInsured,
+        feePayer: feePayerMapped as FeePayer,
+        trustScore, // Send the calculated trustScore to backend
+      });
+
+      const createdDealId = deal.id;
+
+      // 2. Prepare upload queue
+      const uploadTasks: { fileBlob: Blob; sortOrder: number }[] = [];
+      let currentSortOrder = 0;
+
+      // Main photo
+      if (mainPhoto) {
+        uploadTasks.push({
+          fileBlob: dataURLtoBlob(mainPhoto),
+          sortOrder: currentSortOrder++,
+        });
+      }
+
+      // Additional product photos
+      const slots: ("back" | "leftSide" | "rightSide" | "detail")[] = [
+        "back",
+        "leftSide",
+        "rightSide",
+        "detail",
+      ];
+      for (const slot of slots) {
+        const photo = productPhotos[slot];
+        if (photo) {
+          uploadTasks.push({
+            fileBlob: dataURLtoBlob(photo),
+            sortOrder: currentSortOrder++,
+          });
+        }
+      }
+
+      // Video
+      if (verificationVideo) {
+        uploadTasks.push({
+          fileBlob: verificationVideo,
+          sortOrder: currentSortOrder++,
+        });
+      }
+
+      // Certificate Photo
+      if (certPhoto) {
+        uploadTasks.push({
+          fileBlob: dataURLtoBlob(certPhoto),
+          sortOrder: currentSortOrder++,
+        });
+      }
+
+      // 3. Process S3 uploads concurrently
+      if (uploadTasks.length > 0) {
+        await Promise.all(
+          uploadTasks.map(async ({ fileBlob, sortOrder }) => {
+            // Get presigned URL
+            const { presignedUrl, key } = await dealsService.presignMedia(
+              createdDealId,
+              fileBlob.type
+            );
+            // Upload to S3
+            await dealsService.uploadToS3(presignedUrl, fileBlob);
+            // Confirm media
+            await dealsService.confirmMedia(createdDealId, {
+              key,
+              mimeType: fileBlob.type,
+              sizeBytes: fileBlob.size,
+              sortOrder,
+            });
+          })
+        );
+      }
+
+      // 4. Publish deal (this transitions status DRAFT -> OPEN)
+      const publishedDeal = await dealsService.publishDeal(createdDealId);
+
       setIsSubmitting(false);
-      const generatedId = Math.random().toString(36).substring(2, 10).toUpperCase();
-      setDealId(generatedId);
+      setDealId(publishedDeal.dealNumber); // Store the deal number so we link to it
       setIsSuccess(true);
       toast.success("Escrow deal successfully created!");
-    }, 1500);
+    } catch (error: any) {
+      setIsSubmitting(false);
+      toast.error(error.response?.data?.message || error.message || "Failed to create deal. Please try again.");
+    }
   };
 
   const handleBack = () => {

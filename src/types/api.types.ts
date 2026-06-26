@@ -69,7 +69,7 @@ export interface DealMedia {
   id: string;
   dealId: string;
   uploadedBy: string;
-  type: MediaType;
+  type?: MediaType;
   url: string;
   mimeType: string | null;
   sizeBytes: number | null;
@@ -205,6 +205,20 @@ export interface CreateDealDto {
   requireSignatureDelivery?: boolean;
   requireBuyerPackagingPhotos?: boolean;
   feePayer?: FeePayer;
+  trustScore?: number;
 }
 
 export type UpdateDealDto = Partial<CreateDealDto>;
+
+export interface PresignedUrlResponse {
+  presignedUrl: string;
+  key: string;
+  url: string;
+}
+
+export interface ConfirmMediaDto {
+  key: string;
+  mimeType: string;
+  sizeBytes: number;
+  sortOrder: number;
+}

@@ -26,7 +26,8 @@ export const API_CONFIG = {
         UPDATE: (id: string) => `/deals/${id}`,
         PUBLISH: (id: string) => `/deals/${id}/publish`,
         DELETE: (id: string) => `/deals/${id}`,
-        UPLOAD_MEDIA: (id: string) => `/deals/${id}/media`,
+        PRESIGN_MEDIA: (id: string) => `/deals/${id}/media/presign`,
+        CONFIRM_MEDIA: (id: string) => `/deals/${id}/media/confirm`,
         DELETE_MEDIA: (id: string, mediaId: string) => `/deals/${id}/media/${mediaId}`,
     },
 }
