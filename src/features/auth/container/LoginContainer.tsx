@@ -31,15 +31,19 @@ export const LoginContainer: React.FC = () => {
   const mutation = useLoginMutation({
     onSuccess: (data, variables) => {
       reset();
-      // If registration token is returned instead of access/refresh, proceed to verification
-      if (data.registrationToken) {
-        toast.info("Please verify your account to continue.");
-        router.push(`${FRONTEND_ROUTES.VERIFY}?email=${encodeURIComponent(variables.email)}`);
-      } else {
+      
+      const emailVerified = data.emailVerified ?? false;
+      const phoneVerified = data.phoneVerified ?? false;
+      const profileComplete = data.profileComplete ?? false;
+
+      if (emailVerified && phoneVerified && profileComplete) {
         toast.success("Welcome back!", {
           description: "You have signed in successfully.",
         });
         router.push(FRONTEND_ROUTES.DASHBOARD);
+      } else {
+        toast.info("Please complete verification/setup to continue.");
+        router.push(`${FRONTEND_ROUTES.VERIFY}?email=${encodeURIComponent(variables.email)}`);
       }
     },
     onError: (error) => {

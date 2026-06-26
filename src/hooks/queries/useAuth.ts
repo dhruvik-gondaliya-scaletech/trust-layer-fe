@@ -33,6 +33,9 @@ function clearTokens() {
     AUTH_STORAGE_KEYS.ACCESS_TOKEN,
     AUTH_STORAGE_KEYS.REFRESH_TOKEN,
     AUTH_STORAGE_KEYS.REGISTRATION_TOKEN,
+    AUTH_STORAGE_KEYS.EMAIL_VERIFIED,
+    AUTH_STORAGE_KEYS.PHONE_VERIFIED,
+    AUTH_STORAGE_KEYS.PROFILE_COMPLETE,
   ]);
 }
 
@@ -108,11 +111,13 @@ export function useLoginMutation({
     onSuccess: (data, variables) => {
       if (data.accessToken) {
         storeTokens(data.accessToken, data.refreshToken);
+        setStorageItems({
+          [AUTH_STORAGE_KEYS.EMAIL_VERIFIED]: String(data.emailVerified ?? true),
+          [AUTH_STORAGE_KEYS.PHONE_VERIFIED]: String(data.phoneVerified ?? true),
+          [AUTH_STORAGE_KEYS.PROFILE_COMPLETE]: String(data.profileComplete ?? false),
+        });
         removeStorageItems([
           AUTH_STORAGE_KEYS.REGISTRATION_TOKEN,
-          AUTH_STORAGE_KEYS.EMAIL_VERIFIED,
-          AUTH_STORAGE_KEYS.PHONE_VERIFIED,
-          AUTH_STORAGE_KEYS.PROFILE_COMPLETE,
         ]);
       } else if (data.registrationToken) {
         setStorageItems({

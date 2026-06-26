@@ -66,16 +66,20 @@ export function useVerifyEmailMutation({
     onSuccess: (data) => {
       if (data.accessToken) {
         storeTokens(data.accessToken, data.refreshToken);
+        setStorageItems({
+          [AUTH_STORAGE_KEYS.EMAIL_VERIFIED]: "true",
+          [AUTH_STORAGE_KEYS.PHONE_VERIFIED]: "true",
+          [AUTH_STORAGE_KEYS.PROFILE_COMPLETE]: "false",
+        });
         removeStorageItems([
           AUTH_STORAGE_KEYS.REGISTRATION_TOKEN,
-          AUTH_STORAGE_KEYS.EMAIL_VERIFIED,
-          AUTH_STORAGE_KEYS.PHONE_VERIFIED,
-          AUTH_STORAGE_KEYS.PROFILE_COMPLETE,
         ]);
       } else if (data.registrationToken) {
         setStorageItems({
           [AUTH_STORAGE_KEYS.REGISTRATION_TOKEN]: data.registrationToken,
           [AUTH_STORAGE_KEYS.EMAIL_VERIFIED]: "true",
+          [AUTH_STORAGE_KEYS.PHONE_VERIFIED]: "false",
+          [AUTH_STORAGE_KEYS.PROFILE_COMPLETE]: "false",
         });
       }
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
@@ -144,17 +148,20 @@ export function useVerifyPhoneMutation({
     onSuccess: (data) => {
       if (data.accessToken) {
         storeTokens(data.accessToken, data.refreshToken);
+        setStorageItems({
+          [AUTH_STORAGE_KEYS.EMAIL_VERIFIED]: "true",
+          [AUTH_STORAGE_KEYS.PHONE_VERIFIED]: "true",
+          [AUTH_STORAGE_KEYS.PROFILE_COMPLETE]: "false",
+        });
         removeStorageItems([
           AUTH_STORAGE_KEYS.REGISTRATION_TOKEN,
-          AUTH_STORAGE_KEYS.EMAIL_VERIFIED,
-          AUTH_STORAGE_KEYS.PHONE_VERIFIED,
-          AUTH_STORAGE_KEYS.PROFILE_COMPLETE,
         ]);
       } else if (data.registrationToken) {
         setStorageItems({
           [AUTH_STORAGE_KEYS.REGISTRATION_TOKEN]: data.registrationToken,
           [AUTH_STORAGE_KEYS.EMAIL_VERIFIED]: "true",
           [AUTH_STORAGE_KEYS.PHONE_VERIFIED]: "true",
+          [AUTH_STORAGE_KEYS.PROFILE_COMPLETE]: "false",
         });
       }
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
@@ -182,11 +189,11 @@ export function useProfileSetupMutation({
       });
     },
     onSuccess: (data) => {
-      removeStorageItems([
-        AUTH_STORAGE_KEYS.EMAIL_VERIFIED,
-        AUTH_STORAGE_KEYS.PHONE_VERIFIED,
-        AUTH_STORAGE_KEYS.PROFILE_COMPLETE,
-      ]);
+      setStorageItems({
+        [AUTH_STORAGE_KEYS.EMAIL_VERIFIED]: "true",
+        [AUTH_STORAGE_KEYS.PHONE_VERIFIED]: "true",
+        [AUTH_STORAGE_KEYS.PROFILE_COMPLETE]: "true",
+      });
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
       onSuccess?.(data);
     },

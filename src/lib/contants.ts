@@ -38,6 +38,8 @@ export const FRONTEND_ROUTES = {
     LOGIN: "/login",
     DASHBOARD: "/dashboard",
     CREATE_DEAL: "/create-deal",
+    WALLET: "/wallet",
+    TIMELINE: "/timeline",
 
 }
 

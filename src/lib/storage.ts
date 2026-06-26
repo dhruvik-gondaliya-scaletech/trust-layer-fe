@@ -1,34 +1,71 @@
 /**
- * Safely sets an item in localStorage.
+ * Safely sets a cookie on the client side.
+ */
+function setCookie(name: string, value: string, days = 7): void {
+  if (typeof document === "undefined") return;
+  const date = new Date();
+  date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+  const expires = "; expires=" + date.toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(value)}${expires}; path=/; SameSite=Lax`;
+}
+
+/**
+ * Safely gets a cookie value by name on the client side.
+ */
+function getCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const nameEQ = `${name}=`;
+  const ca = document.cookie.split(";");
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i].trim();
+    if (c.indexOf(nameEQ) === 0) {
+      return decodeURIComponent(c.substring(nameEQ.length));
+    }
+  }
+  return null;
+}
+
+/**
+ * Safely deletes a cookie by name on the client side.
+ */
+function removeCookie(name: string): void {
+  if (typeof document === "undefined") return;
+  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax`;
+}
+
+/**
+ * Safely sets an item in localStorage and synchronized cookies.
  */
 export function setStorageItem(key: string, value: string): void {
   try {
     localStorage.setItem(key, value);
   } catch {}
+  setCookie(key, value);
 }
 
 /**
- * Safely gets an item from localStorage.
+ * Safely gets an item from localStorage (falling back to cookies).
  */
 export function getStorageItem(key: string): string | null {
   try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
+    const val = localStorage.getItem(key);
+    if (val !== null) return val;
+  } catch {}
+  return getCookie(key);
 }
 
 /**
- * Safely removes an item from localStorage.
+ * Safely removes an item from localStorage and cookies.
  */
 export function removeStorageItem(key: string): void {
   try {
     localStorage.removeItem(key);
   } catch {}
+  removeCookie(key);
 }
 
 /**
- * Safely sets multiple items in localStorage (bulk write).
+ * Safely sets multiple items in localStorage and cookies (bulk write).
  */
 export function setStorageItems(items: Record<string, string>): void {
   try {
@@ -36,10 +73,13 @@ export function setStorageItems(items: Record<string, string>): void {
       localStorage.setItem(key, value);
     });
   } catch {}
+  Object.entries(items).forEach(([key, value]) => {
+    setCookie(key, value);
+  });
 }
 
 /**
- * Safely removes multiple items from localStorage (bulk delete).
+ * Safely removes multiple items from localStorage and cookies (bulk delete).
  */
 export function removeStorageItems(keys: string[]): void {
   try {
@@ -47,4 +87,7 @@ export function removeStorageItems(keys: string[]): void {
       localStorage.removeItem(key);
     });
   } catch {}
+  keys.forEach((key) => {
+    removeCookie(key);
+  });
 }

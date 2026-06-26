@@ -16,7 +16,7 @@ import {
 } from "@/hooks/queries/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
 import { AUTH_STORAGE_KEYS } from "@/lib/contants";
-import { getStorageItem } from "@/lib/storage";
+import { getStorageItem, setStorageItems } from "@/lib/storage";
 import type { User } from "@/types/api.types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -99,6 +99,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshUser = async () => {
     await queryClient.invalidateQueries({ queryKey: userKeys.me() });
   };
+
+  // Synchronize user verification flags with localStorage on load/change
+  React.useEffect(() => {
+    if (user) {
+      setStorageItems({
+        [AUTH_STORAGE_KEYS.EMAIL_VERIFIED]: String(!!user.emailVerifiedAt),
+        [AUTH_STORAGE_KEYS.PHONE_VERIFIED]: String(!!user.phoneVerifiedAt),
+        [AUTH_STORAGE_KEYS.PROFILE_COMPLETE]: String(!!user.username),
+      });
+    }
+  }, [user]);
 
   // ── Context value ─────────────────────────────────────────────────────────────
   const value = useMemo<AuthContextValue>(
