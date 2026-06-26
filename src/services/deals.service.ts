@@ -89,7 +89,7 @@ const dealsService = {
   ): Promise<PresignedUrlResponse> => {
     const res = await httpService.post<PresignedUrlResponse>(
       API_CONFIG.DEALS.PRESIGN_MEDIA(id),
-      null,
+      undefined,
       {
         params: { mimeType },
       }

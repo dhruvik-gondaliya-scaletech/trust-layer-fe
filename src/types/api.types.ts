@@ -197,13 +197,7 @@ export interface CreateDealDto {
   condition?: string;
   notes?: string;
   handlingTime?: HandlingTime;
-  carrier?: Carrier;
-  carrierOther?: string;
-  shippingType?: ShippingType;
   shippingCost?: number;
-  isInsured?: boolean;
-  requireSignatureDelivery?: boolean;
-  requireBuyerPackagingPhotos?: boolean;
   feePayer?: FeePayer;
   trustScore?: number;
 }

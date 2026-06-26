@@ -193,8 +193,6 @@ export const CreateDealContainer: React.FC = () => {
       const productType = mapCategoryToProductType(formData.category);
       const ot = mapOrderType(formData.orderType);
       const ht = shippingData.handlingTime === "Ship within 1–2 business days" ? "1-2" : "3-5";
-      const carrierMapped = shippingData.carrier === "DHL" ? "Other" : (shippingData.carrier as any);
-      const st = shippingData.shippingType === "Standard" ? "standard" : "priority";
       const feePayerMapped = feesData.feeStructure === "Split 50/50" ? "split" : (feesData.feeStructure === "Buyer Pays" ? "buyer" : "seller");
 
       const deal = await dealsService.createDeal({
@@ -207,9 +205,6 @@ export const CreateDealContainer: React.FC = () => {
         description: formData.description || undefined,
         condition: formData.condition || undefined,
         handlingTime: ht as HandlingTime,
-        carrier: carrierMapped as Carrier,
-        shippingType: st as ShippingType,
-        isInsured: shippingData.isInsured,
         feePayer: feePayerMapped as FeePayer,
         trustScore, // Send the calculated trustScore to backend
       });
