@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Shield, Loader2, Eye, EyeOff } from "lucide-react";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 import Link from "next/link";
-import { BottomActionBar } from "@/components/ui/bottom-action-bar";
 import { useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Form, FormField, FormControl, Field, FieldLabel, FieldError } from "@/components/ui/field";
@@ -32,7 +31,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     : FRONTEND_ROUTES.REGISTER;
 
   return (
-    <div className="flex flex-col min-h-full pb-[140px] lg:pb-0">
+    <div className="flex flex-col min-h-full pb-8">
       {/* Top Header */}
       <div className="flex items-center justify-center p-6 bg-background lg:hidden">
         <div className="flex items-center gap-2 text-primary font-bold text-lg select-none">
@@ -48,81 +47,77 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
         <Form {...form}>
           <form id="login-form" onSubmit={onSubmit} className="space-y-4" noValidate>
-          <FormField control={form.control} name="email" render={({ field }) => (
-            <Field>
-              <FieldLabel className="text-[13px]">Email</FieldLabel>
-              <FormControl>
-                <Input
-                  autoComplete="email"
-                  required
-                  type="email"
-                  disabled={isPending}
-                  placeholder="john@example.com"
-                  {...field}
-                />
-              </FormControl>
-              <FieldError />
-            </Field>
-          )} />
-
-          <FormField control={form.control} name="password" render={({ field }) => (
-            <Field>
-              <FieldLabel className="text-[13px]">Password</FieldLabel>
-              <div className="relative">
+            <FormField control={form.control} name="email" render={({ field }) => (
+              <Field>
+                <FieldLabel className="text-[13px]">Email</FieldLabel>
                 <FormControl>
                   <Input
-                    autoComplete="current-password"
+                    autoComplete="email"
                     required
-                    type={showPassword ? "text" : "password"}
+                    type="email"
                     disabled={isPending}
-                    placeholder="••••••••"
-                    className="pr-10"
+                    placeholder="john@example.com"
                     {...field}
                   />
                 </FormControl>
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  disabled={isPending}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-              <FieldError />
-            </Field>
-          )} />
+                <FieldError />
+              </Field>
+            )} />
 
-          <div className="flex justify-end pt-1">
-            <Link
-              href="#"
-              className="text-[14px] font-bold text-primary hover:underline"
-            >
-              Forgot Password?
-            </Link>
-          </div>
+            <FormField control={form.control} name="password" render={({ field }) => (
+              <Field>
+                <FieldLabel className="text-[13px]">Password</FieldLabel>
+                <div className="relative">
+                  <FormControl>
+                    <Input
+                      autoComplete="current-password"
+                      required
+                      type={showPassword ? "text" : "password"}
+                      disabled={isPending}
+                      placeholder="••••••••"
+                      className="pr-10"
+                      {...field}
+                    />
+                  </FormControl>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    disabled={isPending}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <FieldError />
+              </Field>
+            )} />
+
+            <div className="flex justify-end pt-1">
+              <Link
+                href="#"
+                className="text-[14px] font-bold text-primary hover:underline"
+              >
+                Forgot Password?
+              </Link>
+            </div>
+            <Button type="submit" disabled={isPending} className="w-full h-14 text-[16px] mt-4">
+              {isPending ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Signing In...
+                </span>
+              ) : (
+                "Sign In"
+              )}
+            </Button>
+            <p className="text-center text-[14px] text-muted-foreground mt-4">
+              Don&apos;t have an account?{" "}
+              <Link href={registerUrl} className="text-primary font-bold hover:underline">
+                Create Account
+              </Link>
+            </p>
           </form>
         </Form>
-
-        <p className="text-center text-[14px] text-muted-foreground mt-8">
-          Don&apos;t have an account?{" "}
-          <Link href={registerUrl} className="text-primary font-bold hover:underline">
-            Create Account
-          </Link>
-        </p>
-
-        <BottomActionBar>
-          <Button form="login-form" type="submit" disabled={isPending} className="w-full h-14 text-[16px]">
-            {isPending ? (
-              <span className="flex items-center justify-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Signing In...
-              </span>
-            ) : (
-              "Sign In"
-            )}
-          </Button>
-        </BottomActionBar>
       </div>
     </div>
   );

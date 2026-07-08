@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Shield, Loader2, Eye, EyeOff } from "lucide-react";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 import Link from "next/link";
-import { BottomActionBar } from "@/components/ui/bottom-action-bar";
 import { useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Form, FormField, FormControl, Field, FieldLabel, FieldError } from "@/components/ui/field";
@@ -33,7 +32,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     : FRONTEND_ROUTES.LOGIN;
 
   return (
-    <div className="flex flex-col min-h-full pb-[160px] lg:pb-0">
+    <div className="flex flex-col min-h-full pb-8">
       {/* Top Header */}
       <div className="flex items-center justify-center p-6 bg-background lg:hidden">
         <div className="flex items-center gap-2 text-primary font-bold text-lg select-none">
@@ -157,67 +156,65 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                 <FieldError />
               </Field>
             )} />
-          </form>
 
-          <p className="text-center text-[14px] text-muted-foreground mt-8">
-            Already have an account?{" "}
-            <Link href={loginUrl} className="text-primary font-bold hover:underline">
-              Sign In
-            </Link>
-          </p>
-        <BottomActionBar>
-          <div className="mb-3 flex flex-col gap-3">
-            <FormField control={form.control} name="agreeTerms" render={({ field }) => (
-              <Field className="flex-col gap-3 w-full border-none">
-                <div className="flex items-start gap-3">
-                  <FormControl>
-                    <input
-                      type="checkbox"
-                      disabled={isPending}
-                      className="mt-0.5 flex-shrink-0 w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
-                      checked={field.value}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      name={field.name}
-                      ref={field.ref}
-                    />
-                  </FormControl>
-                  <FieldLabel className="text-[13px] leading-tight text-slate-500 cursor-pointer select-none border-none p-0">
-                    I agree to the{" "}
-                    <Link href="#" className="text-primary hover:underline">
-                      Terms
-                    </Link>
-                    ,{" "}
-                    <Link href="#" className="text-primary hover:underline">
-                      Privacy Policy
-                    </Link>
-                    , and{" "}
-                    <Link href="#" className="text-primary hover:underline">
-                      Escrow Terms
-                    </Link>
-                    .
-                  </FieldLabel>
-                </div>
-                <FieldError />
-              </Field>
-            )} />
-            <div className="text-center mt-1">
-              <p className="text-[12px] text-slate-400 font-medium flex items-center justify-center gap-1.5">
-                <Shield className="w-3.5 h-3.5" /> Built for secure buyer and seller transactions.
-              </p>
+            <div className="mb-3 flex flex-col gap-3 pt-6">
+              <FormField control={form.control} name="agreeTerms" render={({ field }) => (
+                <Field className="flex-col gap-3 w-full border-none">
+                  <div className="flex items-start gap-3">
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        disabled={isPending}
+                        className="mt-0.5 flex-shrink-0 w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+                        checked={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
+                      />
+                    </FormControl>
+                    <FieldLabel className="block text-[13px] leading-normal text-slate-500 cursor-pointer select-none border-none p-0">
+                      I agree to the{" "}
+                      <Link href="#" className="text-primary hover:underline">
+                        Terms
+                      </Link>
+                      ,{" "}
+                      <Link href="#" className="text-primary hover:underline">
+                        Privacy Policy
+                      </Link>
+                      , and{" "}
+                      <Link href="#" className="text-primary hover:underline">
+                        Escrow Terms
+                      </Link>
+                      .
+                    </FieldLabel>
+                  </div>
+                  <FieldError />
+                </Field>
+              )} />
+              <div className="text-center mt-1">
+                <p className="text-[12px] text-slate-400 font-medium flex items-center justify-center gap-1.5">
+                  <Shield className="w-3.5 h-3.5" /> Built for secure buyer and seller transactions.
+                </p>
+              </div>
             </div>
-          </div>
-          <Button form="register-form" type="submit" disabled={isPending} className="w-full h-14 text-[16px]">
-            {isPending ? (
-              <span className="flex items-center justify-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Creating Account...
-              </span>
-            ) : (
-              "Continue"
-            )}
-          </Button>
-        </BottomActionBar>
+            <Button type="submit" disabled={isPending} className="w-full h-14 text-[16px]">
+              {isPending ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Creating Account...
+                </span>
+              ) : (
+                "Continue"
+              )}
+            </Button>
+            <p className="text-center text-[14px] text-muted-foreground mt-4">
+              Already have an account?{" "}
+              <Link href={loginUrl} className="text-primary font-bold hover:underline">
+                Sign In
+              </Link>
+            </p>
+          </form>
         </Form>
       </div>
     </div>
