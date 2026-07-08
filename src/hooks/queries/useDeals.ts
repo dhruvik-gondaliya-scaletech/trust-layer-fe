@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import dealsService from "@/services/deals.service";
-import type { CreateDealDto, UpdateDealDto, MediaType } from "@/types/api.types";
+import s3Service from "@/services/s3.service";
+import type { CreateDealDto, UpdateDealDto, Deal, DeclineDealDto, ShipDealDto, DealStatusResponse } from "@/types/api.types";
+import { ProofType, UploadPurpose } from "@/types/enums";
 
 // ─── Query Keys ───────────────────────────────────────────────────────────────
 
@@ -9,6 +10,8 @@ export const dealKeys = {
   all: ["deals"] as const,
   myDeals: (role?: string) => [...dealKeys.all, "my", role ?? "all"] as const,
   byDealNumber: (dealNumber: string) => [...dealKeys.all, "detail", dealNumber] as const,
+  byId: (id: string) => [...dealKeys.all, "id", id] as const,
+  statusByDealNumber: (dealNumber: string) => [...dealKeys.all, "status", dealNumber] as const,
 };
 
 // ─── useMyDeals ───────────────────────────────────────────────────────────────
@@ -44,6 +47,44 @@ export function useDeal(dealNumber: string | undefined) {
   });
 }
 
+// ─── useDealById ─────────────────────────────────────────────────────────────
+
+/**
+ * Query: GET /deals/id/:id 🔒 Auth Required
+ * Fetches a single deal by its UUID.
+ * Cached for 30 seconds.
+ */
+export function useDealById(id: string | undefined) {
+  return useQuery({
+    queryKey: dealKeys.byId(id ?? ""),
+    queryFn: () => dealsService.getDealById(id!),
+    enabled: !!id,
+    staleTime: 30_000,
+    retry: 1,
+  });
+}
+
+// ─── useDealStatus ───────────────────────────────────────────────────────────
+
+/**
+ * Query: GET /deals/:dealNumber/status 🔒 Auth Required
+ * Fetches lightweight status of a deal by its number (e.g. TRUST-1001) for polling.
+ */
+export function useDealStatus(
+  dealNumber: string | undefined,
+  options?: { enabled?: boolean; refetchInterval?: number | false }
+) {
+  return useQuery({
+    queryKey: dealKeys.statusByDealNumber(dealNumber ?? ""),
+    queryFn: () => dealsService.getDealStatusByNumber(dealNumber!),
+    enabled: !!dealNumber && (options?.enabled ?? true),
+    refetchInterval: options?.refetchInterval,
+    staleTime: 0,
+    retry: 1,
+  });
+}
+
+
 // ─── useCreateDeal ────────────────────────────────────────────────────────────
 
 /**
@@ -63,11 +104,9 @@ export function useCreateDeal({
     mutationFn: (dto: CreateDealDto) => dealsService.createDeal(dto),
     onSuccess: (deal) => {
       queryClient.invalidateQueries({ queryKey: dealKeys.myDeals() });
-      toast.success(`Deal "${deal.dealNumber}" created successfully.`);
       onSuccess?.(deal.id);
     },
     onError: (error: Error) => {
-      toast.error(error.message ?? "Failed to create deal. Please try again.");
       onError?.(error);
     },
   });
@@ -103,7 +142,6 @@ export function useUpdateDeal({
       onSuccess?.();
     },
     onError: (error: Error) => {
-      toast.error(error.message ?? "Failed to update deal. Please try again.");
       onError?.(error);
     },
   });
@@ -112,7 +150,7 @@ export function useUpdateDeal({
 // ─── usePublishDeal ───────────────────────────────────────────────────────────
 
 /**
- * Mutation: POST /deals/:id/publish
+ * Mutation: PATCH /deals/:id with publish: true
  * Publishes a DRAFT deal → OPEN. Requires at least one main_photo.
  */
 export function usePublishDeal({
@@ -127,7 +165,7 @@ export function usePublishDeal({
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => dealsService.publishDeal(id),
+    mutationFn: (id: string) => dealsService.updateDeal(id, { publish: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: dealKeys.myDeals() });
       if (dealNumber) {
@@ -135,11 +173,9 @@ export function usePublishDeal({
           queryKey: dealKeys.byDealNumber(dealNumber),
         });
       }
-      toast.success("Deal published successfully!");
       onSuccess?.();
     },
     onError: (error: Error) => {
-      toast.error(error.message ?? "Failed to publish deal. Please try again.");
       onError?.(error);
     },
   });
@@ -164,11 +200,9 @@ export function useDeleteDeal({
     mutationFn: (id: string) => dealsService.deleteDeal(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: dealKeys.myDeals() });
-      toast.success("Deal deleted.");
       onSuccess?.();
     },
     onError: (error: Error) => {
-      toast.error(error.message ?? "Failed to delete deal. Please try again.");
       onError?.(error);
     },
   });
@@ -177,15 +211,15 @@ export function useDeleteDeal({
 // ─── useUploadDealMedia ───────────────────────────────────────────────────────
 
 /**
- * Mutation: POST /deals/:id/media
- * Uploads a media file for a deal. Invalidates relevant caches on success.
+ * Mutation: POST /s3/pre-signed-url → S3 POST → POST /deals/:id/media
+ * Presigns straight into the deal's own S3 folder (dealId in the presign
+ * payload), uploads the file, then attaches it to the deal.
+ * Invalidates relevant caches on success.
  */
 export function useUploadDealMedia({
-  dealNumber,
   onSuccess,
   onError,
 }: {
-  dealNumber?: string;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 } = {}) {
@@ -196,33 +230,41 @@ export function useUploadDealMedia({
       dealId,
       file,
       sortOrder,
+      fileName,
     }: {
       dealId: string;
       file: File | Blob;
       sortOrder: number;
+      fileName?: string;
     }) => {
-      // 1. Get presigned URL
-      const { presignedUrl, key } = await dealsService.presignMedia(
-        dealId,
-        file.type
-      );
+      // 1. Get presigned URL via S3 service — presigned into the deal's folder
+      const presignedUrls = await s3Service.getPreSignedUrls({
+        files: [
+          {
+            purpose: UploadPurpose.DEAL_MEDIA,
+            fileName: fileName || (file as File).name || "media.jpg",
+            contentType: file.type || "image/jpeg",
+            dealId,
+          },
+        ],
+      });
+      const presignResponse = presignedUrls[0];
       // 2. Put file directly to S3
-      await dealsService.uploadToS3(presignedUrl, file);
-      // 3. Confirm to backend
-      return await dealsService.confirmMedia(dealId, {
-        key,
-        mimeType: file.type,
+      await s3Service.uploadToS3(presignResponse, file);
+      // 3. Add to the deal
+      return await dealsService.addMedia(dealId, {
+        key: presignResponse.key,
+        mimeType: file.type || "image/jpeg",
         sizeBytes: file.size,
         sortOrder,
+        proofType: ProofType.ITEM_MEDIA,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: dealKeys.all });
-      toast.success("Media uploaded successfully.");
       onSuccess?.();
     },
     onError: (error: Error) => {
-      toast.error(error.message ?? "Media upload failed. Please try again.");
       onError?.(error);
     },
   });
@@ -255,12 +297,103 @@ export function useDeleteDealMedia({
           queryKey: dealKeys.byDealNumber(dealNumber),
         });
       }
-      toast.success("Media removed.");
       onSuccess?.();
     },
     onError: (error: Error) => {
-      toast.error(error.message ?? "Failed to remove media. Please try again.");
       onError?.(error);
     },
   });
 }
+
+/**
+ * Mutation: POST /deals/:id/decline
+ * Declines a deal. Invalidates my-deals and by-number caches.
+ */
+export function useDeclineDeal({
+  dealNumber,
+  onSuccess,
+  onError,
+}: {
+  dealNumber: string;
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
+}) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, dto }: { id: string; dto: DeclineDealDto }) =>
+      dealsService.declineDeal(id, dto),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: dealKeys.myDeals() });
+      queryClient.invalidateQueries({
+        queryKey: dealKeys.byDealNumber(dealNumber),
+      });
+      onSuccess?.();
+    },
+    onError: (error: Error) => {
+      onError?.(error);
+    },
+  });
+}
+
+/**
+ * Mutation: POST /deals/:id/ship
+ * Marks a deal as shipped. Invalidates my-deals and by-number caches.
+ */
+export function useShipDeal({
+  dealNumber,
+  onSuccess,
+  onError,
+}: {
+  dealNumber: string;
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
+}) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, dto }: { id: string; dto: ShipDealDto }) =>
+      dealsService.shipDeal(id, dto),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: dealKeys.myDeals() });
+      queryClient.invalidateQueries({
+        queryKey: dealKeys.byDealNumber(dealNumber),
+      });
+      onSuccess?.();
+    },
+    onError: (error: Error) => {
+      onError?.(error);
+    },
+  });
+}
+
+/**
+ * Mutation: POST /deals/:id/confirm-delivery
+ * Confirms delivery of a deal. Invalidates my-deals and by-number caches.
+ */
+export function useConfirmDelivery({
+  dealNumber,
+  onSuccess,
+  onError,
+}: {
+  dealNumber: string;
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
+}) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => dealsService.confirmDelivery(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: dealKeys.myDeals() });
+      queryClient.invalidateQueries({
+        queryKey: dealKeys.byDealNumber(dealNumber),
+      });
+      onSuccess?.();
+    },
+    onError: (error: Error) => {
+      onError?.(error);
+    },
+  });
+}
+

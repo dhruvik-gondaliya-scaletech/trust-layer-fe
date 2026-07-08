@@ -5,7 +5,6 @@ export const API_CONFIG = {
     AUTH: {
         REGISTER: "/auth/register",
         LOGIN: "/auth/login",
-        REFRESH: "/auth/refresh",
         VERIFY_OTP: "/auth/verify-otp",
         RESEND_OTP: "/auth/resend-otp",
         SEND_PHONE_OTP: "/auth/send-phone-otp",
@@ -14,8 +13,14 @@ export const API_CONFIG = {
     // ─── User Endpoints ───────────────────────────────────────────────────────
     USERS: {
         ME: "/users/me",
-        ME_PHOTO: "/users/me/photo",
         BY_USERNAME: (username: string) => `/users/${username}`,
+        ADDRESSES: "/users/me/addresses",
+        ADDRESS_BY_ID: (id: string) => `/users/me/addresses/${id}`,
+    },
+
+    // ─── S3 Endpoints ─────────────────────────────────────────────────────────
+    S3: {
+        PRE_SIGNED_URL: "/s3/pre-signed-url",
     },
 
     // ─── Deal Endpoints ───────────────────────────────────────────────────────
@@ -23,12 +28,33 @@ export const API_CONFIG = {
         CREATE: "/deals",
         MY_DEALS: "/deals/my",
         BY_DEAL_NUMBER: (dealNumber: string) => `/deals/${dealNumber}`,
+        BY_ID: (id: string) => `/deals/id/${id}`,
+        STATUS: (dealNumber: string) => `/deals/${dealNumber}/status`,
         UPDATE: (id: string) => `/deals/${id}`,
-        PUBLISH: (id: string) => `/deals/${id}/publish`,
         DELETE: (id: string) => `/deals/${id}`,
-        PRESIGN_MEDIA: (id: string) => `/deals/${id}/media/presign`,
-        CONFIRM_MEDIA: (id: string) => `/deals/${id}/media/confirm`,
+        ADD_MEDIA: (id: string) => `/deals/${id}/media`,
         DELETE_MEDIA: (id: string, mediaId: string) => `/deals/${id}/media/${mediaId}`,
+        DECLINE: (id: string) => `/deals/${id}/decline`,
+        SHIP: (id: string) => `/deals/${id}/ship`,
+        CONFIRM_DELIVERY: (id: string) => `/deals/${id}/confirm-delivery`,
+    },
+
+    // ─── Payment Endpoints ────────────────────────────────────────────────────
+    PAYMENTS: {
+        CREATE_CHECKOUT_SESSION: (dealId: string) => `/payments/deals/${dealId}/create-checkout-session`,
+    },
+
+    // ─── Wallet Endpoints ─────────────────────────────────────────────────────
+    WALLET: {
+        ME: "/wallet/me",
+    },
+
+    // ─── Notification Endpoints ───────────────────────────────────────────────
+    NOTIFICATIONS: {
+        LIST: "/notifications",
+        UNREAD_COUNT: "/notifications/unread-count",
+        MARK_READ: (id: string) => `/notifications/${id}/read`,
+        MARK_ALL_READ: "/notifications/read-all",
     },
 }
 
@@ -41,16 +67,15 @@ export const FRONTEND_ROUTES = {
     CREATE_DEAL: "/create-deal",
     WALLET: "/wallet",
     TIMELINE: "/timeline",
-
-}
-
-export enum VerificationStep {
-    EMAIL_VERIFY = "email-verify",
-    EMAIL_SUCCESS = "email-success",
-    PHONE_INPUT = "phone-input",
-    PHONE_VERIFY = "phone-verify",
-    PHONE_SUCCESS = "phone-success",
-    PROFILE_SETUP = "profile-setup",
+    NOTIFICATIONS: "/notifications",
+    ADD_SHIPPING_ADDRESS: "/add-shipping-address",
+    FUND_ESCROW: (id: string) => `/fund-escrow/${id}`,
+    DISPUTE_FLOW: (id: string) => `/dispute-flow/${id}`,
+    REVIEW_SELLER: (id: string) => `/review-seller/${id}`,
+    DEAL_TIMELINE: (id: string) => `/timeline/${id}`,
+    BUYER_VIEW: (id: string) => `/deal/${id}`,
+    DEAL_LISTING: `/deal-details`,
+    DEAL_DETAILS: (id: string) => `/deal-details/${id}`,
 }
 
 export const AUTH_STORAGE_KEYS = {
@@ -61,3 +86,9 @@ export const AUTH_STORAGE_KEYS = {
     PHONE_VERIFIED: "tl_phone_verified",
     PROFILE_COMPLETE: "tl_profile_complete",
 } as const;
+
+export const DEAL_STORAGE_KEYS = {
+    DRAFT_EXISTS: "tl_deal_draft_exists",
+} as const;
+
+export const CODE_RESEND_TIME_OUT = 60;

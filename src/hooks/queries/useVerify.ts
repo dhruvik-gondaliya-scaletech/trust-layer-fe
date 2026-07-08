@@ -185,7 +185,7 @@ export function useProfileSetupMutation({
       return usersService.updateMe({
         username: data.username,
         bio: data.bio ?? "",
-        profilePhotoUrl: data.avatar,
+        profilePhotoUrl: data.avatar || undefined,
       });
     },
     onSuccess: (data) => {

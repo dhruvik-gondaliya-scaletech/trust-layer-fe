@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { zodResolver } from "@/lib/validations/resolver";
 import {
   emailVerifySchema,
@@ -27,13 +28,15 @@ import { EmailVerifyStep } from "../components/EmailVerifyStep";
 import { PhoneInputStep } from "../components/PhoneInputStep";
 import { PhoneVerifyStep } from "../components/PhoneVerifyStep";
 import { ProfileSetupStep } from "../components/ProfileSetupStep";
-import { FRONTEND_ROUTES, VerificationStep, AUTH_STORAGE_KEYS } from "@/lib/contants";
+import { FRONTEND_ROUTES, AUTH_STORAGE_KEYS } from "@/lib/contants";
 import { getStorageItem } from "@/lib/storage";
+import { VerificationStep } from "@/types/enums";
 
 export const VerifyContainer: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
+  const redirect = searchParams.get("redirect");
 
   const [step, setStep] = useState<VerificationStep>(VerificationStep.EMAIL_VERIFY);
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -60,7 +63,7 @@ export const VerifyContainer: React.FC = () => {
       } else {
         setStep(VerificationStep.EMAIL_VERIFY);
       }
-    } catch {}
+    } catch { }
   }, []);
 
   // Forms definition for each step
@@ -81,7 +84,7 @@ export const VerifyContainer: React.FC = () => {
 
   const profileSetupForm = useForm<ProfileSetupInput>({
     resolver: zodResolver(profileSetupSchema),
-    defaultValues: { username: "", bio: "", avatar: "🐶" },
+    defaultValues: { username: "", bio: "", avatar: "" },
   });
 
   // Mutations definition
@@ -122,7 +125,11 @@ export const VerifyContainer: React.FC = () => {
     onSuccess: () => {
       toast.success("Profile setup complete! Welcome to TrustLayer!");
       setProfileComplete(true);
-      router.push(FRONTEND_ROUTES.DASHBOARD);
+      if (redirect) {
+        router.push(redirect);
+      } else {
+        router.push(FRONTEND_ROUTES.DASHBOARD);
+      }
     },
     onError: (err) => {
       toast.error(err.message || "Failed to save profile.");
@@ -172,83 +179,136 @@ export const VerifyContainer: React.FC = () => {
   };
 
   const renderTracker = () => {
+    const isEmailActive = step === VerificationStep.EMAIL_VERIFY;
+    const isPhoneActive = step === VerificationStep.PHONE_INPUT || step === VerificationStep.PHONE_VERIFY;
+    const isProfileActive = step === VerificationStep.PROFILE_SETUP;
+
     return (
-      <div className="flex items-center justify-center gap-2 mb-8 select-none">
-        {/* Email Tab */}
-        <button
-          type="button"
-          onClick={() => {
-            setStep(VerificationStep.EMAIL_VERIFY);
-          }}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold border transition-all ${
-            step === VerificationStep.EMAIL_VERIFY
-              ? "bg-blue-50 text-blue-700 border-blue-100"
-              : emailVerified
-              ? "bg-green-50 text-green-700 border-green-100 hover:bg-green-100/50"
-              : "text-gray-400 border-gray-200 hover:bg-gray-50"
-          }`}
-        >
-          {emailVerified ? (
-            <Check className="w-3.5 h-3.5 text-green-600" strokeWidth={3} />
-          ) : (
-            step === VerificationStep.EMAIL_VERIFY && <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
-          )}
-          Email
-        </button>
+      <div className="w-full max-w-sm mx-auto mb-10 select-none px-1">
+        <div className="relative flex items-center justify-between">
+          {/* Background Connecting Line */}
+          <div className="absolute left-0 top-[20px] -translate-y-1/2 w-full h-[3px] bg-slate-100 rounded-full -z-10" />
 
-        <div className="h-px w-4 bg-gray-200" />
+          {/* Active Progress Connecting Line */}
+          <div
+            className="absolute left-0 top-[20px] -translate-y-1/2 h-[3px] bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-500 rounded-full transition-all duration-500 -z-10"
+            style={{
+              width: emailVerified && phoneVerified
+                ? "100%"
+                : emailVerified
+                  ? "50%"
+                  : "0%"
+            }}
+          />
 
-        {/* Phone Tab */}
-        <button
-          type="button"
-          onClick={() => {
-            setStep(VerificationStep.PHONE_INPUT);
-          }}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold border transition-all ${
-            step === VerificationStep.PHONE_INPUT || step === VerificationStep.PHONE_VERIFY
-              ? "bg-blue-50 text-blue-700 border-blue-100"
-              : phoneVerified
-              ? "bg-green-50 text-green-700 border-green-100 hover:bg-green-100/50"
-              : "text-gray-400 border-gray-200 hover:bg-gray-50"
-          }`}
-        >
-          {phoneVerified ? (
-            <Check className="w-3.5 h-3.5 text-green-600" strokeWidth={3} />
-          ) : (
-            (step === VerificationStep.PHONE_INPUT || step === VerificationStep.PHONE_VERIFY) && (
-              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
-            )
-          )}
-          Phone
-        </button>
+          {/* Step 1: Email */}
+          <div className="flex flex-col items-center flex-1">
+            <button
+              type="button"
+              onClick={() => setStep(VerificationStep.EMAIL_VERIFY)}
+              className="group focus:outline-none cursor-pointer"
+            >
+              <div
+                className={cn(
+                  "w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all duration-300",
+                  emailVerified
+                    ? "bg-emerald-500 border-emerald-500 text-white shadow-[0_0_12px_rgba(16,185,129,0.2)]"
+                    : isEmailActive
+                      ? "bg-blue-600 border-blue-600 text-white ring-4 ring-blue-500/15 shadow-[0_0_12px_rgba(59,130,246,0.25)]"
+                      : "bg-white border-slate-200 text-slate-400 group-hover:border-slate-300"
+                )}
+              >
+                {emailVerified ? (
+                  <Check className="w-5 h-5 text-white" strokeWidth={3} />
+                ) : (
+                  <span>1</span>
+                )}
+              </div>
+            </button>
+            <span className={cn(
+              "text-xs mt-2 transition-colors duration-300",
+              isEmailActive || emailVerified ? "text-slate-800 font-bold" : "text-slate-400 font-semibold"
+            )}>
+              Email
+            </span>
+          </div>
 
-        <div className="h-px w-4 bg-gray-200" />
+          {/* Step 2: Phone */}
+          <div className="flex flex-col items-center flex-1">
+            <button
+              type="button"
+              onClick={() => {
+                if (emailVerified) {
+                  setStep(VerificationStep.PHONE_INPUT);
+                } else {
+                  toast.error("Please verify your email first.");
+                }
+              }}
+              className="group focus:outline-none cursor-pointer"
+            >
+              <div
+                className={cn(
+                  "w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all duration-300",
+                  phoneVerified
+                    ? "bg-emerald-500 border-emerald-500 text-white shadow-[0_0_12px_rgba(16,185,129,0.2)]"
+                    : isPhoneActive
+                      ? "bg-blue-600 border-blue-600 text-white ring-4 ring-blue-500/15 shadow-[0_0_12px_rgba(59,130,246,0.25)]"
+                      : "bg-white border-slate-200 text-slate-400 group-hover:border-slate-300"
+                )}
+              >
+                {phoneVerified ? (
+                  <Check className="w-5 h-5 text-white" strokeWidth={3} />
+                ) : (
+                  <span>2</span>
+                )}
+              </div>
+            </button>
+            <span className={cn(
+              "text-xs mt-2 transition-colors duration-300",
+              isPhoneActive || phoneVerified ? "text-slate-800 font-bold" : "text-slate-400 font-semibold"
+            )}>
+              Phone
+            </span>
+          </div>
 
-        {/* Profile Tab */}
-        <button
-          type="button"
-          onClick={() => {
-            if (emailVerified && phoneVerified) {
-              setStep(VerificationStep.PROFILE_SETUP);
-            } else {
-              toast.error("Please verify your email and phone first.");
-            }
-          }}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold border transition-all ${
-            step === VerificationStep.PROFILE_SETUP
-              ? "bg-blue-50 text-blue-700 border-blue-100"
-              : profileComplete
-              ? "bg-green-50 text-green-700 border-green-100 hover:bg-green-100/50"
-              : "text-gray-400 border-gray-200 hover:bg-gray-50"
-          }`}
-        >
-          {profileComplete ? (
-            <Check className="w-3.5 h-3.5 text-green-600" strokeWidth={3} />
-          ) : (
-            step === VerificationStep.PROFILE_SETUP && <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
-          )}
-          Profile
-        </button>
+          {/* Step 3: Profile */}
+          <div className="flex flex-col items-center flex-1">
+            <button
+              type="button"
+              onClick={() => {
+                if (emailVerified && phoneVerified) {
+                  setStep(VerificationStep.PROFILE_SETUP);
+                } else {
+                  toast.error("Please verify your email and phone first.");
+                }
+              }}
+              className="group focus:outline-none cursor-pointer"
+            >
+              <div
+                className={cn(
+                  "w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all duration-300",
+                  profileComplete
+                    ? "bg-emerald-500 border-emerald-500 text-white shadow-[0_0_12px_rgba(16,185,129,0.2)]"
+                    : isProfileActive
+                      ? "bg-blue-600 border-blue-600 text-white ring-4 ring-blue-500/15 shadow-[0_0_12px_rgba(59,130,246,0.25)]"
+                      : "bg-white border-slate-200 text-slate-400 group-hover:border-slate-300"
+                )}
+              >
+                {profileComplete ? (
+                  <Check className="w-5 h-5 text-white" strokeWidth={3} />
+                ) : (
+                  <span>3</span>
+                )}
+              </div>
+            </button>
+            <span className={cn(
+              "text-xs mt-2 transition-colors duration-300",
+              isProfileActive || profileComplete ? "text-slate-800 font-bold" : "text-slate-400 font-semibold"
+            )}>
+              Profile
+            </span>
+          </div>
+        </div>
       </div>
     );
   };
@@ -261,14 +321,10 @@ export const VerifyContainer: React.FC = () => {
     <>
       {step === VerificationStep.EMAIL_VERIFY && (
         <EmailVerifyStep
-          register={emailForm.register}
-          errors={emailForm.formState.errors}
+          form={emailForm}
           isPending={verifyEmailMutation.isPending}
           onSubmit={(data) => verifyEmailMutation.mutate(data)}
-          handleSubmit={emailForm.handleSubmit}
-          setValue={emailForm.setValue}
           onBack={handleBack}
-          defaultCode={emailForm.getValues("code")}
           onResend={handleResendEmail}
           isResending={resendOtpMutation.isPending}
           emailVerified={emailVerified}
@@ -279,11 +335,9 @@ export const VerifyContainer: React.FC = () => {
 
       {(step === VerificationStep.PHONE_INPUT) && (
         <PhoneInputStep
-          register={phoneInputForm.register}
-          errors={phoneInputForm.formState.errors}
+          form={phoneInputForm}
           isPending={sendPhoneMutation.isPending}
           onSubmit={(data) => sendPhoneMutation.mutate(data)}
-          handleSubmit={phoneInputForm.handleSubmit}
           onBack={handleBack}
           phoneVerified={phoneVerified}
           onContinue={() => setStep(VerificationStep.PROFILE_SETUP)}
@@ -293,14 +347,10 @@ export const VerifyContainer: React.FC = () => {
 
       {step === VerificationStep.PHONE_VERIFY && (
         <PhoneVerifyStep
-          register={phoneVerifyForm.register}
-          errors={phoneVerifyForm.formState.errors}
+          form={phoneVerifyForm}
           isPending={verifyPhoneMutation.isPending}
           onSubmit={(data) => verifyPhoneMutation.mutate(data)}
-          handleSubmit={phoneVerifyForm.handleSubmit}
-          setValue={phoneVerifyForm.setValue}
           onBack={handleBack}
-          defaultCode={phoneVerifyForm.getValues("code")}
           onResend={handleResendPhone}
           isResending={resendOtpMutation.isPending}
           renderTracker={renderTracker}
@@ -309,12 +359,9 @@ export const VerifyContainer: React.FC = () => {
 
       {step === VerificationStep.PROFILE_SETUP && (
         <ProfileSetupStep
-          register={profileSetupForm.register}
-          errors={profileSetupForm.formState.errors}
+          form={profileSetupForm}
           isPending={profileSetupMutation.isPending}
           onSubmit={(data) => profileSetupMutation.mutate(data)}
-          handleSubmit={profileSetupForm.handleSubmit}
-          setValue={profileSetupForm.setValue}
           onBack={handleBack}
           renderTracker={renderTracker}
         />

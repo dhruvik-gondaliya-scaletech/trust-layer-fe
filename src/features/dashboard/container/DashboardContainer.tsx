@@ -7,125 +7,197 @@ import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useDashboardData } from "@/hooks/queries/useDashboardData";
+import { useUnreadNotificationsCount } from "@/hooks/queries/useNotifications";
+import { useRole } from "@/providers/role-provider";
 import { fadeIn, slideUp, staggerContainer } from "@/lib/motion";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 import { DashboardHeader } from "../components/DashboardHeader";
 import { QuickActions } from "../components/QuickActions";
 import { RecentDeals } from "../components/RecentDeals";
 import { QuickInsights } from "../components/QuickInsights";
-import { YourActivity } from "../components/YourActivity";
 import { WalletCard } from "../components/WalletCard";
 import { DashboardSkeleton } from "../components/DashboardSkeleton";
 import { DashboardError } from "../components/DashboardError";
 import { DashboardEmpty } from "../components/DashboardEmpty";
+import { cn } from "@/lib/utils";
 
 export const DashboardContainer: React.FC = () => {
   const router = useRouter();
+  const { role } = useRole();
 
-  // Query hook to fetch simulated dashboard data
-  const { data, isLoading, isError, error, refetch } = useDashboardData();
+  const { data, isLoading, isError, error, refetch } = useDashboardData(role);
+  const { data: unreadNotificationsCount = 0 } = useUnreadNotificationsCount();
 
-  // Action callback handlers
+  // ── Action Handlers ─────────────────────────────────────────────────────
   const handleNotificationClick = () => {
-    toast.info("Notifications Panel", {
-      description: "You have no new critical system alerts.",
-    });
+    router.push(FRONTEND_ROUTES.NOTIFICATIONS);
   };
 
-  const handleQuickActionClick = (action: any) => {
-    toast.success(`Opening Action Window`, {
-      description: `Resolving task: ${action.title}.`,
-    });
+  const handleQuickActionClick = (action: { id: string; type: string; title: string }) => {
+    if (action.type === "fund_escrow") {
+      router.push(FRONTEND_ROUTES.FUND_ESCROW(action.id));
+    } else if (action.type === "upload_tracking" || action.type === "release_funds") {
+      router.push(FRONTEND_ROUTES.DEAL_TIMELINE(action.id));
+    } else {
+      toast.info("Opening Action Window", {
+        description: `Resolving task: ${action.title}.`,
+      });
+    }
   };
 
   const handleViewAllDeals = () => {
-    toast.info("Navigating to Deals Hub", {
-      description: "Redirecting to all transaction records...",
-    });
+    router.push(FRONTEND_ROUTES.DEAL_LISTING);
   };
 
-  const handleDealClick = (deal: any) => {
-    toast.info(`Opening Deal Profile`, {
-      description: `Viewing details for ${deal.title} (${deal.price})`,
-    });
+  const handleDealClick = (deal: { id: string }) => {
+    router.push(FRONTEND_ROUTES.DEAL_DETAILS(deal.id));
   };
 
-  const handleActivityClick = (type: "selling" | "buying") => {
-    toast.info(`Filtering Activity`, {
-      description: `Showing active ${type} contracts.`,
-    });
-  };
-
-  const handleWithdrawClick = () => {
-    toast.success("Withdrawal Initiated", {
-      description: "Processing your transfer requests...",
-    });
-  };
-
-  const handleHistoryClick = () => {
-    toast.info("Opening Wallet Ledger", {
-      description: "Loading deposit and withdrawal history.",
-    });
+  const handleWalletClick = () => {
+    router.push(FRONTEND_ROUTES.WALLET);
   };
 
   const handleCreateNewDeal = () => {
     router.push(FRONTEND_ROUTES.CREATE_DEAL);
   };
 
-  // State Boundaries
+  // ── State Guards ─────────────────────────────────────────────────────────
   if (isLoading) {
     return <DashboardSkeleton />;
   }
 
   if (isError) {
     return (
-      <DashboardError
-        message={error?.message || "Could not retrieve dashboard statistics."}
-        onRetry={refetch}
-      />
+      <DashboardResponsiveShell>
+        <DashboardError
+          message={error?.message || "Could not retrieve dashboard statistics."}
+          onRetry={refetch}
+        />
+      </DashboardResponsiveShell>
     );
   }
 
   if (!data) {
-    return <DashboardError message="No data received." onRetry={refetch} />;
+    return (
+      <DashboardResponsiveShell>
+        <DashboardError message="No data received." onRetry={refetch} />
+      </DashboardResponsiveShell>
+    );
   }
 
-  // Check if deals are empty to show the empty state screen
   const isEmpty = data.recentDeals.length === 0;
 
   if (isEmpty) {
     return (
-      <DashboardEmpty
-        name={data.user.name}
-        onCreateDeal={handleCreateNewDeal}
-      />
+      <DashboardResponsiveShell>
+        <DashboardHeader
+          name={data.user.name}
+          welcomeMessage={data.user.welcomeMessage}
+          emailVerified={data.user.emailVerified}
+          phoneVerified={data.user.phoneVerified}
+          notificationCount={unreadNotificationsCount}
+          onNotificationClick={handleNotificationClick}
+        />
+        <DashboardEmpty name={data.user.name} onCreateDeal={handleCreateNewDeal} />
+        {role === "seller" && (
+          <MobileCreateDealBar onCreateNewDeal={handleCreateNewDeal} />
+        )}
+      </DashboardResponsiveShell>
     );
   }
 
   return (
-    <div className="relative w-full h-full flex flex-col overflow-hidden">
-      {/* Scrollable Container */}
-      <div className="flex-1 overflow-y-auto scrollbar-none">
+    <>
+      {/* ─── MOBILE LAYOUT (< md) ──────────────────────────────────────────── */}
+      <div className="md:hidden w-full min-h-dvh bg-background flex flex-col">
+        <div className="w-full max-w-[430px] mx-auto flex flex-col flex-1 relative bg-background shadow-2xl overflow-x-hidden">
+          <div
+            className={cn("flex-1 overflow-y-auto scrollbar-none", role === "seller" ? "pb-28" : "pb-8")}
+          >
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+              className="flex flex-col gap-6 w-full"
+            >
+              <motion.div variants={fadeIn}>
+                <DashboardHeader
+                  name={data.user.name}
+                  welcomeMessage={data.user.welcomeMessage}
+                  emailVerified={data.user.emailVerified}
+                  phoneVerified={data.user.phoneVerified}
+                  notificationCount={unreadNotificationsCount}
+                  onNotificationClick={handleNotificationClick}
+                />
+              </motion.div>
+
+              <motion.div variants={slideUp} className="px-5">
+                <WalletCard
+                  availableBalance={data.wallet.availableBalance}
+                  inEscrow={data.wallet.inEscrow}
+                  readyToWithdraw={data.wallet.readyToWithdraw}
+                  onWalletClick={handleWalletClick}
+                />
+              </motion.div>
+
+              {data.quickActions.length > 0 && (
+                <motion.div variants={slideUp} className="px-5">
+                  <QuickActions
+                    actions={data.quickActions}
+                    role={role}
+                    onActionClick={handleQuickActionClick}
+                  />
+                </motion.div>
+              )}
+
+              <motion.div variants={slideUp} className="px-5">
+                <QuickInsights
+                  activeListings={data.insights.activeListings}
+                  awaitingFunds={data.insights.awaitingFunds}
+                  inTransit={data.insights.inTransit}
+                  completedDeals={data.insights.completedDeals}
+                />
+              </motion.div>
+
+              <motion.div variants={slideUp} className="px-5 pb-4">
+                <RecentDeals
+                  deals={data.recentDeals.slice(0, 3)}
+                  onViewAllClick={handleViewAllDeals}
+                  onDealClick={handleDealClick}
+                />
+              </motion.div>
+            </motion.div>
+          </div>
+
+          {role === "seller" && (
+            <MobileCreateDealBar onCreateNewDeal={handleCreateNewDeal} />
+          )}
+        </div>
+      </div>
+
+      {/* ─── DESKTOP LAYOUT (≥ md) ─────────────────────────────────────────── */}
+      <div className="hidden md:block w-full bg-background min-h-[calc(100vh-4rem)]">
         <motion.div
           initial="hidden"
           animate="visible"
           variants={staggerContainer}
-          className="w-full flex flex-col gap-6 pt-6 pb-6"
+          className="max-w-7xl mx-auto px-6 py-8"
         >
-          {/* 1. Header Row */}
-          <motion.div variants={fadeIn}>
+          {/* Desktop Header — greeting on the left, Create New Deal CTA on the right (role toggle is in the top navbar) */}
+          <motion.div variants={fadeIn} className="mb-8">
             <DashboardHeader
               name={data.user.name}
               welcomeMessage={data.user.welcomeMessage}
               emailVerified={data.user.emailVerified}
               phoneVerified={data.user.phoneVerified}
-              notificationCount={data.user.notificationCount}
+              notificationCount={unreadNotificationsCount}
               onNotificationClick={handleNotificationClick}
+              onCreateNewDeal={handleCreateNewDeal}
             />
           </motion.div>
 
-          {/* 4. Quick Insights */}
-          <motion.div variants={slideUp}>
+          {/* KPI row — full width across the top */}
+          <motion.div variants={slideUp} className="mb-6 xl:mb-8">
             <QuickInsights
               activeListings={data.insights.activeListings}
               awaitingFunds={data.insights.awaitingFunds}
@@ -134,57 +206,60 @@ export const DashboardContainer: React.FC = () => {
             />
           </motion.div>
 
-          {/* 2. Actions Alert */}
-          <motion.div variants={slideUp}>
-            <QuickActions
-              actions={data.quickActions}
-              onActionClick={handleQuickActionClick}
-            />
-          </motion.div>
+          {/* Recent Deals + Quick Actions side by side */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 xl:gap-8 items-start">
+            {/* ── Recent Deals column — capped to 3 ────────────────────────── */}
+            <motion.div variants={slideUp}>
+              <RecentDeals
+                deals={data.recentDeals.slice(0, 3)}
+                onViewAllClick={handleViewAllDeals}
+                onDealClick={handleDealClick}
+              />
+            </motion.div>
 
-          {/* 3. Recent Deals */}
-          <motion.div variants={slideUp}>
-            <RecentDeals
-              deals={data.recentDeals}
-              onViewAllClick={handleViewAllDeals}
-              onDealClick={handleDealClick}
-            />
-          </motion.div>
-
-          {/* 5. Buying/Selling Activity */}
-          <motion.div variants={slideUp}>
-            <YourActivity
-              sellingActive={data.activity.sellingActive}
-              buyingActive={data.activity.buyingActive}
-              onSellingClick={() => handleActivityClick("selling")}
-              onBuyingClick={() => handleActivityClick("buying")}
-            />
-          </motion.div>
-
-          {/* 6. Wallet card */}
-          <motion.div variants={slideUp}>
-            <WalletCard
-              availableBalance={data.wallet.availableBalance}
-              inEscrow={data.wallet.inEscrow}
-              readyToWithdraw={data.wallet.readyToWithdraw}
-              onWithdrawClick={handleWithdrawClick}
-              onHistoryClick={handleHistoryClick}
-            />
-          </motion.div>
+            {/* ── Quick Actions column ────────────────────────────────────── */}
+            {data.quickActions.length > 0 && (
+              <motion.div variants={slideUp} className="max-h-[420px] overflow-y-auto pr-1 scrollbar-none">
+                <QuickActions
+                  actions={data.quickActions}
+                  role={role}
+                  onActionClick={handleQuickActionClick}
+                />
+              </motion.div>
+            )}
+          </div>
         </motion.div>
       </div>
-
-      {/* 7. Sticky Bottom Actions Bar */}
-      <div className="shrink-0 p-6 bg-card border-t border-border/40 z-20">
-        <Button
-          onClick={handleCreateNewDeal}
-          size="lg"
-          className="w-full bg-primary hover:bg-primary/95 text-primary-foreground font-extrabold rounded-2xl h-12 shadow-lg shadow-primary/15 flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Create New Deal</span>
-        </Button>
-      </div>
-    </div>
+    </>
   );
 };
+
+// ── Shared sub-components ─────────────────────────────────────────────────────
+
+/** Responsive shell used for loading / error / empty states */
+const DashboardResponsiveShell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="w-full min-h-dvh bg-background flex flex-col">
+    {/* Mobile: constrained frame */}
+    <div className="md:hidden w-full max-w-[430px] mx-auto flex flex-col flex-1 relative shadow-2xl overflow-x-hidden">
+      {children}
+    </div>
+    {/* Desktop: centered content */}
+    <div className="hidden md:flex flex-1 items-center justify-center max-w-7xl mx-auto w-full px-6 py-8">
+      <div className="w-full max-w-xl">{children}</div>
+    </div>
+  </div>
+);
+
+/** Fixed bottom CTA bar for mobile seller view */
+const MobileCreateDealBar: React.FC<{ onCreateNewDeal: () => void }> = ({ onCreateNewDeal }) => (
+  <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-4 pb-6 pt-4 bg-card/95 backdrop-blur-md border-t border-border/40 z-40">
+    <Button
+      onClick={onCreateNewDeal}
+      size="lg"
+      className="w-full bg-primary hover:bg-primary/95 text-primary-foreground font-extrabold rounded-2xl h-12 shadow-lg shadow-primary/15 flex items-center justify-center gap-2 active:scale-[0.98] transition-all cursor-pointer"
+    >
+      <Plus className="w-5 h-5" />
+      <span>Create New Deal</span>
+    </Button>
+  </div>
+);

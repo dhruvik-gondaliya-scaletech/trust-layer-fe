@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import usersService from "@/services/users.service";
+import s3Service from "@/services/s3.service";
 import { AUTH_STORAGE_KEYS } from "@/lib/contants";
 import { getStorageItem } from "@/lib/storage";
-import type { UpdateProfileDto } from "@/types/api.types";
+import { UploadPurpose } from "@/types/enums";
+import type { UpdateProfileDto, User } from "@/types/api.types";
 
 // ─── Query Keys ───────────────────────────────────────────────────────────────
 
@@ -32,11 +33,11 @@ function hasStoredToken(): boolean {
  * Only fires when an access token is present in localStorage.
  * Cached for 60 seconds (staleTime).
  */
-export function useCurrentUser() {
+export function useCurrentUser(enabled?: boolean) {
   return useQuery({
     queryKey: userKeys.me(),
     queryFn: () => usersService.getMe(),
-    enabled: hasStoredToken(),
+    enabled: enabled !== undefined ? enabled : hasStoredToken(),
     staleTime: 60_000,
     retry: 1,
   });
@@ -62,11 +63,9 @@ export function useUpdateProfile({
     mutationFn: (dto: UpdateProfileDto) => usersService.updateMe(dto),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
-      toast.success("Profile updated successfully.");
       onSuccess?.();
     },
     onError: (error: Error) => {
-      toast.error(error.message ?? "Failed to update profile. Please try again.");
       onError?.(error);
     },
   });
@@ -75,27 +74,45 @@ export function useUpdateProfile({
 // ─── useUploadProfilePhoto ────────────────────────────────────────────────────
 
 /**
- * Mutation: POST /users/me/photo
- * Uploads a new profile photo. Invalidates the me cache on success.
+ * Mutation: S3 upload + PATCH /users/me
+ * Uploads a new profile photo via S3. Invalidates the me cache on success.
  */
 export function useUploadProfilePhoto({
   onSuccess,
   onError,
 }: {
-  onSuccess?: () => void;
+  onSuccess?: (data: User) => void;
   onError?: (error: Error) => void;
 } = {}) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (file: File) => usersService.uploadPhoto(file),
-    onSuccess: () => {
+    mutationFn: async (file: File) => {
+      // 1. Get presigned post credentials
+      const presignedUrls = await s3Service.getPreSignedUrls({
+        files: [
+          {
+            purpose: UploadPurpose.PROFILE_PHOTO,
+            fileName: file.name,
+            contentType: file.type,
+          },
+        ],
+      });
+      const presignResponse = presignedUrls[0];
+
+      // 2. Upload file to S3 using POST
+      await s3Service.uploadToS3(presignResponse, file);
+
+      // 3. Update the user's profile with the new photo CDN URL
+      return await usersService.updateMe({
+        profilePhotoUrl: presignResponse.cdnUrl,
+      });
+    },
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
-      toast.success("Profile photo updated.");
-      onSuccess?.();
+      onSuccess?.(data);
     },
     onError: (error: Error) => {
-      toast.error(error.message ?? "Photo upload failed. Please try again.");
       onError?.(error);
     },
   });

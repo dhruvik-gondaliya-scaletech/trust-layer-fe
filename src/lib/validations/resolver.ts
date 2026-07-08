@@ -1,5 +1,5 @@
-import { FieldValues, Resolver } from "react-hook-form";
-import { ZodSchema } from "zod";
+import { FieldErrors, FieldValues, Resolver } from "react-hook-form";
+import { ZodError, ZodSchema } from "zod";
 
 export const zodResolver = <TFieldValues extends FieldValues>(
   schema: ZodSchema<TFieldValues>
@@ -11,11 +11,11 @@ export const zodResolver = <TFieldValues extends FieldValues>(
         values: data,
         errors: {},
       };
-    } catch (error: any) {
-      if (error && error.issues) {
-        const errors = error.issues.reduce((allErrors: any, currentError: any) => {
+    } catch (error: unknown) {
+      if (error instanceof ZodError) {
+        const errors = error.issues.reduce<Record<string, { type: string; message: string }>>((allErrors, currentError) => {
           const path = currentError.path[0];
-          if (path) {
+          if (typeof path === "string") {
             allErrors[path] = {
               type: currentError.code,
               message: currentError.message,
@@ -25,7 +25,7 @@ export const zodResolver = <TFieldValues extends FieldValues>(
         }, {});
         return {
           values: {},
-          errors,
+          errors: errors as unknown as FieldErrors<TFieldValues>,
         };
       }
       return {
@@ -35,7 +35,7 @@ export const zodResolver = <TFieldValues extends FieldValues>(
             type: "validate",
             message: "Validation failed",
           },
-        },
+        } as unknown as FieldErrors<TFieldValues>,
       };
     }
   };

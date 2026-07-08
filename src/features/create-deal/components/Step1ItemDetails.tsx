@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { TrustScoreHeader, TrustScoreBreakdown } from "./TrustScoreHeader";
+import { Form, FormField, FormControl, Field, FieldLabel, FieldError } from "@/components/ui/field";
 
 export interface Step1FormData {
   title: string;
@@ -39,13 +40,7 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
   nextStepName,
   breakdown,
 }) => {
-  const {
-    register,
-    handleSubmit,
-    control,
-    watch,
-    formState: { errors },
-  } = useForm<Step1FormData>({
+  const form = useForm<Step1FormData>({
     defaultValues: {
       title: initialData?.title || "",
       price: initialData?.price || undefined,
@@ -58,15 +53,16 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
     },
   });
 
-  const isGraded = watch("isGraded");
+  const isGraded = form.watch("isGraded");
 
   return (
-    <form
-      id="step1-form"
-      onSubmit={handleSubmit(onContinue)}
-      className="flex flex-col h-full flex-1 overflow-hidden text-left"
-      noValidate
-    >
+    <Form {...form}>
+      <form
+        id="step1-form"
+        onSubmit={form.handleSubmit(onContinue)}
+        className="flex flex-col h-full flex-1 overflow-hidden text-left"
+        noValidate
+      >
       {/* Scrollable Form Content */}
       <div className="flex-1 overflow-y-auto px-0.5 space-y-5 scrollbar-none pb-28">
 
@@ -79,64 +75,57 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
         <h2 className="text-2xl font-extrabold text-foreground tracking-tight">Item details</h2>
 
         {/* Title */}
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="item-title" className="text-sm font-semibold text-foreground/80">
-            Title
-          </Label>
-          <Input
-            id="item-title"
-            placeholder="Charizard Holo 1999 Base Set"
-            className={cn(
-              "rounded-2xl h-12 px-4 border text-base font-semibold bg-background",
-              errors.title ? "border-destructive focus-visible:ring-destructive/20" : "border-border/80"
-            )}
-            {...register("title", { required: "Item title is required" })}
-          />
-          {errors.title && (
-            <span className="text-xs font-medium text-destructive mt-0.5" role="alert">
-              {errors.title.message}
-            </span>
-          )}
-        </div>
+        <FormField control={form.control} name="title" rules={{ required: "Item title is required" }} render={({ field }) => (
+          <Field className="flex flex-col gap-1.5 border-none p-0">
+            <FieldLabel htmlFor="item-title" className="text-sm font-semibold text-foreground/80">
+              Title
+            </FieldLabel>
+            <FormControl>
+              <Input
+                id="item-title"
+                placeholder="Charizard Holo 1999 Base Set"
+                className="rounded-2xl h-12 px-4 border text-base font-semibold bg-background"
+                {...field}
+              />
+            </FormControl>
+            <FieldError className="text-xs font-medium mt-0.5" />
+          </Field>
+        )} />
 
         {/* Price */}
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="item-price" className="text-sm font-semibold text-foreground/80">
-            Price (USD)
-          </Label>
-          <div className="relative">
-            <Input
-              id="item-price"
-              type="number"
-              placeholder="4300"
-              className={cn(
-                "rounded-2xl h-12 px-4 border text-base font-semibold bg-background",
-                errors.price ? "border-destructive focus-visible:ring-destructive/20" : "border-border/80"
-              )}
-              {...register("price", {
-                required: "Price is required",
-                min: { value: 1, message: "Price must be greater than 0" },
-                valueAsNumber: true,
-              })}
-            />
-          </div>
-          {errors.price && (
-            <span className="text-xs font-medium text-destructive mt-0.5" role="alert">
-              {errors.price.message}
-            </span>
-          )}
-        </div>
+        <FormField control={form.control} name="price" rules={{
+          required: "Price is required",
+          min: { value: 1, message: "Price must be greater than 0" },
+        }} render={({ field }) => (
+          <Field className="flex flex-col gap-1.5 border-none p-0">
+            <FieldLabel htmlFor="item-price" className="text-sm font-semibold text-foreground/80">
+              Price (USD)
+            </FieldLabel>
+            <div className="relative">
+              <FormControl>
+                <Input
+                  id="item-price"
+                  type="number"
+                  placeholder="4300"
+                  className="rounded-2xl h-12 px-4 border text-base font-semibold bg-background"
+                  {...field}
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(Number.isNaN(e.target.valueAsNumber) ? undefined : e.target.valueAsNumber)}
+                />
+              </FormControl>
+            </div>
+            <FieldError className="text-xs font-medium mt-0.5" />
+          </Field>
+        )} />
 
         {/* Product Type & Condition Dropdowns Side-by-Side */}
         <div className="grid grid-cols-[1.3fr_1fr] gap-3">
-          <div className="flex flex-col gap-1.5">
-            <Label className="text-sm font-semibold text-foreground/80">
-              Product Type
-            </Label>
-            <Controller
-              name="category"
-              control={control}
-              render={({ field }) => (
+          <FormField control={form.control} name="category" render={({ field }) => (
+            <Field className="flex flex-col gap-1.5 border-none p-0">
+              <FieldLabel className="text-sm font-semibold text-foreground/80">
+                Product Type
+              </FieldLabel>
+              <FormControl>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger className="rounded-2xl border border-border/80 h-12 text-sm font-semibold">
                     <SelectValue />
@@ -149,18 +138,16 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
                     ))}
                   </SelectContent>
                 </Select>
-              )}
-            />
-          </div>
+              </FormControl>
+            </Field>
+          )} />
 
-          <div className="flex flex-col gap-1.5">
-            <Label className="text-sm font-semibold text-foreground/80">
-              Condition
-            </Label>
-            <Controller
-              name="condition"
-              control={control}
-              render={({ field }) => (
+          <FormField control={form.control} name="condition" render={({ field }) => (
+            <Field className="flex flex-col gap-1.5 border-none p-0">
+              <FieldLabel className="text-sm font-semibold text-foreground/80">
+                Condition
+              </FieldLabel>
+              <FormControl>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger className="rounded-2xl border border-border/80 h-12 text-sm font-semibold">
                     <SelectValue />
@@ -173,20 +160,18 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
                     ))}
                   </SelectContent>
                 </Select>
-              )}
-            />
-          </div>
+              </FormControl>
+            </Field>
+          )} />
         </div>
 
         {/* Order Type Dropdown */}
-        <div className="flex flex-col gap-1.5">
-          <Label className="text-sm font-semibold text-foreground/80">
-            Order Type
-          </Label>
-          <Controller
-            name="orderType"
-            control={control}
-            render={({ field }) => (
+        <FormField control={form.control} name="orderType" render={({ field }) => (
+          <Field className="flex flex-col gap-1.5 border-none p-0">
+            <FieldLabel className="text-sm font-semibold text-foreground/80">
+              Order Type
+            </FieldLabel>
+            <FormControl>
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger className="rounded-2xl border border-border/80 h-12 text-sm font-semibold">
                   <SelectValue />
@@ -196,42 +181,42 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
                   <SelectItem value="In-Person Transaction">In-Person Transaction</SelectItem>
                 </SelectContent>
               </Select>
-            )}
-          />
-        </div>
+            </FormControl>
+          </Field>
+        )} />
 
         {/* Graded Product Group to prevent layout jerking */}
         <div className="flex flex-col">
-          <Controller
-            name="isGraded"
-            control={control}
-            render={({ field }) => (
-              <div
-                onClick={() => field.onChange(!field.value)}
-                className="flex items-center gap-3 p-4 bg-muted/15 border border-border/80 rounded-2xl cursor-pointer hover:bg-muted/20 select-none transition-colors"
-              >
+          <FormField control={form.control} name="isGraded" render={({ field }) => (
+            <Field className="border-none p-0">
+              <FormControl>
                 <div
-                  className={cn(
-                    "w-5 h-5 rounded-md border flex items-center justify-center transition-all",
-                    field.value
-                      ? "bg-primary border-primary text-primary-foreground"
-                      : "border-muted-foreground/40 bg-background"
-                  )}
+                  onClick={() => field.onChange(!field.value)}
+                  className="flex items-center gap-3 p-4 bg-muted/15 border border-border/80 rounded-2xl cursor-pointer hover:bg-muted/20 select-none transition-colors"
                 >
-                  {field.value && (
-                    <svg
-                      className="w-3 h-3 stroke-current stroke-[3]"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  )}
+                  <div
+                    className={cn(
+                      "w-5 h-5 rounded-md border flex items-center justify-center transition-all",
+                      field.value
+                        ? "bg-primary border-primary text-primary-foreground"
+                        : "border-muted-foreground/40 bg-background"
+                    )}
+                  >
+                    {field.value && (
+                      <svg
+                        className="w-3 h-3 stroke-current stroke-[3]"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    )}
+                  </div>
+                  <span className="text-base font-bold text-foreground">Graded Product</span>
                 </div>
-                <span className="text-base font-bold text-foreground">Graded Product</span>
-              </div>
-            )}
-          />
+              </FormControl>
+            </Field>
+          )} />
 
           {/* Conditional Serial Number field with Smooth Height/Margin Transition */}
           <AnimatePresence initial={false}>
@@ -243,44 +228,46 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
                 transition={{ duration: 0.22, ease: "easeInOut" }}
                 className="overflow-hidden flex flex-col gap-1.5"
               >
-                <Label htmlFor="item-serial" className="text-sm font-semibold text-foreground/80">
-                  Serial Number
-                </Label>
-                <Input
-                  id="item-serial"
-                  placeholder="Enter serial number..."
-                  className={cn(
-                    "rounded-2xl h-12 px-4 border text-base font-semibold bg-background",
-                    errors.gradedSerial ? "border-destructive focus-visible:ring-destructive/20" : "border-border/80"
-                  )}
-                  {...register("gradedSerial", {
-                    required: isGraded ? "Serial number is required" : false,
-                  })}
-                />
-                {errors.gradedSerial && (
-                  <span className="text-xs font-medium text-destructive mt-0.5" role="alert">
-                    {errors.gradedSerial.message}
-                  </span>
-                )}
+                <FormField control={form.control} name="gradedSerial" rules={{ required: isGraded ? "Serial number is required" : false }} render={({ field }) => (
+                  <Field className="flex flex-col gap-1.5 border-none p-0">
+                    <FieldLabel htmlFor="item-serial" className="text-sm font-semibold text-foreground/80">
+                      Serial Number
+                    </FieldLabel>
+                    <FormControl>
+                      <Input
+                        id="item-serial"
+                        placeholder="Enter serial number..."
+                        className="rounded-2xl h-12 px-4 border text-base font-semibold bg-background"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FieldError className="text-xs font-medium mt-0.5" />
+                  </Field>
+                )} />
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
         {/* Description */}
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="item-desc" className="text-sm font-semibold text-foreground/80">
-            Description
-          </Label>
-          <Textarea
-            id="item-desc"
-            placeholder="Mint condition. Kept in sleeve."
-            rows={3}
-            className="border-border/80 resize-none rounded-2xl p-4 text-base font-semibold bg-background"
-            {...register("description")}
-          />
-        </div>
+        <FormField control={form.control} name="description" render={({ field }) => (
+          <Field className="flex flex-col gap-1.5 border-none p-0">
+            <FieldLabel htmlFor="item-desc" className="text-sm font-semibold text-foreground/80">
+              Description
+            </FieldLabel>
+            <FormControl>
+              <Textarea
+                id="item-desc"
+                placeholder="Mint condition. Kept in sleeve."
+                rows={3}
+                className="border-border/80 resize-none rounded-2xl p-4 text-base font-semibold bg-background"
+                {...field}
+              />
+            </FormControl>
+          </Field>
+        )} />
       </div>
     </form>
+  </Form>
   );
 };

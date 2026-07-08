@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { ChevronDown, ChevronUp, Check, Star, Zap, Award } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export interface TrustScoreBreakdown {
   hasItemDetails: boolean;
@@ -61,54 +62,11 @@ export const TrustScoreHeader: React.FC<TrustScoreHeaderProps> = ({
 
   return (
     <>
-      {/* CSS keyframes for fluid gradient and shimmer */}
-      <style>{`
-        @keyframes trustFluid {
-          0%   { background-position: 0% 50%; }
-          50%  { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        @keyframes shimmerBar {
-          0%   { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
-        }
-        @keyframes starSpin {
-          0%   { transform: rotate(0deg) scale(1); }
-          50%  { transform: rotate(180deg) scale(1.2); }
-          100% { transform: rotate(360deg) scale(1); }
-        }
-        .trust-fluid-bg {
-          background: linear-gradient(135deg, #3b82f6, #6366f1, #8b5cf6, #ec4899, #f59e0b, #10b981, #3b82f6);
-          background-size: 400% 400%;
-          animation: trustFluid 4s ease infinite;
-        }
-        .trust-static-bg {
-          background: linear-gradient(135deg, #2563eb, #1d4ed8, #3730a3);
-        }
-        .shimmer-bar {
-          background: linear-gradient(90deg, #ffffff 25%, #e0f2fe 50%, #ffffff 75%);
-          background-size: 200% 100%;
-          animation: shimmerBar 1.6s linear infinite;
-        }
-        .star-spin {
-          animation: starSpin 2s linear infinite;
-        }
-      `}</style>
-
       <div
-        className={`w-full rounded-3xl p-5 shadow-md text-white flex flex-col gap-3 relative overflow-hidden transition-all duration-700 ${
-          isPerfect ? "trust-fluid-bg shadow-lg" : "trust-static-bg"
-        }`}
+        className="w-full rounded-3xl p-5 shadow-md text-white flex flex-col gap-3 relative overflow-hidden transition-all duration-700 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800"
       >
         {/* Ambient glow orb */}
         <div className="absolute -top-10 -right-10 w-24 h-24 rounded-full bg-white/5 pointer-events-none" />
-
-        {/* Perfect score glow ring */}
-        {isPerfect && (
-          <div className="absolute inset-0 rounded-3xl pointer-events-none"
-            style={{ boxShadow: "0 0 32px 4px rgba(139,92,246,0.35), inset 0 0 24px 0 rgba(255,255,255,0.06)" }}
-          />
-        )}
 
         {/* Main Row */}
         <div className="flex items-start justify-between z-10">
@@ -116,11 +74,11 @@ export const TrustScoreHeader: React.FC<TrustScoreHeaderProps> = ({
             <div className="flex items-center gap-2">
               <span className="text-xl font-extrabold tracking-tight">Trust Score</span>
               {isPerfect && (
-                <Award className="w-4.5 h-4.5 text-amber-300 star-spin" />
+                <Award className="w-4.5 h-4.5 text-amber-300" />
               )}
             </div>
             {score > 0 ? (
-              <Badge className={`${tierClass} rounded-md text-[11px] font-extrabold py-0.5 px-2 mt-1 uppercase w-max tracking-wider`}>
+              <Badge className={cn(tierClass, "rounded-md text-[11px] font-extrabold py-0.5 px-2 mt-1 uppercase w-max tracking-wider")}>
                 {tier}
               </Badge>
             ) : (
@@ -134,7 +92,7 @@ export const TrustScoreHeader: React.FC<TrustScoreHeaderProps> = ({
               initial={{ scale: 1.2, opacity: 0.7 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className={`text-5xl font-extrabold tracking-tight ${isPerfect ? "text-white drop-shadow-md" : ""}`}
+              className="text-5xl font-extrabold tracking-tight"
             >
               {score}
             </motion.span>
@@ -182,14 +140,10 @@ export const TrustScoreHeader: React.FC<TrustScoreHeaderProps> = ({
         {/* Progress Bar + Breakdown Toggle */}
         <div className="w-full flex flex-col gap-3 z-10">
           <div className="w-full h-2.5 bg-blue-950/45 rounded-full overflow-hidden">
-            {isPerfect ? (
-              <div className="h-full w-full shimmer-bar rounded-full" />
-            ) : (
-              <div
-                className="h-full bg-white rounded-full transition-all duration-500 ease-out"
-                style={{ width: `${score}%` }}
-              />
-            )}
+            <div
+              className="h-full bg-white rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${score}%` }}
+            />
           </div>
 
           {breakdown && (
@@ -242,8 +196,8 @@ export const TrustScoreHeader: React.FC<TrustScoreHeaderProps> = ({
                 {/* Item Details */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className={`w-4 h-4 rounded-full flex items-center justify-center border shrink-0 ${breakdown.hasItemDetails ? "bg-white/20 border-white" : "border-white/25"}`}>
-                      <Check className={`w-2.5 h-2.5 stroke-[3] ${breakdown.hasItemDetails ? "" : "opacity-30"}`} />
+                    <div className={cn("w-4 h-4 rounded-full flex items-center justify-center border shrink-0", breakdown.hasItemDetails ? "bg-white/20 border-white" : "border-white/25")}>
+                      <Check className={cn("w-2.5 h-2.5 stroke-[3]", !breakdown.hasItemDetails && "opacity-30")} />
                     </div>
                     <span className={breakdown.hasItemDetails ? "" : "opacity-50"}>Item Details</span>
                   </div>
@@ -253,8 +207,8 @@ export const TrustScoreHeader: React.FC<TrustScoreHeaderProps> = ({
                 {/* Main Photo */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className={`w-4 h-4 rounded-full flex items-center justify-center border shrink-0 ${breakdown.hasMainPhoto ? "bg-white/20 border-white" : "border-white/25"}`}>
-                      <Check className={`w-2.5 h-2.5 stroke-[3] ${breakdown.hasMainPhoto ? "" : "opacity-30"}`} />
+                    <div className={cn("w-4 h-4 rounded-full flex items-center justify-center border shrink-0", breakdown.hasMainPhoto ? "bg-white/20 border-white" : "border-white/25")}>
+                      <Check className={cn("w-2.5 h-2.5 stroke-[3]", !breakdown.hasMainPhoto && "opacity-30")} />
                     </div>
                     <span className={breakdown.hasMainPhoto ? "" : "opacity-50"}>Main Photo</span>
                   </div>
@@ -264,8 +218,8 @@ export const TrustScoreHeader: React.FC<TrustScoreHeaderProps> = ({
                 {/* Additional Photos */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className={`w-4 h-4 rounded-full flex items-center justify-center border shrink-0 ${breakdown.additionalPhotosCount > 0 ? "bg-white/20 border-white" : "border-white/25"}`}>
-                      <Check className={`w-2.5 h-2.5 stroke-[3] ${breakdown.additionalPhotosCount > 0 ? "" : "opacity-30"}`} />
+                    <div className={cn("w-4 h-4 rounded-full flex items-center justify-center border shrink-0", breakdown.additionalPhotosCount > 0 ? "bg-white/20 border-white" : "border-white/25")}>
+                      <Check className={cn("w-2.5 h-2.5 stroke-[3]", breakdown.additionalPhotosCount === 0 && "opacity-30")} />
                     </div>
                     <span className={breakdown.additionalPhotosCount > 0 ? "" : "opacity-50"}>
                       Additional Photos ({breakdown.additionalPhotosCount}/4)
@@ -279,8 +233,8 @@ export const TrustScoreHeader: React.FC<TrustScoreHeaderProps> = ({
                 {/* Product Video */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className={`w-4 h-4 rounded-full flex items-center justify-center border shrink-0 ${breakdown.hasVideo ? "bg-white/20 border-white" : "border-white/25"}`}>
-                      <Check className={`w-2.5 h-2.5 stroke-[3] ${breakdown.hasVideo ? "" : "opacity-30"}`} />
+                    <div className={cn("w-4 h-4 rounded-full flex items-center justify-center border shrink-0", breakdown.hasVideo ? "bg-white/20 border-white" : "border-white/25")}>
+                      <Check className={cn("w-2.5 h-2.5 stroke-[3]", !breakdown.hasVideo && "opacity-30")} />
                     </div>
                     <span className={breakdown.hasVideo ? "" : "opacity-50"}>Product Video</span>
                   </div>
@@ -293,8 +247,8 @@ export const TrustScoreHeader: React.FC<TrustScoreHeaderProps> = ({
                 {breakdown.isGraded && (
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className={`w-4 h-4 rounded-full flex items-center justify-center border shrink-0 ${breakdown.hasCertPhoto ? "bg-white/20 border-white" : "border-white/25"}`}>
-                        <Check className={`w-2.5 h-2.5 stroke-[3] ${breakdown.hasCertPhoto ? "" : "opacity-30"}`} />
+                      <div className={cn("w-4 h-4 rounded-full flex items-center justify-center border shrink-0", breakdown.hasCertPhoto ? "bg-white/20 border-white" : "border-white/25")}>
+                        <Check className={cn("w-2.5 h-2.5 stroke-[3]", !breakdown.hasCertPhoto && "opacity-30")} />
                       </div>
                       <span className={breakdown.hasCertPhoto ? "" : "opacity-50"}>Graded Certificate</span>
                     </div>

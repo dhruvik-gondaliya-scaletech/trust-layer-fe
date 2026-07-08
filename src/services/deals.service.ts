@@ -1,4 +1,3 @@
-import axios from "axios";
 import httpService from "@/lib/http-services";
 import { API_CONFIG } from "@/lib/contants";
 import type {
@@ -6,9 +5,10 @@ import type {
   DealMedia,
   CreateDealDto,
   UpdateDealDto,
-  MediaType,
-  PresignedUrlResponse,
   ConfirmMediaDto,
+  DeclineDealDto,
+  ShipDealDto,
+  DealStatusResponse,
 } from "@/types/api.types";
 
 /**
@@ -52,21 +52,32 @@ const dealsService = {
   },
 
   /**
+   * GET /deals/id/:id 🔒 Auth Required
+   * Fetch a deal by its database ID (UUID).
+   */
+  getDealById: async (id: string): Promise<Deal> => {
+    const res = await httpService.get<Deal>(API_CONFIG.DEALS.BY_ID(id));
+    return res.data;
+  },
+
+  /**
+   * GET /deals/:dealNumber/status 🔒 Auth Required
+   * Fetch lightweight status of a deal by its number.
+   */
+  getDealStatusByNumber: async (dealNumber: string): Promise<DealStatusResponse> => {
+    const res = await httpService.get<DealStatusResponse>(
+      API_CONFIG.DEALS.STATUS(dealNumber)
+    );
+    return res.data;
+  },
+
+  /**
    * PATCH /deals/:id 🔒 Auth Required
    * Update a deal (only allowed when status is draft or open).
    * Automatically recalculates fees and trust score.
    */
   updateDeal: async (id: string, dto: UpdateDealDto): Promise<Deal> => {
     const res = await httpService.patch<Deal>(API_CONFIG.DEALS.UPDATE(id), dto);
-    return res.data;
-  },
-
-  /**
-   * POST /deals/:id/publish 🔒 Auth Required
-   * Publish a deal: DRAFT → OPEN. Requires at least one main_photo.
-   */
-  publishDeal: async (id: string): Promise<Deal> => {
-    const res = await httpService.post<Deal>(API_CONFIG.DEALS.PUBLISH(id));
     return res.data;
   },
 
@@ -79,47 +90,18 @@ const dealsService = {
     return res.data;
   },
 
-  /**
-   * POST /deals/:id/media/presign 🔒 Auth Required
-   * Get an S3 presigned URL to upload a photo or video.
-   */
-  presignMedia: async (
-    id: string,
-    mimeType: string
-  ): Promise<PresignedUrlResponse> => {
-    const res = await httpService.post<PresignedUrlResponse>(
-      API_CONFIG.DEALS.PRESIGN_MEDIA(id),
-      undefined,
-      {
-        params: { mimeType },
-      }
-    );
-    return res.data;
-  },
+
 
   /**
-   * PUT to S3 🔓 Public
-   * Directly upload a file blob to the presigned S3 URL.
-   * NOTE: This bypasses httpService interceptors to avoid sending bearer token headers.
+   * POST /deals/:id/media 🔒 Auth Required
+   * Add a single media item to an existing OPEN deal.
    */
-  uploadToS3: async (presignedUrl: string, file: Blob | File): Promise<void> => {
-    await axios.put(presignedUrl, file, {
-      headers: {
-        "Content-Type": file.type,
-      },
-    });
-  },
-
-  /**
-   * POST /deals/:id/media/confirm 🔒 Auth Required
-   * Confirm media upload after direct S3 upload.
-   */
-  confirmMedia: async (
+  addMedia: async (
     id: string,
     dto: ConfirmMediaDto
   ): Promise<DealMedia> => {
     const res = await httpService.post<DealMedia>(
-      API_CONFIG.DEALS.CONFIRM_MEDIA(id),
+      API_CONFIG.DEALS.ADD_MEDIA(id),
       dto
     );
     return res.data;
@@ -133,6 +115,33 @@ const dealsService = {
     const res = await httpService.delete<null>(
       API_CONFIG.DEALS.DELETE_MEDIA(id, mediaId)
     );
+    return res.data;
+  },
+
+  /**
+   * POST /deals/:id/decline 🔒 Auth Required
+   * Decline a deal.
+   */
+  declineDeal: async (id: string, dto: DeclineDealDto): Promise<Deal> => {
+    const res = await httpService.post<Deal>(API_CONFIG.DEALS.DECLINE(id), dto);
+    return res.data;
+  },
+
+  /**
+   * POST /deals/:id/ship 🔒 Auth Required
+   * Ship a deal.
+   */
+  shipDeal: async (id: string, dto: ShipDealDto): Promise<Deal> => {
+    const res = await httpService.post<Deal>(API_CONFIG.DEALS.SHIP(id), dto);
+    return res.data;
+  },
+
+  /**
+   * POST /deals/:id/confirm-delivery 🔒 Auth Required
+   * Confirm delivery of a deal.
+   */
+  confirmDelivery: async (id: string): Promise<Deal> => {
+    const res = await httpService.post<Deal>(API_CONFIG.DEALS.CONFIRM_DELIVERY(id));
     return res.data;
   },
 };

@@ -17,7 +17,7 @@ function getCookie(name: string): string | null {
   const nameEQ = `${name}=`;
   const ca = document.cookie.split(";");
   for (let i = 0; i < ca.length; i++) {
-    let c = ca[i].trim();
+    const c = ca[i].trim();
     if (c.indexOf(nameEQ) === 0) {
       return decodeURIComponent(c.substring(nameEQ.length));
     }
@@ -41,6 +41,9 @@ export function setStorageItem(key: string, value: string): void {
     localStorage.setItem(key, value);
   } catch {}
   setCookie(key, value);
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("local-storage-change"));
+  }
 }
 
 /**
@@ -62,6 +65,9 @@ export function removeStorageItem(key: string): void {
     localStorage.removeItem(key);
   } catch {}
   removeCookie(key);
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("local-storage-change"));
+  }
 }
 
 /**
@@ -76,6 +82,9 @@ export function setStorageItems(items: Record<string, string>): void {
   Object.entries(items).forEach(([key, value]) => {
     setCookie(key, value);
   });
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("local-storage-change"));
+  }
 }
 
 /**
@@ -90,4 +99,7 @@ export function removeStorageItems(keys: string[]): void {
   keys.forEach((key) => {
     removeCookie(key);
   });
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("local-storage-change"));
+  }
 }

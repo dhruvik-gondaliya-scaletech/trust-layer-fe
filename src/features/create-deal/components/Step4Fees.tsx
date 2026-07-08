@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronUp, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { calculateEscrowFees } from "@/utils/fee";
 
 export type FeeStructureType = "Split 50/50" | "Buyer Pays" | "Seller Pays";
 
@@ -14,12 +15,14 @@ export interface Step4FeesData {
 
 interface Step4FeesProps {
   price: number;
+  shippingCost?: number;
   initialData?: Partial<Step4FeesData>;
   onContinue: (data: Step4FeesData) => void;
 }
 
 export const Step4Fees: React.FC<Step4FeesProps> = ({
   price,
+  shippingCost = 0,
   initialData,
   onContinue,
 }) => {
@@ -28,31 +31,13 @@ export const Step4Fees: React.FC<Step4FeesProps> = ({
   );
   const [showBreakdown, setShowBreakdown] = useState(false);
 
-  // Platform fee calculation: 3% of the price
-  const platformFeePercent = 3;
-  const platformFee = Math.round(price * (platformFeePercent / 100) * 100) / 100;
+  const { platformFee, buyerFeeShare, sellerFeeShare } = calculateEscrowFees(price, feeStructure);
 
-  let sellerEarnings = price;
-  let buyerCost = price;
-  let sellerFeeShare = 0;
-  let buyerFeeShare = 0;
+  const sellerEarnings = Number((price - sellerFeeShare).toFixed(2));
+  const buyerCost = Number((price + buyerFeeShare).toFixed(2));
 
-  if (feeStructure === "Split 50/50") {
-    sellerFeeShare = platformFee / 2;
-    buyerFeeShare = platformFee / 2;
-    sellerEarnings = price - sellerFeeShare;
-    buyerCost = price + buyerFeeShare;
-  } else if (feeStructure === "Buyer Pays") {
-    buyerFeeShare = platformFee;
-    sellerFeeShare = 0;
-    sellerEarnings = price;
-    buyerCost = price + platformFee;
-  } else if (feeStructure === "Seller Pays") {
-    sellerFeeShare = platformFee;
-    buyerFeeShare = 0;
-    sellerEarnings = price - platformFee;
-    buyerCost = price;
-  }
+  // Shipping is charged to the buyer on top of the item price and fee share
+  const totalBuyerPays = Number((buyerCost + shippingCost).toFixed(2));
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,7 +144,15 @@ export const Step4Fees: React.FC<Step4FeesProps> = ({
                     <span className="text-foreground">${price.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Total Platform Fee ({platformFeePercent}%)</span>
+                    <span>Shipping Cost</span>
+                    <span className="text-foreground">
+                      {shippingCost > 0
+                        ? `$${shippingCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
+                        : "FREE"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Platform Fee (3.5% + $0.30)</span>
                     <span className="text-foreground">${platformFee.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
                   <div className="flex justify-between border-t border-dashed border-border/20 pt-1.5 font-bold">
@@ -172,7 +165,7 @@ export const Step4Fees: React.FC<Step4FeesProps> = ({
                   </div>
                   <div className="flex justify-between border-t border-border/20 pt-2 font-extrabold text-foreground">
                     <span>Total Buyer Pays</span>
-                    <span>${buyerCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    <span>${totalBuyerPays.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
                 </div>
               </motion.div>

@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import authService from "@/services/auth.service";
 import { AUTH_STORAGE_KEYS, FRONTEND_ROUTES } from "@/lib/contants";
 import {
@@ -85,7 +84,6 @@ export function useRegisterMutation({
       onSuccess?.(data, variables);
     },
     onError: (error: Error) => {
-      toast.error(error.message ?? "Registration failed. Please try again.");
       onError?.(error);
     },
   });
@@ -136,7 +134,6 @@ export function useLoginMutation({
       onSuccess?.(data, variables);
     },
     onError: (error: Error) => {
-      toast.error(error.message ?? "Login failed. Please check your credentials.");
       onError?.(error);
     },
   });
@@ -160,7 +157,6 @@ export function useVerifyOtpMutation({
   return useMutation({
     mutationFn: (dto: VerifyOtpDto) => authService.verifyOtp(dto),
     onSuccess: (data) => {
-      toast.success(data.message ?? "Verification successful!");
       if (data.accessToken) {
         storeTokens(data.accessToken, data.refreshToken);
         removeStorageItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
@@ -170,7 +166,6 @@ export function useVerifyOtpMutation({
       onSuccess?.(data);
     },
     onError: (error: Error) => {
-      toast.error(error.message ?? "Verification failed. Please try again.");
       onError?.(error);
     },
   });
@@ -192,11 +187,9 @@ export function useResendOtpMutation({
   return useMutation({
     mutationFn: (dto: ResendOtpDto) => authService.resendOtp(dto),
     onSuccess: (data, variables) => {
-      toast.success(data.message ?? "Verification code sent.");
       onSuccess?.(variables.type);
     },
     onError: (error: Error) => {
-      toast.error(error.message ?? "Failed to resend code. Please try again.");
       onError?.(error);
     },
   });
@@ -218,11 +211,9 @@ export function useSendPhoneOtpMutation({
   return useMutation({
     mutationFn: (dto: SendPhoneOtpDto) => authService.sendPhoneOtp(dto),
     onSuccess: (data) => {
-      toast.success(data.message ?? "Verification code sent to your phone.");
       onSuccess?.();
     },
     onError: (error: Error) => {
-      toast.error(error.message ?? "Failed to send SMS code. Please try again.");
       onError?.(error);
     },
   });

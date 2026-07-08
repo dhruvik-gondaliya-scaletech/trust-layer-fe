@@ -3,7 +3,6 @@ import { API_CONFIG } from "@/lib/contants";
 import type {
   RegisterDto,
   LoginDto,
-  RefreshTokenDto,
   VerifyOtpDto,
   ResendOtpDto,
   SendPhoneOtpDto,
@@ -44,17 +43,6 @@ const authService = {
     return res.data;
   },
 
-  /**
-   * POST /auth/refresh 🔓 Public
-   * Exchange a valid refresh token for a new access/refresh pair.
-   */
-  refreshToken: async (dto: RefreshTokenDto): Promise<AuthTokenResponse> => {
-    const res = await httpService.post<AuthTokenResponse>(
-      API_CONFIG.AUTH.REFRESH,
-      dto
-    );
-    return res.data;
-  },
 
   /**
    * POST /auth/verify-otp 🔒 Auth Required

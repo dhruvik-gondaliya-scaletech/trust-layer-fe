@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "react-phone-number-input/style.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -92,6 +93,26 @@
   --sidebar-ring: hsl(216 100% 50%);
 }
 
+html[data-role="seller"] {
+  --primary: hsl(216 100% 50%); /* #0066FF */
+  --secondary: hsl(216 100% 95%); /* #E5F0FF */
+  --secondary-foreground: hsl(216 100% 50%);
+  --ring: hsl(216 100% 50%);
+  --sidebar-primary: hsl(216 100% 50%);
+  --sidebar-accent-foreground: hsl(216 100% 50%);
+  --sidebar-ring: hsl(216 100% 50%);
+}
+
+html[data-role="buyer"] {
+  --primary: hsl(142.1 76.2% 36.3%); /* Green-600 */
+  --secondary: hsl(138.5 76.5% 96.7%); /* Light Green-50 */
+  --secondary-foreground: hsl(142.1 76.2% 36.3%);
+  --ring: hsl(142.1 76.2% 36.3%);
+  --sidebar-primary: hsl(142.1 76.2% 36.3%);
+  --sidebar-accent-foreground: hsl(142.1 76.2% 36.3%);
+  --sidebar-ring: hsl(142.1 76.2% 36.3%);
+}
+
 .dark {
   --background: hsl(222.2 84% 4.9%);
   --foreground: hsl(210 40% 98%);
@@ -136,6 +157,103 @@
     padding-left: 1rem !important;
     padding-right: 1rem !important;
   }
+}
+
+/* react-phone-number-input */
+.PhoneInput {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.PhoneInputCountry {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  min-width: 84px;
+  height: 56px;
+  background-color: rgba(248, 250, 252, 0.3);
+  border: 1px solid hsl(214.3 31.8% 91.4%);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: border-color 200ms, box-shadow 200ms;
+}
+
+.PhoneInputCountry:focus-within {
+  border-color: rgb(37, 99, 235);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+.PhoneInputCountrySelect {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+}
+
+.PhoneInputCountryIcon {
+  width: 1.5em !important;
+  height: auto !important;
+  flex-shrink: 0;
+}
+
+.PhoneInputCountryIcon--border {
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
+
+.PhoneInputCountrySelectArrow {
+  color: hsl(215.4 16.3% 46.9%);
+  opacity: 1 !important;
+  width: 0.4em !important;
+  height: 0.4em !important;
+  border-color: currentColor !important;
+}
+
+.PhoneInputInput {
+  flex: 1;
+  height: 56px;
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+  font-size: 15px;
+  font-weight: 700;
+  background-color: rgba(248, 250, 252, 0.3);
+  border: 1px solid hsl(214.3 31.8% 91.4%);
+  border-radius: 16px;
+  color: hsl(222.2 84% 4.9%);
+  transition: border-color 200ms, box-shadow 200ms;
+  outline: none;
+}
+
+.PhoneInputInput:focus {
+  border-color: rgb(37, 99, 235);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.PhoneInputInput::placeholder {
+  color: hsl(215.4 16.3% 46.9%);
+  font-weight: 400;
+}
+
+.PhoneInputInput:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.PhoneInput--error .PhoneInputCountry,
+.PhoneInput--error .PhoneInputInput {
+  border-color: hsl(0 84.2% 60.2%);
+}
+
+.PhoneInput--error .PhoneInputInput:focus,
+.PhoneInput--error .PhoneInputCountry:focus-within {
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
 }
 
 /* Mobile Constraint Wrapper */

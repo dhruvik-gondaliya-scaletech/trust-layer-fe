@@ -67,6 +67,7 @@ const PUBLIC_ROUTES: string[] = [
     FRONTEND_ROUTES.LOGIN,
     FRONTEND_ROUTES.REGISTER,
     FRONTEND_ROUTES.VERIFY,
+    "/deal",
 ];
 
 class HttpService {
@@ -153,22 +154,28 @@ class HttpService {
             (error) => {
                 // --- Parse backend error envelope ---
                 if (error.response?.data) {
-                    const errorData = error.response.data as ApiErrorResponse;
+                    const errorData = error.response.data as any;
 
-                    // Re-throw as a typed ApiError when the backend error shape is present
+                    // Re-throw as a typed ApiError when the backend error shape or a message is present
                     if (
                         typeof errorData === "object" &&
-                        "statusCode" in errorData &&
-                        "message" in errorData
+                        errorData !== null &&
+                        ("message" in errorData || "error" in errorData)
                     ) {
+                        let errorMessage = "Request failed";
+                        if (typeof errorData.message === "string") {
+                            errorMessage = errorData.message;
+                        } else if (Array.isArray(errorData.message)) {
+                            errorMessage = errorData.message.join(", ");
+                        } else if (typeof errorData.error === "string") {
+                            errorMessage = errorData.error;
+                        }
+
                         const apiError = new ApiError({
-                            statusCode: errorData.statusCode ?? error.response.status,
+                            statusCode: errorData.statusCode ?? error.response?.status ?? 500,
                             timestamp: errorData.timestamp ?? new Date().toISOString(),
                             path: errorData.path ?? "",
-                            message:
-                                typeof errorData.message === "string"
-                                    ? errorData.message
-                                    : "Request failed",
+                            message: errorMessage,
                         });
                         return Promise.reject(apiError);
                     }

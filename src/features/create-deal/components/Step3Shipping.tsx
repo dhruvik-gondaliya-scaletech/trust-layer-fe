@@ -1,17 +1,18 @@
 "use client";
 
 import React from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Info, Check } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Form, FormField, FormControl, Field, FieldLabel, FieldError } from "@/components/ui/field";
 
 export interface Step3ShippingData {
   handlingTime: string;
-  carrier: string;
-  shippingType: string;
-  isInsured: boolean;
+  // null until the user enters a value — the field is required to continue
+  shippingCost: number | null;
 }
 
 interface Step3ShippingProps {
@@ -24,30 +25,24 @@ const HANDLING_TIMES = [
   "Ship within 3–5 business days",
 ];
 
-const CARRIERS = ["USPS", "UPS", "FedEx", "DHL"];
-const SHIPPING_TYPES = ["Standard", "Expedited", "Express"];
-
 export const Step3Shipping: React.FC<Step3ShippingProps> = ({
   initialData,
   onContinue,
 }) => {
-  const { control, handleSubmit, watch, setValue } = useForm<Step3ShippingData>({
+  const form = useForm<Step3ShippingData>({
     defaultValues: {
-      handlingTime: initialData?.handlingTime || "Ship within 1–2 business days",
-      carrier: initialData?.carrier || "USPS",
-      shippingType: initialData?.shippingType || "Standard",
-      isInsured: initialData?.isInsured ?? false,
+      handlingTime: initialData?.handlingTime || "",
+      shippingCost: initialData?.shippingCost ?? null,
     },
   });
 
-  const isInsured = watch("isInsured");
-
   return (
-    <form
-      id="step3-form"
-      onSubmit={handleSubmit(onContinue)}
-      className="flex flex-col h-full flex-1 overflow-hidden text-left"
-    >
+    <Form {...form}>
+      <form
+        id="step3-form"
+        onSubmit={form.handleSubmit(onContinue)}
+        className="flex flex-col h-full flex-1 overflow-hidden text-left"
+      >
       {/* Scrollable Form Content */}
       <div className="flex-1 overflow-y-auto px-0.5 space-y-5 scrollbar-none pb-28">
         <div className="flex flex-col gap-1">
@@ -56,27 +51,30 @@ export const Step3Shipping: React.FC<Step3ShippingProps> = ({
 
         {/* Handling Time */}
         <div className="flex flex-col gap-1.5">
-          <Label className="text-sm font-semibold text-foreground/85">
-            Handling Time
-          </Label>
-          <Controller
-            name="handlingTime"
-            control={control}
-            render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger className="rounded-2xl border border-border/80 h-12 text-sm font-semibold">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl">
-                  {HANDLING_TIMES.map((time) => (
-                    <SelectItem key={time} value={time}>
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
+          <FormField control={form.control} name="handlingTime" rules={{ required: "Please select a handling time" }} render={({ field }) => (
+            <Field className="flex flex-col gap-1.5 border-none p-0">
+              <FieldLabel className="text-sm font-semibold text-foreground/85">
+                Handling Time
+              </FieldLabel>
+              <FormControl>
+                <Select value={field.value || ""} onValueChange={field.onChange}>
+                  <SelectTrigger
+                    className="rounded-2xl border border-border/80 h-12 text-sm font-semibold"
+                  >
+                    <SelectValue placeholder="Select handling time" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    {HANDLING_TIMES.map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FieldError className="text-xs font-semibold" />
+            </Field>
+          )} />
 
           {/* Amber Info Box */}
           <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-500 text-xs leading-relaxed">
@@ -87,83 +85,35 @@ export const Step3Shipping: React.FC<Step3ShippingProps> = ({
           </div>
         </div>
 
-        {/* Carrier & Shipping Type side-by-side */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1.5">
-            <Label className="text-sm font-semibold text-foreground/85">
-              Carrier
-            </Label>
-            <Controller
-              name="carrier"
-              control={control}
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="rounded-2xl border border-border/80 h-12 text-sm font-semibold">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl">
-                    {CARRIERS.map((c) => (
-                      <SelectItem key={c} value={c}>
-                        {c}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <Label className="text-sm font-semibold text-foreground/85">
-              Shipping Type
-            </Label>
-            <Controller
-              name="shippingType"
-              control={control}
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="rounded-2xl border border-border/80 h-12 text-sm font-semibold">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl">
-                    {SHIPPING_TYPES.map((t) => (
-                      <SelectItem key={t} value={t}>
-                        {t}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
-        </div>
-
-        {/* Insured Shipment Card */}
-        <div
-          onClick={() => setValue("isInsured", !isInsured, { shouldDirty: true })}
-          className={cn(
-            "p-4 bg-muted/15 border border-border/80 rounded-2xl cursor-pointer hover:bg-muted/20 select-none transition-all flex items-start gap-3",
-            isInsured && "border-primary/40 bg-primary/5"
-          )}
-        >
-          <div
-            className={cn(
-              "w-5 h-5 rounded-md border flex items-center justify-center shrink-0 mt-0.5 transition-all",
-              isInsured
-                ? "bg-primary border-primary text-primary-foreground"
-                : "border-muted-foreground/30 bg-background"
-            )}
-          >
-            {isInsured && <Check className="w-3.5 h-3.5 stroke-[3.5]" />}
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <span className="text-sm font-bold text-foreground leading-none">Insured Shipment</span>
-            <span className="text-xs text-muted-foreground leading-normal mt-1">
-              Insurance amount will be entered later during tracking upload.
-            </span>
-          </div>
-        </div>
+        {/* Shipping Cost */}
+        <FormField control={form.control} name="shippingCost" rules={{
+          required: "Please enter a shipping cost (0 for free shipping)",
+          min: { value: 0, message: "Shipping cost cannot be negative" },
+        }} render={({ field }) => (
+          <Field className="flex flex-col gap-1.5 border-none p-0">
+            <FieldLabel className="text-sm font-semibold text-foreground/85">
+              Shipping Cost (USD)
+            </FieldLabel>
+            <FormControl>
+              <Input
+                type="number"
+                min={0}
+                step="0.01"
+                placeholder="0.00"
+                className="rounded-2xl border h-12 text-sm font-semibold border-border/80"
+                value={field.value ?? ""}
+                onChange={(e) =>
+                  field.onChange(
+                    Number.isNaN(e.target.valueAsNumber) ? null : e.target.valueAsNumber
+                  )
+                }
+              />
+            </FormControl>
+            <FieldError className="text-xs font-semibold" />
+          </Field>
+        )} />
       </div>
     </form>
+  </Form>
   );
 };

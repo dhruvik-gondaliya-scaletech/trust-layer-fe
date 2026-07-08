@@ -12,3 +12,9 @@ export const animationTokens = {
     decelerate: [0.0, 0.0, 0.2, 1],   // easeOut (for entering elements)
   }
 } as const;
+
+export const stepVariants = {
+  enter: { opacity: 0, x: 20 },
+  center: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -20 },
+};

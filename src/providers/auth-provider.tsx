@@ -67,25 +67,44 @@ function hasStoredToken(): boolean {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
 
+  // Track token existence in reactive state
+  const [tokenExists, setTokenExists] = React.useState(false);
+  const [hasCheckedToken, setHasCheckedToken] = React.useState(false);
+
+  React.useEffect(() => {
+    // Sync initial state on mount
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setTokenExists(hasStoredToken());
+    setHasCheckedToken(true);
+
+    const handleStorageChange = () => {
+      setTokenExists(hasStoredToken());
+    };
+
+    window.addEventListener("local-storage-change", handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("local-storage-change", handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
+
   // ── Derive user + status from the RQ cache / network ─────────────────────────
-  // `useCurrentUser` only fires when there is a stored access token.
-  // If no token exists we skip the network call entirely.
+  // `useCurrentUser` only fires when tokenExists is true.
   const {
     data: user,
     isPending,
     isError,
-  } = useCurrentUser();
-
-  // useCurrentUser runs regardless; we gate "authenticated" on whether the
-  // query succeeded AND we actually have a user object back.
-  const tokenExists = hasStoredToken();
+  } = useCurrentUser(tokenExists);
 
   const status: AuthStatus = useMemo(() => {
+    if (!hasCheckedToken) return "loading";
     if (isPending && tokenExists) return "loading";
     if (user) return "authenticated";
     if (isError || !tokenExists) return "unauthenticated";
     return "loading";
-  }, [isPending, user, isError, tokenExists]);
+  }, [hasCheckedToken, isPending, user, isError, tokenExists]);
 
   const isInitializing = status === "loading";
   const isAuthenticated = status === "authenticated";

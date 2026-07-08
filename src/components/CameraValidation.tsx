@@ -2,10 +2,13 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Camera, RefreshCw, AlertCircle, Video, ShieldCheck } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { getBlurScore } from "@/utils/blur";
+import { getDistanceRatio } from "@/utils/distance";
 
-interface CameraCaptureProps {
+interface CameraValidationProps {
   isOpen: boolean;
   onClose: () => void;
   onCapture: (dataUrl: string) => void;
@@ -14,40 +17,22 @@ interface CameraCaptureProps {
   title: string;
 }
 
-const MAX_RECORDING_SECONDS = 60;
-const BLUR_THRESHOLD = 1.8;
-
-function computeBlurScore(video: HTMLVideoElement): number {
-  const size = 80;
-  const canvas = document.createElement("canvas");
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext("2d", { willReadFrequently: true });
-  if (!ctx) return 999;
-  const vW = video.videoWidth || 640;
-  const vH = video.videoHeight || 480;
-  const crop = Math.min(vW, vH) * 0.6;
-  try {
-    ctx.drawImage(video, (vW - crop) / 2, (vH - crop) / 2, crop, crop, 0, 0, size, size);
-  } catch {
-    return 999;
-  }
-  const pixels = ctx.getImageData(0, 0, size, size).data;
-  const gray = new Float32Array(size * size);
-  for (let i = 0; i < pixels.length; i += 4) {
-    gray[i / 4] = 0.299 * pixels[i] + 0.587 * pixels[i + 1] + 0.114 * pixels[i + 2];
-  }
-  let sum = 0;
-  for (let y = 1; y < size - 1; y++) {
-    for (let x = 1; x < size - 1; x++) {
-      const i = y * size + x;
-      sum += Math.abs(gray[i - size] + gray[i - 1] - 4 * gray[i] + gray[i + 1] + gray[i + size]);
-    }
-  }
-  return sum / (size * size);
+enum CameraFeedback {
+  INITIALIZING = "Initializing camera...",
+  REQUESTING_ACCESS = "Requesting camera access...",
+  POSITION_ITEM = "Position item inside frame",
+  INITIALIZATION_FAILED = "Initialization failed",
+  LOADING_CV = "Loading computer vision...",
+  HOLD_STEADY = "Hold steady to focus",
+  GET_CLOSER = "Get a bit closer",
+  MOVE_BACK = "Move back if product is cropped",
+  PERFECT_PHOTO = "Perfect. Ready to capture.",
+  PERFECT_RECORD = "Perfect. Ready to record.",
 }
 
-export const CameraCapture: React.FC<CameraCaptureProps> = ({
+const MAX_RECORDING_SECONDS = 60;
+
+export const CameraValidation: React.FC<CameraValidationProps> = ({
   isOpen,
   onClose,
   onCapture,
@@ -59,14 +44,21 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  // Use a ref (not state) to collect chunks — avoids stale closure in ondataavailable
   const recordedChunksRef = useRef<Blob[]>([]);
   const isRecordingRef = useRef(false);
+  const ratioHistoryRef = useRef<number[]>([]);
+  const lastDistanceStateRef = useRef<"closer" | "perfect" | "back">("perfect");
+  // Holds the stop fn for the current analysis loop; called before starting a new one
+  const analysisCleanupRef = useRef<(() => void) | null>(null);
+  // Pauses the analysis loop while the user is reviewing a captured photo/video
+  const inPreviewRef = useRef(false);
+  // Tracks the actual MIME type the MediaRecorder settled on to avoid type/data mismatch
+  const mimeTypeRef = useRef<string>("video/webm");
 
   const [hasStarted, setHasStarted] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<string>("Initializing camera...");
-  const [feedbackColor, setFeedbackColor] = useState<string>("text-blue-500");
+  const [feedback, setFeedback] = useState<string>(CameraFeedback.INITIALIZING);
+  const [feedbackColor, setFeedbackColor] = useState<string>("text-blue-400");
 
   // Preview states
   const [capturedDataUrl, setCapturedDataUrl] = useState<string | null>(null);
@@ -139,11 +131,14 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
     setHasStarted(false);
     setCapturedDataUrl(null);
     setCapturedIsBlurry(false);
+    ratioHistoryRef.current = [];
+    lastDistanceStateRef.current = "perfect";
+    inPreviewRef.current = false;
     if (capturedVideoUrl) URL.revokeObjectURL(capturedVideoUrl);
     setCapturedVideoBlob(null);
     setCapturedVideoUrl(null);
-    setFeedback("Requesting camera access...");
-    setFeedbackColor("text-blue-500");
+    setFeedback(CameraFeedback.REQUESTING_ACCESS);
+    setFeedbackColor("text-blue-400");
 
     if (!navigator.mediaDevices?.getUserMedia) {
       setErrorMsg("Camera APIs are not supported on this browser or insecure origin.");
@@ -175,22 +170,39 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        videoRef.current.play().catch((err) => {
+          console.warn("video.play() failed or was blocked by browser:", err);
+        });
         setHasStarted(true);
-        setFeedback("Hold camera steady");
-        setFeedbackColor("text-emerald-500");
+        setFeedback(CameraFeedback.POSITION_ITEM);
+        setFeedbackColor("text-blue-400");
         startRealTimeAnalysis();
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Camera access denied.";
       setErrorMsg(msg);
-      setFeedback("Initialization failed");
-      setFeedbackColor("text-destructive");
+      setFeedback(CameraFeedback.INITIALIZATION_FAILED);
+      setFeedbackColor("text-red-500");
     }
   };
 
   const stopCamera = () => {
+    // Kill the analysis loop before stopping the stream
+    analysisCleanupRef.current?.();
+    analysisCleanupRef.current = null;
+    // Cancel any in-progress recording. Clear onstop BEFORE calling stop() so
+    // the async onstop callback never fires and cannot corrupt the next session
+    // with stale chunks from this canceled recording.
+    const recorder = mediaRecorderRef.current;
+    if (recorder && recorder.state !== "inactive") {
+      recorder.onstop = null;
+      try { recorder.stop(); } catch { /* ignore */ }
+    }
+    mediaRecorderRef.current = null;
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
+    // Clear srcObject so the browser releases the stream reference (important on iOS)
+    if (videoRef.current) videoRef.current.srcObject = null;
     setHasStarted(false);
     setIsRecording(false);
     isRecordingRef.current = false;
@@ -198,60 +210,105 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
   };
 
   const startRealTimeAnalysis = () => {
+    // Stop any existing loop before starting a new one to prevent multiple loops
+    analysisCleanupRef.current?.();
+
     const canvas = canvasRef.current;
     const video = videoRef.current;
     if (!canvas || !video) return;
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
-    const S = 80; // analysis resolution — keep small for speed
+    const S = 320; // 320x320 analysis resolution
     let active = true;
+    analysisCleanupRef.current = () => { active = false; };
 
     const analyzeFrame = () => {
-      if (!active || !videoRef.current || videoRef.current.paused || videoRef.current.ended) return;
+      if (!active || !videoRef.current) return;
+
+      // Pause while showing preview to save CPU/battery
+      if (inPreviewRef.current) {
+        setTimeout(() => { if (active) requestAnimationFrame(analyzeFrame); }, 500);
+        return;
+      }
+
+      if (video.paused || video.ended || video.readyState < 2 || video.videoWidth === 0) {
+        // Schedule next check instead of exiting permanently
+        setTimeout(() => { if (active) requestAnimationFrame(analyzeFrame); }, 300);
+        return;
+      }
+
+      if (!window.cv) {
+        setFeedback(CameraFeedback.LOADING_CV);
+        setFeedbackColor("text-blue-400");
+        setTimeout(() => { if (active) requestAnimationFrame(analyzeFrame); }, 300);
+        return;
+      }
+
       const vW = video.videoWidth || 640;
       const vH = video.videoHeight || 480;
       canvas.width = S;
       canvas.height = S;
-      const crop = Math.min(vW, vH) * 0.6;
+
+      // Crop video to a square and draw onto hidden canvas
+      const crop = Math.min(vW, vH);
       const sx = (vW - crop) / 2;
       const sy = (vH - crop) / 2;
+
       try {
         ctx.drawImage(video, sx, sy, crop, crop, 0, 0, S, S);
-        const pixels = ctx.getImageData(0, 0, S, S).data;
-        let brightness = 0;
-        for (let i = 0; i < pixels.length; i += 4) brightness += (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
-        const avgBrightness = brightness / (pixels.length / 4);
 
-        const gray = new Float32Array(S * S);
-        for (let i = 0; i < pixels.length; i += 4) {
-          gray[i / 4] = 0.299 * pixels[i] + 0.587 * pixels[i + 1] + 0.114 * pixels[i + 2];
+        // Convert the 320x320 canvas to an OpenCV Mat
+        const src = window.cv.imread(canvas);
+
+        const blurScore = getBlurScore(src);
+        const distanceRatio = getDistanceRatio(src);
+
+        // Delete Mat to avoid memory leak
+        src.delete();
+
+        // Rolling average over last 5 frames to smooth per-device sensor noise
+        const history = ratioHistoryRef.current;
+        history.push(distanceRatio);
+        if (history.length > 5) history.shift();
+        const smoothedRatio = history.reduce((a, b) => a + b, 0) / history.length;
+
+        // Hysteresis: exit bands are wider than entry bands so the message
+        // doesn't flip at the threshold edge on different-FOV cameras.
+        // Entry: closer < 0.20, back > 0.75
+        // Exit:  closer needs > 0.27 to leave, back needs < 0.68 to leave
+        const prev = lastDistanceStateRef.current;
+        let distanceState: "closer" | "perfect" | "back";
+        if (prev === "closer") {
+          distanceState = smoothedRatio < 0.27 ? "closer" : smoothedRatio > 0.75 ? "back" : "perfect";
+        } else if (prev === "back") {
+          distanceState = smoothedRatio > 0.68 ? "back" : smoothedRatio < 0.20 ? "closer" : "perfect";
+        } else {
+          distanceState = smoothedRatio < 0.20 ? "closer" : smoothedRatio > 0.75 ? "back" : "perfect";
         }
-        let lapSum = 0;
-        let edgePx = 0;
-        for (let y = 1; y < S - 1; y++) {
-          for (let x = 1; x < S - 1; x++) {
-            const idx = y * S + x;
-            const v = Math.abs(gray[idx - S] + gray[idx - 1] - 4 * gray[idx] + gray[idx + 1] + gray[idx + S]);
-            lapSum += v;
-            if (v > 15) edgePx++;
-          }
+        lastDistanceStateRef.current = distanceState;
+
+        if (blurScore < 80) {
+          setFeedback(CameraFeedback.HOLD_STEADY);
+          setFeedbackColor("text-amber-400");
+        } else if (distanceState === "closer") {
+          setFeedback(CameraFeedback.GET_CLOSER);
+          setFeedbackColor("text-amber-400");
+        } else if (distanceState === "back") {
+          setFeedback(CameraFeedback.MOVE_BACK);
+          setFeedbackColor("text-amber-400");
+        } else {
+          setFeedback(type === "video" ? CameraFeedback.PERFECT_RECORD : CameraFeedback.PERFECT_PHOTO);
+          setFeedbackColor("text-emerald-400");
         }
-        const avgLap = lapSum / (S * S);
-        const edgeDensity = edgePx / (S * S);
+      } catch (err) {
+        console.error("Frame analysis failed:", err);
+      }
 
-        if (avgBrightness < 35) { setFeedback("Too dark — find better lighting"); setFeedbackColor("text-amber-500"); }
-        else if (avgBrightness > 225) { setFeedback("Too bright — avoid direct glare"); setFeedbackColor("text-amber-500"); }
-        else if (avgLap < BLUR_THRESHOLD) { setFeedback("Blurry — hold steady or tap to focus"); setFeedbackColor("text-amber-500"); }
-        else if (edgeDensity < 0.02) { setFeedback("Too far — bring product closer"); setFeedbackColor("text-blue-400"); }
-        else if (edgeDensity > 0.35) { setFeedback("Too close — pull camera back slightly"); setFeedbackColor("text-blue-400"); }
-        else { setFeedback("Perfect frame — ready to capture!"); setFeedbackColor("text-emerald-500"); }
-      } catch { /* ignore canvas errors */ }
-
-      setTimeout(() => { if (active) requestAnimationFrame(analyzeFrame); }, 250);
+      // Analyze every 300ms
+      setTimeout(() => { if (active) requestAnimationFrame(analyzeFrame); }, 300);
     };
 
     requestAnimationFrame(analyzeFrame);
-    return () => { active = false; };
   };
 
   // ── Simulate (dev bypass) ─────────────────────────────────────────────────
@@ -279,6 +336,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
     ctx.fillStyle = "rgba(255,255,255,0.2)"; ctx.font = "11px monospace";
     ctx.fillText(`TS: ${new Date().toISOString()}`, 400, 380);
     const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
+    inPreviewRef.current = true;
     setCapturedDataUrl(dataUrl);
     setCapturedIsBlurry(false);
   };
@@ -298,21 +356,48 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
   const handleCapture = () => {
     const video = videoRef.current;
     if (!video) return;
-    const blurScore = computeBlurScore(video);
-    const isBlurry = blurScore < BLUR_THRESHOLD;
+
+    // Full-resolution canvas for the submitted image
     const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth || 1280;
     canvas.height = video.videoHeight || 720;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    let isBlurry = false;
+    if (window.cv) {
+      try {
+        // Run blur check at the same 320x320 resolution used by live analysis so
+        // the threshold of 80 stays consistent regardless of capture resolution
+        const analysisCanvas = document.createElement("canvas");
+        analysisCanvas.width = 320;
+        analysisCanvas.height = 320;
+        const aCtx = analysisCanvas.getContext("2d");
+        if (aCtx) {
+          const vW = video.videoWidth || 1280;
+          const vH = video.videoHeight || 720;
+          const crop = Math.min(vW, vH);
+          aCtx.drawImage(video, (vW - crop) / 2, (vH - crop) / 2, crop, crop, 0, 0, 320, 320);
+          const src = window.cv.imread(analysisCanvas);
+          const blurScore = getBlurScore(src);
+          isBlurry = blurScore < 80;
+          src.delete();
+        }
+      } catch (err) {
+        console.error("Capture analysis failed:", err);
+      }
+    }
+
     const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+    inPreviewRef.current = true;
     setCapturedDataUrl(dataUrl);
     setCapturedIsBlurry(isBlurry);
     if (isBlurry) toast.warning("Photo looks blurry — consider retaking for best quality.");
   };
 
   const handleRetakePhoto = () => {
+    inPreviewRef.current = false;
     setCapturedDataUrl(null);
     setCapturedIsBlurry(false);
     if (!streamRef.current) startCamera();
@@ -335,19 +420,56 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
     setIsRecording(true);
     setRecordingSeconds(0);
 
+    // Probe for the best supported MIME type to avoid type/data mismatch on Safari
+    // (Safari records mp4, not webm)
+    let chosenMime = "";
+    if (typeof MediaRecorder !== "undefined") {
+      for (const candidate of [
+        "video/webm;codecs=vp9,opus",
+        "video/webm",
+        "video/mp4",
+      ]) {
+        if (MediaRecorder.isTypeSupported(candidate)) {
+          chosenMime = candidate;
+          break;
+        }
+      }
+    }
+
     let recorder: MediaRecorder;
     try {
-      recorder = new MediaRecorder(streamRef.current, { mimeType: "video/webm;codecs=vp9,opus" });
+      recorder = chosenMime
+        ? new MediaRecorder(streamRef.current, { mimeType: chosenMime })
+        : new MediaRecorder(streamRef.current);
     } catch {
       recorder = new MediaRecorder(streamRef.current);
     }
+
+    // Use the MIME type the recorder actually settled on for the Blob
+    mimeTypeRef.current = recorder.mimeType || chosenMime || "video/webm";
 
     recorder.ondataavailable = (e) => {
       if (e.data?.size > 0) recordedChunksRef.current.push(e.data);
     };
 
+    // Use onstop instead of a fixed timeout — the spec guarantees all
+    // ondataavailable events fire before onstop, so chunks are complete here
+    recorder.onstop = () => {
+      const chunks = recordedChunksRef.current;
+      if (chunks.length === 0) {
+        toast.error("Recording captured no data — please try again.");
+        inPreviewRef.current = false;
+        return;
+      }
+      const blob = new Blob(chunks, { type: mimeTypeRef.current });
+      const url = URL.createObjectURL(blob);
+      inPreviewRef.current = true;
+      setCapturedVideoBlob(blob);
+      setCapturedVideoUrl(url);
+    };
+
     mediaRecorderRef.current = recorder;
-    recorder.start(100); // flush every 100 ms so chunks arrive before stop
+    recorder.start(100); // flush every 100 ms
     toast.info("Recording verification video...");
   };
 
@@ -358,34 +480,37 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
 
     const recorder = mediaRecorderRef.current;
     if (recorder && recorder.state !== "inactive") {
-      recorder.stop(); // triggers one final ondataavailable before onstop
+      recorder.stop(); // triggers ondataavailable flush → then onstop → blob creation
     }
 
-    // Blur check on last frame
+    // Blur check on last frame at the same 320x320 as live analysis
     const video = videoRef.current;
-    if (video) {
-      const score = computeBlurScore(video);
-      if (score < BLUR_THRESHOLD) {
-        toast.warning("Some frames may be blurry — retake for better quality if needed.");
+    if (video && window.cv) {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = 320;
+        canvas.height = 320;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          const vW = video.videoWidth || 640;
+          const vH = video.videoHeight || 480;
+          const crop = Math.min(vW, vH);
+          ctx.drawImage(video, (vW - crop) / 2, (vH - crop) / 2, crop, crop, 0, 0, 320, 320);
+          const src = window.cv.imread(canvas);
+          const blurScore = getBlurScore(src);
+          src.delete();
+          if (blurScore < 80) {
+            toast.warning("Some frames may be blurry — retake for better quality if needed.");
+          }
+        }
+      } catch (err) {
+        console.error("Video stop analysis error:", err);
       }
     }
-
-    // Collect chunks after MediaRecorder fully flushes
-    setTimeout(() => {
-      const chunks = recordedChunksRef.current;
-      let blob: Blob;
-      if (chunks.length > 0) {
-        blob = new Blob(chunks, { type: "video/webm" });
-      } else {
-        blob = new Blob(["mock video data"], { type: "video/webm" });
-      }
-      const url = URL.createObjectURL(blob);
-      setCapturedVideoBlob(blob);
-      setCapturedVideoUrl(url);
-    }, 350);
   };
 
   const handleRetakeVideo = () => {
+    inPreviewRef.current = false;
     if (capturedVideoUrl) URL.revokeObjectURL(capturedVideoUrl);
     setCapturedVideoBlob(null);
     setCapturedVideoUrl(null);
@@ -428,8 +553,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
 
       {/* Main View */}
       <div className="flex-1 relative flex items-center justify-center bg-zinc-950 overflow-hidden">
-
-        {/* Always-mounted live video (hidden during preview via CSS) */}
+        {/* Live camera stream */}
         <video
           ref={videoRef}
           autoPlay
@@ -437,15 +561,18 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
           muted
           className={`absolute inset-0 w-full h-full object-cover ${inPreview || errorMsg ? "invisible" : ""}`}
         />
-        <canvas ref={canvasRef} className="hidden" />
+        {/* Hidden analysis canvas (resized to 320x320) */}
+        <canvas ref={canvasRef} width={320} height={320} className="hidden" style={{ display: "none" }} />
 
         {/* Photo preview */}
         {isPhotoPreview && capturedDataUrl && (
           <div className="absolute inset-0 flex items-center justify-center bg-black">
-            <img
+            <Image
               src={capturedDataUrl}
               alt="Captured preview"
-              className="max-w-full max-h-full object-contain"
+              fill
+              unoptimized
+              className="object-contain"
             />
             {capturedIsBlurry && (
               <div className="absolute bottom-4 left-4 right-4 flex items-center gap-2.5 bg-amber-500/90 backdrop-blur-md rounded-2xl px-4 py-3">
@@ -514,7 +641,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
             {/* Real-time feedback pill */}
             <div className="absolute top-20 left-4 right-4 flex justify-center pointer-events-none">
               <div className="px-4 py-2 bg-black/70 backdrop-blur-md rounded-full border border-white/10 flex items-center gap-2 shadow-md">
-                <span className={`text-[11px] font-extrabold tracking-wide uppercase ${feedbackColor}`}>
+                <span className={`text-[13px] font-semibold tracking-wide ${feedbackColor}`}>
                   {feedback}
                 </span>
               </div>
@@ -541,7 +668,6 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
 
       {/* Bottom Controls */}
       <div className="px-6 py-8 bg-gradient-to-t from-black/90 to-transparent flex flex-col items-center gap-4 z-10">
-
         {/* ── Photo preview controls ── */}
         {isPhotoPreview && (
           <div className="w-full flex gap-3 max-w-sm mx-auto">
@@ -594,7 +720,6 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
                     onClick={handleStopRecording}
                     className="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center bg-red-600 hover:scale-105 active:scale-95 transition-all shadow-lg"
                   >
-                    {/* Square stop icon */}
                     <div className="w-7 h-7 bg-white rounded-md" />
                   </button>
                 ) : (
@@ -603,7 +728,6 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
                     disabled={!hasStarted}
                     className="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center bg-red-600 disabled:opacity-50 hover:scale-105 active:scale-95 transition-all shadow-lg"
                   >
-                    {/* Circle record icon */}
                     <div className="w-10 h-10 bg-red-400 rounded-full" />
                   </button>
                 )}
@@ -624,7 +748,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
 
             <div className="flex items-center gap-1.5 text-[10px] text-white/50 font-bold uppercase tracking-wider">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-              <span>Real-time Secure Verification Camera</span>
+              <span>Real-time Secure Verification Camera (OpenCV.js Enabled)</span>
             </div>
           </>
         )}

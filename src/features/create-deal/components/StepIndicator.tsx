@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@/lib/utils";
 
 interface StepIndicatorProps {
   currentStep: number;
@@ -19,9 +20,10 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
           return (
             <div
               key={idx}
-              className={`h-2 flex-1 rounded-full transition-all duration-300 ${
+              className={cn(
+                "h-2 flex-1 rounded-full transition-all duration-300",
                 isActive ? "bg-primary" : "bg-muted-foreground/15"
-              }`}
+              )}
             />
           );
         })}

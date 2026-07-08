@@ -28,19 +28,6 @@ const usersService = {
     return res.data;
   },
 
-  /**
-   * POST /users/me/photo 🔒 Auth Required
-   * Upload a profile photo (multipart/form-data, field name: `file`).
-   */
-  uploadPhoto: async (file: File): Promise<User> => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const res = await httpService.post<User>(API_CONFIG.USERS.ME_PHOTO, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-    return res.data;
-  },
 
   /**
    * GET /users/:username 🔓 Public

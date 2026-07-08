@@ -3,7 +3,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { loginSchema, LoginInput } from "@/lib/validations/login";
 import { zodResolver } from "@/lib/validations/resolver";
 import { useLoginMutation } from "@/hooks/queries/useAuth";
@@ -12,15 +12,10 @@ import { FRONTEND_ROUTES } from "@/lib/contants";
 
 export const LoginContainer: React.FC = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect");
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    getValues,
-    reset,
-    formState: { errors },
-  } = useForm<LoginInput>({
+  const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
@@ -30,7 +25,7 @@ export const LoginContainer: React.FC = () => {
 
   const mutation = useLoginMutation({
     onSuccess: (data, variables) => {
-      reset();
+      form.reset();
       
       const emailVerified = data.emailVerified ?? false;
       const phoneVerified = data.phoneVerified ?? false;
@@ -40,10 +35,17 @@ export const LoginContainer: React.FC = () => {
         toast.success("Welcome back!", {
           description: "You have signed in successfully.",
         });
-        router.push(FRONTEND_ROUTES.DASHBOARD);
+        if (redirect) {
+          router.push(redirect);
+        } else {
+          router.push(FRONTEND_ROUTES.DASHBOARD);
+        }
       } else {
         toast.info("Please complete verification/setup to continue.");
-        router.push(`${FRONTEND_ROUTES.VERIFY}?email=${encodeURIComponent(variables.email)}`);
+        const verifyUrl = `${FRONTEND_ROUTES.VERIFY}?email=${encodeURIComponent(variables.email)}${
+          redirect ? `&redirect=${encodeURIComponent(redirect)}` : ""
+        }`;
+        router.push(verifyUrl);
       }
     },
     onError: (error) => {
@@ -62,18 +64,17 @@ export const LoginContainer: React.FC = () => {
     const fields: Array<keyof LoginInput> = ["email", "password"];
     fields.forEach((field) => {
       const el = document.getElementsByName(field)[0] as HTMLInputElement | undefined;
-      if (el && el.value && !getValues(field)) {
-        setValue(field, el.value, { shouldValidate: true });
+      if (el && el.value && !form.getValues(field)) {
+        form.setValue(field, el.value, { shouldValidate: true });
       }
     });
 
-    handleSubmit(onSubmit)(e);
+    form.handleSubmit(onSubmit)(e);
   };
 
   return (
     <LoginForm
-      register={register}
-      errors={errors}
+      form={form}
       isPending={mutation.isPending}
       onSubmit={handlePreSubmit}
     />

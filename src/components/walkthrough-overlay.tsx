@@ -6,6 +6,7 @@ import { Shield, CheckCircle2, User, ArrowRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { FRONTEND_ROUTES } from "@/lib/contants";
+import { cn } from "@/lib/utils";
 
 interface WalkthroughOverlayProps {
   isOpen: boolean;
@@ -70,9 +71,7 @@ export function WalkthroughOverlay({ isOpen, onClose }: WalkthroughOverlayProps)
               {[0, 1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    i === step ? "w-8 bg-primary" : "w-2 bg-gray-200"
-                  }`}
+                  className={cn("h-1.5 rounded-full transition-all duration-300", i === step ? "w-8 bg-primary" : "w-2 bg-gray-200")}
                 />
               ))}
             </div>
