@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useDealById, useConfirmDelivery, dealKeys } from "@/hooks/queries/useDeals";
+import { useDealById, useConfirmDelivery, usePublishDeal, dealKeys } from "@/hooks/queries/useDeals";
 import { useAuth } from "@/providers/auth-provider";
 import { useRole } from "@/providers/role-provider";
 import { FRONTEND_ROUTES } from "@/lib/contants";
@@ -32,6 +32,17 @@ export default function DealDetailsContainer() {
       toast.success("Delivery confirmed — funds released to the seller.");
     },
     onError: (error) => toast.error(error.message || "Failed to confirm delivery."),
+  });
+
+  const publishMutation = usePublishDeal({
+    dealNumber: deal?.dealNumber ?? "",
+    onSuccess: () => {
+      if (deal) {
+        queryClient.invalidateQueries({ queryKey: dealKeys.byId(deal.id) });
+      }
+      toast.success("Deal published successfully!");
+    },
+    onError: (error) => toast.error(error.message || "Failed to publish deal."),
   });
 
   if (isLoading) {
@@ -98,6 +109,12 @@ export default function DealDetailsContainer() {
       onReportIssue={
         action?.type === "confirm-delivery" ? () => router.push(FRONTEND_ROUTES.DISPUTE_FLOW(deal.dealNumber)) : undefined
       }
+      onPublish={() => {
+        if (deal) {
+          publishMutation.mutate(deal.id);
+        }
+      }}
+      isPublishing={publishMutation.isPending}
     />
   );
 }
