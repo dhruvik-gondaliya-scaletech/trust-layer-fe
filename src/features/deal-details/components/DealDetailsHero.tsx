@@ -1,19 +1,18 @@
 "use client";
 
-import { ChevronLeft, ImageOff } from "lucide-react";
+import { ChevronLeft, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getStatusBadgeMeta } from "../utils/dealStatusMeta";
 import { formatCurrency } from "../utils/format";
 import type { Deal } from "@/types/api.types";
-import Image from "next/image";
 
 interface DealDetailsHeroProps {
   deal: Deal;
-  heroImageUrl: string | null;
   onBack: () => void;
+  onEdit?: () => void;
 }
 
-export function DealDetailsHero({ deal, heroImageUrl, onBack }: DealDetailsHeroProps) {
+export function DealDetailsHero({ deal, onBack, onEdit }: DealDetailsHeroProps) {
   const badge = getStatusBadgeMeta(deal.status);
   const subtitleParts = [
     deal.condition, 
@@ -33,45 +32,45 @@ export function DealDetailsHero({ deal, heroImageUrl, onBack }: DealDetailsHeroP
   };
 
   return (
-    <div className="relative h-[280px] md:h-[320px] w-full bg-gray-900">
-      {heroImageUrl ? (
-        <Image 
-          src={heroImageUrl} 
-          alt={deal.title} 
-          fill
-          priority
-          className="object-cover opacity-60" 
-        />
-      ) : (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-800 opacity-60">
-          <ImageOff className="w-10 h-10 text-gray-500" />
-        </div>
-      )}
-      <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent" />
+    <div className="relative h-[200px] md:h-[220px] w-full bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border-b border-white/5 overflow-hidden flex flex-col justify-end">
+      {/* Background premium light glow */}
+      <div className="absolute -top-20 -left-16 w-60 h-60 rounded-full bg-indigo-500/10 blur-[80px]" />
+      <div className="absolute -bottom-20 -right-16 w-60 h-60 rounded-full bg-blue-500/10 blur-[80px]" />
       
-      <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10 max-w-2xl mx-auto">
+      <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10 max-w-2xl mx-auto w-full px-4 sm:px-6">
         <button 
           onClick={onBack} 
-          className="p-2 rounded-full bg-black/20 backdrop-blur-md text-white hover:bg-black/40 transition-colors"
+          className="p-2 rounded-full bg-white/10 backdrop-blur-md text-white hover:bg-white/20 transition-all active:scale-95 border border-white/15 shadow-sm"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
         
-        <div className={cn(
-          "px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider backdrop-blur-md border",
-          getBadgeStyle()
-        )}>
-          {badge.label}
+        <div className="flex items-center gap-2">
+          {onEdit && (
+            <button 
+              onClick={onEdit} 
+              className="px-3 py-1.5 rounded-full text-xs font-bold bg-white/10 hover:bg-white/25 text-white backdrop-blur-md border border-white/15 flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
+            >
+              <Pencil className="h-3 w-3" />
+              <span>Edit</span>
+            </button>
+          )}
+          <div className={cn(
+            "px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider backdrop-blur-md border",
+            getBadgeStyle()
+          )}>
+            {badge.label}
+          </div>
         </div>
       </div>
 
-      <div className="absolute bottom-6 left-5 right-5 z-10 max-w-2xl mx-auto">
+      <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 pb-6 z-10">
         <div className="w-full">
-          <p className="text-gray-300 font-bold text-[13px] mb-1 uppercase tracking-wider">{deal.dealNumber}</p>
-          <h1 className="text-white text-[24px] md:text-[28px] font-extrabold leading-tight mb-2 tracking-tight truncate">{deal.title}</h1>
-          <div className="flex items-center justify-between">
-            <span className="text-white/80 text-[14px] font-medium truncate pr-4">{productCondition}</span>
-            <span className="text-white text-[24px] md:text-[28px] font-black shrink-0">${formatCurrency(deal.buyerPaysAmount)}</span>
+          <p className="text-slate-400 font-bold text-[11px] mb-1 uppercase tracking-widest">{deal.dealNumber}</p>
+          <h1 className="text-white text-[22px] md:text-[26px] font-extrabold leading-tight mb-1.5 tracking-tight truncate">{deal.title}</h1>
+          <div className="flex items-center justify-between mt-1">
+            <span className="text-slate-300 text-[13px] font-medium truncate pr-4">{productCondition}</span>
+            <span className="text-white text-[22px] md:text-[26px] font-black shrink-0">${formatCurrency(deal.buyerPaysAmount)}</span>
           </div>
         </div>
       </div>

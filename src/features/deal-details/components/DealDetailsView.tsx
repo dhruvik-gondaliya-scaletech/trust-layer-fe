@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Star, Globe } from "lucide-react";
+import { Loader2, Star, Globe, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BottomActionBar } from "@/components/ui/bottom-action-bar";
 import { DealDetailsHero } from "./DealDetailsHero";
@@ -9,6 +9,7 @@ import { ProgressStepper } from "./ProgressStepper";
 import { PaymentSummaryCard } from "./PaymentSummaryCard";
 import { PartyCard } from "./PartyCard";
 import { TrackingCard } from "./TrackingCard";
+import { MediaDetailsCard } from "./MediaDetailsCard";
 import type { Deal } from "@/types/api.types";
 import { cn } from "@/lib/utils";
 import { useRole } from "@/providers/role-provider";
@@ -21,8 +22,8 @@ export type DealDetailsAction =
 
 interface DealDetailsViewProps {
   deal: Deal;
-  heroImageUrl: string | null;
   onBack: () => void;
+  onEdit?: () => void;
   action: DealDetailsAction;
   onPrimaryAction: () => void;
   onReportIssue?: () => void;
@@ -32,8 +33,8 @@ interface DealDetailsViewProps {
 
 export function DealDetailsView({
   deal,
-  heroImageUrl,
   onBack,
+  onEdit,
   action,
   onPrimaryAction,
   onReportIssue,
@@ -51,7 +52,7 @@ export function DealDetailsView({
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <DealDetailsHero deal={deal} heroImageUrl={heroImageUrl} onBack={onBack} />
+      <DealDetailsHero deal={deal} onBack={onBack} onEdit={deal.status === "draft" ? onEdit : undefined} />
 
       <div className={cn(
         "max-w-2xl mx-auto w-full px-4 sm:px-6 flex flex-col gap-4 -mt-4 relative z-20",
@@ -72,27 +73,39 @@ export function DealDetailsView({
                   </p>
                 </div>
               </div>
-              <Button
-                onClick={onPublish}
-                disabled={isPublishing}
-                className="w-full h-12 text-[14px] font-bold rounded-2xl bg-primary hover:bg-primary/95 text-white flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.99]"
-              >
-                {isPublishing ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" /> Publishing...
-                  </>
-                ) : (
-                  <>
-                    <Globe size={16} /> Publish Deal
-                  </>
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
+                {onEdit && (
+                  <Button
+                    onClick={onEdit}
+                    variant="outline"
+                    className="w-full h-12 text-[14px] font-bold rounded-2xl border-slate-200 hover:bg-slate-50 flex items-center justify-center gap-2 shrink-0 sm:w-auto px-6"
+                  >
+                    <Pencil size={16} /> Edit Deal
+                  </Button>
                 )}
-              </Button>
+                <Button
+                  onClick={onPublish}
+                  disabled={isPublishing}
+                  className="flex-1 h-12 text-[14px] font-bold rounded-2xl bg-primary hover:bg-primary/95 text-white flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.99]"
+                >
+                  {isPublishing ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" /> Publishing...
+                    </>
+                  ) : (
+                    <>
+                      <Globe size={16} /> Publish Deal
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           ) : (
             <ShareableDealLink dealNumber={deal.dealNumber} />
           )
         )}
         <ProgressStepper status={deal.status} />
+        <MediaDetailsCard deal={deal} />
         <PaymentSummaryCard deal={deal} />
         <PartyCard label={partyLabel} user={partyUser} trustScore={deal.trustScore} />
         <TrackingCard deal={deal} />

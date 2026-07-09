@@ -76,10 +76,6 @@ export default function DealDetailsContainer() {
 
   const isBuyer = role === Role.BUYER || Boolean(user && deal.buyerId === user.id);
 
-  const sortedMedia = [...(deal.media ?? [])].sort((a, b) => a.sortOrder - b.sortOrder);
-  const heroImage = sortedMedia.find((m) => (m.mimeType ?? "").startsWith("image/"));
-  const heroImageUrl = heroImage?.url ?? null;
-
   let action: DealDetailsAction = null;
   if (isBuyer && (deal.status === "shipped" || deal.status === "delivered")) {
     action = { type: "confirm-delivery", isPending: confirmDeliveryMutation.isPending };
@@ -99,11 +95,17 @@ export default function DealDetailsContainer() {
     }
   };
 
+  const handleEdit = () => {
+    if (deal) {
+      router.push(`${FRONTEND_ROUTES.CREATE_DEAL}?dealId=${deal.id}&dealNumber=${deal.dealNumber}`);
+    }
+  };
+
   return (
     <DealDetailsView
       deal={deal}
-      heroImageUrl={heroImageUrl}
       onBack={() => router.back()}
+      onEdit={handleEdit}
       action={action}
       onPrimaryAction={handlePrimaryAction}
       onReportIssue={

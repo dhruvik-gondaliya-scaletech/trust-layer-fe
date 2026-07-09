@@ -122,10 +122,10 @@ export const CreateDealContainer: React.FC = () => {
   const [step, setStep] = useState<number>(1);
   const [formData, setFormData] = useState<Step1FormData>({
     title: "",
-    price: 0,
-    category: "Trading Cards",
-    condition: "Mint",
-    orderType: "Online Transaction",
+    price: undefined as any,
+    category: "",
+    condition: "",
+    orderType: "",
     isGraded: false,
     gradedSerial: "",
     description: "",

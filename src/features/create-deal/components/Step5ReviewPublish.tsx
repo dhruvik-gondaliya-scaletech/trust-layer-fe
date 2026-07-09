@@ -411,7 +411,7 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
 
               <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-xs text-muted-foreground font-semibold">Product Type</span>
+                  <span className="text-xs text-muted-foreground font-semibold">Category</span>
                   <span className="text-sm font-bold text-foreground">{formData.category}</span>
                 </div>
                 <div className="flex flex-col gap-0.5">

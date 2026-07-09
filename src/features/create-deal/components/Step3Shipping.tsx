@@ -99,8 +99,8 @@ export const Step3Shipping: React.FC<Step3ShippingProps> = ({
                 type="number"
                 min={0}
                 step="0.01"
-                placeholder="0.00"
-                className="rounded-2xl border h-12 text-sm font-semibold border-border/80"
+                placeholder="Enter shipping cost"
+                className="rounded-2xl border h-12 text-sm font-semibold border-border/80 placeholder:text-muted-foreground/50 placeholder:font-normal"
                 value={field.value ?? ""}
                 onChange={(e) =>
                   field.onChange(
