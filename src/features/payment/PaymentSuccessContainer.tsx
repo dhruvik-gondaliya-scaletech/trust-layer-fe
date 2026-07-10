@@ -1,8 +1,9 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, AlertCircle, ArrowRight } from "lucide-react";
+import { AlertCircle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BottomActionBar } from "@/components/ui/bottom-action-bar";
 import { useDeal, useDealStatus } from "@/hooks/queries/useDeals";
@@ -74,7 +75,7 @@ export default function PaymentSuccessContainer() {
   if (showLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
-        <Loader2 size={36} className="text-primary animate-spin" />
+        <Spinner className="text-primary size-9" />
         <p className="text-[13px] text-slate-400 font-bold mt-3">Confirming payment...</p>
         <p className="text-[12px] text-slate-400 mt-1">This usually only takes a few seconds.</p>
       </div>

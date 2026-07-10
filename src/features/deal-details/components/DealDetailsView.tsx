@@ -1,7 +1,8 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import { useState } from "react";
-import { Loader2, Star, Edit, Trash2 } from "lucide-react";
+import { Star, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BottomActionBar } from "@/components/ui/bottom-action-bar";
 import { AnimatedModal } from "@/components/shared/animated-modal";
@@ -94,7 +95,7 @@ export function DealDetailsView({
               >
                 {action.isPending ? (
                   <>
-                    <Loader2 size={16} className="animate-spin" /> Confirming...
+                    <Spinner className="size-4" /> Confirming...
                   </>
                 ) : (
                   "Confirm Delivery"
@@ -142,7 +143,7 @@ export function DealDetailsView({
                   >
                     {isPublishPending ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Spinner className="w-4 h-4" />
                         <span>Publishing...</span>
                       </>
                     ) : (
@@ -170,7 +171,7 @@ export function DealDetailsView({
                   >
                     {isDeletePending ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Spinner className="w-4 h-4" />
                         <span>Deleting...</span>
                       </>
                     ) : (
@@ -267,7 +268,7 @@ export function DealDetailsView({
               >
                 {isDeletePending ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Spinner className="w-4 h-4" />
                     <span>Deleting Deal...</span>
                   </>
                 ) : (

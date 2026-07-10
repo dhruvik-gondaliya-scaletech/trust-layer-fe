@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowRight, Loader2, Lock } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { ArrowRight, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BottomActionBar } from "@/components/ui/bottom-action-bar";
 import type { ShippingAddress } from "@/types/address.types";
@@ -101,7 +102,7 @@ export function WizardFooter({
           >
             {isSubmittingPayment ? (
               <>
-                <Loader2 size={16} className="animate-spin" /> Redirecting to Secure Checkout...
+                <Spinner className="size-4" /> Redirecting to Secure Checkout...
               </>
             ) : (
               <>
@@ -124,7 +125,7 @@ export function WizardFooter({
         >
           {isSubmittingPayment ? (
             <>
-              <Loader2 size={16} className="animate-spin" /> Simulating Collateral Deposit...
+              <Spinner className="size-4" /> Simulating Collateral Deposit...
             </>
           ) : (
             <>

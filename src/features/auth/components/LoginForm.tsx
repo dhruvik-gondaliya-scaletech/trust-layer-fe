@@ -1,11 +1,12 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import React, { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { LoginInput } from "@/lib/validations/login";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Shield, Loader2, Eye, EyeOff } from "lucide-react";
+import { Shield, Eye, EyeOff } from "lucide-react";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -103,7 +104,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             <Button type="submit" disabled={isPending} className="w-full h-14 text-[16px] mt-4">
               {isPending ? (
                 <span className="flex items-center justify-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Spinner className="w-4 h-4" />
                   Signing In...
                 </span>
               ) : (

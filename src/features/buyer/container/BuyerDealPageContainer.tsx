@@ -1,11 +1,12 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useDeal, useDeclineDeal } from "@/hooks/queries/useDeals";
 import { useAuth } from "@/providers/auth-provider";
 import BuyerView from "../components/BuyerView";
-import { Loader2, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 
@@ -21,7 +22,7 @@ export default function BuyerDealPageContainer() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
-        <Loader2 size={36} className="text-primary animate-spin" />
+        <Spinner className="text-primary size-9" />
         <p className="text-[13px] text-slate-400 font-bold mt-3">Loading deal details...</p>
       </div>
     );

@@ -1,8 +1,9 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Shield, Lock, CheckCircle2, Loader2 } from "lucide-react";
+import { Shield, Lock, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WalkthroughOverlay } from "@/components/walkthrough-overlay";
 import { FRONTEND_ROUTES } from "@/lib/contants";
@@ -32,8 +33,7 @@ export default function Home() {
         <div className="w-full min-h-dvh bg-[#F8FAFC] flex flex-col items-center justify-center p-6">
           <div className="flex flex-col items-center gap-4">
             <div className="relative flex items-center justify-center">
-              <Loader2 className="w-10 h-10 text-primary animate-spin" strokeWidth={2.5} />
-              <div className="absolute w-2 h-2 bg-primary rounded-full animate-ping" />
+              <Spinner className="w-10 h-10 text-primary" strokeWidth={2.5} />
             </div>
             <p className="text-sm font-semibold text-muted-foreground animate-pulse">
               Verifying secure session...
@@ -79,9 +79,9 @@ export default function Home() {
           </div>
         </div>
 
-        <WalkthroughOverlay 
-          isOpen={showWalkthrough} 
-          onClose={() => setShowWalkthrough(false)} 
+        <WalkthroughOverlay
+          isOpen={showWalkthrough}
+          onClose={() => setShowWalkthrough(false)}
         />
 
         {/* How it works section */}

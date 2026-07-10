@@ -1,5 +1,6 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@/lib/zodResolver";
@@ -7,7 +8,7 @@ import { addressSchema, AddressFormInput } from "@/lib/validations/address";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Home, Briefcase, Tag } from "lucide-react";
+import { Home, Briefcase, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BottomActionBar } from "@/components/ui/bottom-action-bar";
 import { Form, FormField, FormControl, Field, FieldLabel, FieldError } from "@/components/ui/field";
@@ -280,7 +281,7 @@ export default function AddShippingAddress({
           className="w-full h-14 text-[16px] font-bold"
         >
           {isSubmitting ? (
-            <Loader2 size={16} className="animate-spin" />
+            <Spinner className="size-4" />
           ) : (
             "Save Address"
           )}

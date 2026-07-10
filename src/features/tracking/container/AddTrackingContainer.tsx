@@ -1,5 +1,6 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import React, { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useDealById, useShipDeal, useUploadDealMedia } from "@/hooks/queries/useDeals";
@@ -7,7 +8,7 @@ import AddTracking from "../components/AddTracking";
 import { TrackingFormInput } from "@/lib/validations/tracking";
 import { ProofType } from "@/types/enums";
 import { toast } from "sonner";
-import { Loader2, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 
@@ -81,8 +82,7 @@ export default function AddTrackingContainer() {
       <div className="w-full min-h-dvh bg-background flex flex-col items-center justify-center p-6 text-center select-none">
         <div className="flex flex-col items-center gap-4">
           <div className="relative flex items-center justify-center">
-            <Loader2 className="w-10 h-10 text-primary animate-spin" strokeWidth={2.5} />
-            <div className="absolute w-2 h-2 bg-primary rounded-full animate-ping" />
+            <Spinner className="w-10 h-10 text-primary" strokeWidth={2.5} />
           </div>
           <p className="text-sm font-semibold text-muted-foreground animate-pulse">
             Loading deal details...

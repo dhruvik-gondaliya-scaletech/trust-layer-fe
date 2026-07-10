@@ -1,8 +1,9 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { ChevronLeft, Loader2, Package } from "lucide-react";
+import { ChevronLeft, Package } from "lucide-react";
 import { zodResolver } from "@/lib/zodResolver";
 import { trackingSchema, TrackingFormInput } from "@/lib/validations/tracking";
 import { Button } from "@/components/ui/button";
@@ -248,7 +249,7 @@ export default function AddTracking({
           >
             {isSubmitting ? (
               <>
-                <Loader2 size={16} className="animate-spin" />
+                <Spinner className="size-4" />
                 <span>Uploading Tracking...</span>
               </>
             ) : (

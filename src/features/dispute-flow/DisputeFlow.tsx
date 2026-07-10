@@ -1,5 +1,6 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@/lib/zodResolver";
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertCircle, ChevronLeft, Upload, FileText, Image as ImageIcon, Video, X, Loader2 } from "lucide-react";
+import { AlertCircle, ChevronLeft, Upload, FileText, Image as ImageIcon, Video, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Form, FormField, FormControl, Field, FieldLabel, FieldError } from "@/components/ui/field";
@@ -247,7 +248,7 @@ export default function DisputeFlow({ onSubmit, isSubmitting, onBack }: DisputeF
             className="w-full h-12 bg-destructive hover:bg-destructive-hover text-white rounded-[14px] font-bold text-[14px] mt-4 flex items-center justify-center gap-2"
           >
             {isSubmitting ? (
-              <Loader2 size={16} className="animate-spin" />
+              <Spinner className="size-4" />
             ) : (
               "Submit Dispute Claim"
             )}

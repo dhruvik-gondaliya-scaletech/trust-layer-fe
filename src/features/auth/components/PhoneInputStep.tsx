@@ -1,12 +1,13 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import React from "react";
 import { UseFormReturn } from "react-hook-form";
 import PhoneInput from "react-phone-number-input";
 import { PhoneInputInput } from "@/lib/validations/verify";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Check, ChevronLeft, Loader2, Smartphone, Shield } from "lucide-react";
+import { Check, ChevronLeft, Smartphone, Shield } from "lucide-react";
 import { BottomActionBar } from "@/components/ui/bottom-action-bar";
 import { cn } from "@/lib/utils";
 import { Form, FormField, FormControl, Field, FieldLabel, FieldError } from "@/components/ui/field";
@@ -155,7 +156,7 @@ export const PhoneInputStep: React.FC<PhoneInputStepProps> = ({
           >
             {isPending ? (
               <span className="flex items-center justify-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Spinner className="w-4 h-4" />
                 Sending Code...
               </span>
             ) : (

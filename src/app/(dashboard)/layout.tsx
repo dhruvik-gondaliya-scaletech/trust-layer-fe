@@ -1,11 +1,11 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import React, { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
 import { FRONTEND_ROUTES, AUTH_STORAGE_KEYS } from "@/lib/contants";
 import {
-  Loader2,
   LayoutDashboard,
   PlusCircle,
   LogOut,
@@ -65,8 +65,7 @@ export default function DashboardLayout({
       <div className="w-full min-h-dvh bg-[#F8FAFC] flex flex-col items-center justify-center p-6">
         <div className="flex flex-col items-center gap-4">
           <div className="relative flex items-center justify-center">
-            <Loader2 className="w-10 h-10 text-primary animate-spin" strokeWidth={2.5} />
-            <div className="absolute w-2 h-2 bg-primary rounded-full animate-ping" />
+            <Spinner className="w-10 h-10 text-primary" strokeWidth={2.5} />
           </div>
           <p className="text-sm font-semibold text-muted-foreground animate-pulse">
             Verifying secure session...
@@ -85,7 +84,7 @@ export default function DashboardLayout({
       return (
         <div className="w-full min-h-dvh bg-[#F8FAFC] flex flex-col items-center justify-center p-6">
           <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-10 h-10 text-primary animate-spin" strokeWidth={2.5} />
+            <Spinner className="w-10 h-10 text-primary" strokeWidth={2.5} />
             <p className="text-sm font-semibold text-muted-foreground animate-pulse">
               Redirecting to verification...
             </p>
@@ -181,10 +180,10 @@ export default function DashboardLayout({
               {isDashboardActive
                 ? "Dashboard"
                 : isCreateDealActive
-                ? "Create Deal"
-                : isTimelineActive
-                ? "Deals Timeline"
-                : "TrustLayer"}
+                  ? "Create Deal"
+                  : isTimelineActive
+                    ? "Deals Timeline"
+                    : "TrustLayer"}
             </span>
           </div>
 

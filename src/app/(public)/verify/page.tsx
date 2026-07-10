@@ -1,3 +1,4 @@
+import { Spinner } from "@/components/ui/spinner";
 import React, { Suspense } from "react";
 import { VerifyContainer } from "@/features/auth/container/VerifyContainer";
 import { Metadata } from "next";
@@ -11,7 +12,7 @@ export default function VerifyPage() {
   return (
     <Suspense fallback={
       <div className="flex-1 flex items-center justify-center min-h-dvh">
-        <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+        <Spinner className="w-8 h-8 text-primary" />
       </div>
     }>
       <VerifyContainer />
