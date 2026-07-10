@@ -60,12 +60,6 @@ export const WalletCard: React.FC<WalletCardProps> = ({
               <p className="font-bold text-[17px] text-primary-foreground">{readyToWithdraw}</p>
             </div>
           </div>
-
-          {/* Tap hint */}
-          <div className="mt-4 flex items-center gap-1 text-[13px] font-medium text-primary-foreground/70">
-            Tap to view wallet details
-            <ChevronRight className="w-4 h-4" />
-          </div>
         </div>
       </div>
     </div>

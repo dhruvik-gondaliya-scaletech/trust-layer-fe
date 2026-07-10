@@ -42,3 +42,4 @@ export interface VerificationStep {
     isComplete: boolean;
     errorMsg?: string;
 }
+

@@ -18,114 +18,26 @@ import { cn } from "@/lib/utils";
 import dealsService from "@/services/deals.service";
 import s3Service from "@/services/s3.service";
 import { useUploadDealMedia, useDeleteDealMedia } from "@/hooks/queries/useDeals";
-export type MediaSlot =
-  | "main"
-  | "back"
-  | "leftSide"
-  | "rightSide"
-  | "detail"
-  | "video"
-  | "cert";
-
-export type MediaSlotIds = Partial<Record<MediaSlot, string | null>>;
-import type { Deal, ProductType, OrderType, HandlingTime, FeePayer } from "@/types/api.types";
+import type { Deal, HandlingTime, FeePayer } from "@/types/api.types";
 import { ProofType, UploadPurpose } from "@/types/enums";
-
-const mapCategoryToProductType = (category: string): ProductType => {
-  switch (category) {
-    case "Trading Cards":
-      return "trading_cards";
-    case "Sports Cards":
-      return "sports_cards";
-    case "Toys":
-      return "toy";
-    case "Plush":
-      return "plush";
-    case "Figures":
-      return "figure";
-    default:
-      return "other";
-  }
-};
-
-const mapProductTypeToCategory = (pt: ProductType | string): string => {
-  switch (pt) {
-    case "trading_cards":
-      return "Trading Cards";
-    case "sports_cards":
-      return "Sports Cards";
-    case "toy":
-      return "Toys";
-    case "plush":
-      return "Plush";
-    case "figure":
-      return "Figures";
-    default:
-      return "Trading Cards";
-  }
-};
-
-const mapOrderType = (ot: string): OrderType => {
-  return ot === "In-Person Transaction" ? "in_person" : "online";
-};
-
-const mapStep1ToDto = (data: Step1FormData) => ({
-  title: data.title,
-  price: data.price,
-  productType: mapCategoryToProductType(data.category),
-  orderType: mapOrderType(data.orderType),
-  isGraded: data.isGraded,
-  serialNumber: data.gradedSerial || undefined,
-  description: data.description || undefined,
-  condition: data.condition || undefined,
-});
-
-// Fixed display order for Step 2 media slots (0-indexed sortOrder on the backend).
-const SLOT_SORT_ORDER: Record<MediaSlot, number> = {
-  main: 0,
-  back: 1,
-  leftSide: 2,
-  rightSide: 3,
-  detail: 4,
-  video: 5,
-  cert: 6,
-};
-
-const SLOT_FILE_NAMES: Record<MediaSlot, string> = {
-  main: "main.jpg",
-  back: "back.jpg",
-  leftSide: "left-side.jpg",
-  rightSide: "right-side.jpg",
-  detail: "detail.jpg",
-  video: "verification.mp4",
-  cert: "certificate.jpg",
-};
-
-const dataURLtoBlob = (dataUrl: string): Blob => {
-  const arr = dataUrl.split(",");
-  const mime = arr[0].match(/:(.*?);/)?.[1] || "image/jpeg";
-  const bstr = atob(arr[1]);
-  let n = bstr.length;
-  const u8arr = new Uint8Array(n);
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n);
-  }
-  return new Blob([u8arr], { type: mime });
-};
+import { MediaSlot, MediaSlotIds } from "@/types/deal.types";
+import { dataURLtoBlob, mapProductTypeToCategory, mapStep1ToDto, SLOT_FILE_NAMES, SLOT_SORT_ORDER } from "@/utils/deal";
 
 export const CreateDealContainer: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlDealId = searchParams.get("dealId");
   const urlDealNumber = searchParams.get("dealNumber");
+  const isUpdateMode = searchParams.get("update") === "true";
 
   const [step, setStep] = useState<number>(1);
+  const [dealStatus, setDealStatus] = useState<string | null>(null);
   const [formData, setFormData] = useState<Step1FormData>({
     title: "",
     price: 0,
-    category: "Trading Cards",
-    condition: "Mint",
-    orderType: "Online Transaction",
+    category: "",
+    condition: "",
+    orderType: "",
     isGraded: false,
     gradedSerial: "",
     description: "",
@@ -157,7 +69,6 @@ export const CreateDealContainer: React.FC = () => {
   });
 
   const [dealId, setDealId] = useState<string | null>(urlDealId);
-  const [dealNumber, setDealNumber] = useState<string | null>(urlDealNumber);
   const [mediaIds, setMediaIds] = useState<MediaSlotIds>({});
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -173,28 +84,30 @@ export const CreateDealContainer: React.FC = () => {
       try {
         let deal: Deal | undefined;
 
-        if (urlDealNumber) {
-          deal = await dealsService.getDealByNumber(urlDealNumber);
-        } else if (urlDealId) {
-          const sellerDeals = await dealsService.getMyDeals("seller");
-          deal = sellerDeals.find((d) => d.id === urlDealId);
+        if (urlDealId) {
+          try {
+            deal = await dealsService.getDealById(urlDealId);
+          } catch (e) {
+            const sellerDeals = await dealsService.getMyDeals("seller");
+            deal = sellerDeals.find((d) => d.id === urlDealId);
+          }
         }
 
         if (deal) {
-          if (deal.status !== "draft") {
+          if (deal.status !== "draft" && !isUpdateMode) {
             router.replace(FRONTEND_ROUTES.DEAL_DETAILS(deal.id));
             return;
           }
 
           setDealId(deal.id);
-          setDealNumber(deal.dealNumber);
+          setDealStatus(deal.status);
 
           setFormData({
             title: deal.title || "",
             price: Number(deal.price) || 0,
             category: mapProductTypeToCategory(deal.productType),
-            condition: deal.condition || "Mint",
-            orderType: deal.orderType === "in_person" ? "In-Person Transaction" : "Online Transaction",
+            condition: deal.condition || "",
+            orderType: deal.orderType === "in_person" ? "In-Person Transaction" : (deal.orderType === "online" ? "Online Transaction" : ""),
             isGraded: deal.isGraded || false,
             gradedSerial: deal.serialNumber || "",
             description: deal.description || "",
@@ -255,7 +168,7 @@ export const CreateDealContainer: React.FC = () => {
           setVerificationVideo(nextVerificationVideo);
           setMediaIds(nextMediaIds);
 
-          if (deal.title) {
+          if (deal.title && !isUpdateMode) {
             setStep(2);
           }
         }
@@ -267,7 +180,7 @@ export const CreateDealContainer: React.FC = () => {
       }
     }
     init();
-  }, [urlDealId, urlDealNumber]);
+  }, [urlDealId, urlDealNumber, isUpdateMode]);
 
   // Step 5 specific states lifted
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -275,6 +188,18 @@ export const CreateDealContainer: React.FC = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [publishedDealId, setPublishedDealId] = useState("");
   const [publishedDealNumber, setPublishedDealNumber] = useState("");
+
+  const isInPerson = formData.orderType === "In-Person Transaction";
+  const stepsList = isInPerson
+    ? ["Item Details", "Proof Verification", "Fees Setup", "Review & Publish"]
+    : ["Item Details", "Proof Verification", "Shipping Terms", "Fees Setup", "Review & Publish"];
+
+  const getVisualStep = (s: number) => {
+    if (isInPerson && s >= 4) {
+      return s - 1;
+    }
+    return s;
+  };
 
   // Step 2 live uploads — which slots currently have an upload in flight
   const [uploadingSlots, setUploadingSlots] = useState<Partial<Record<MediaSlot, boolean>>>({});
@@ -379,8 +304,7 @@ export const CreateDealContainer: React.FC = () => {
           publish: false,
         });
         setDealId(deal.id);
-        setDealNumber(deal.dealNumber);
-        
+
         // Update URL to include both dealId and dealNumber
         const newUrl = `${window.location.pathname}?dealId=${deal.id}&dealNumber=${deal.dealNumber}`;
         window.history.replaceState(null, "", newUrl);
@@ -490,13 +414,14 @@ export const CreateDealContainer: React.FC = () => {
       }
 
       // 2. Map wizard state to deal fields
-      const ht = shippingData.handlingTime === "Ship within 1–2 business days" ? "1-2" : "3-5";
+      const ht = isInPerson ? undefined : (shippingData.handlingTime === "Ship within 1–2 business days" ? "1-2" : "3-5");
+      const shippingCost = isInPerson ? 0 : shippingData.shippingCost;
       const feePayerMapped = feesData.feeStructure === "Split 50/50" ? "split" : (feesData.feeStructure === "Buyer Pays" ? "buyer" : "seller");
 
       const dealFields = {
         ...mapStep1ToDto(formData),
         handlingTime: ht as HandlingTime,
-        shippingCost: shippingData.shippingCost,
+        shippingCost: shippingCost,
         feePayer: feePayerMapped as FeePayer,
         trustScore, // Send the calculated trustScore to backend
       };
@@ -598,16 +523,21 @@ export const CreateDealContainer: React.FC = () => {
 
       if (publish) {
         setIsSubmitting(false);
-        setPublishedDealId(deal.id); // Store the deal ID so we link to it
-        setPublishedDealNumber(deal.dealNumber); // Store the deal number
-        setIsSuccess(true);
-        toast.success("Escrow deal successfully created!");
-        window.history.replaceState(null, "", FRONTEND_ROUTES.DEAL_DETAILS(deal.id));
+        if (isUpdateMode && dealStatus !== "draft") {
+          toast.success("Deal updated successfully!");
+          router.push(FRONTEND_ROUTES.DEAL_DETAILS(deal.id));
+        } else {
+          setPublishedDealId(deal.id); // Store the deal ID so we link to it
+          setPublishedDealNumber(deal.dealNumber); // Store the deal number
+          setIsSuccess(true);
+          toast.success(isUpdateMode ? "Deal updated and published!" : "Escrow deal successfully created!");
+          window.history.replaceState(null, "", FRONTEND_ROUTES.DEAL_DETAILS(deal.id));
+        }
       } else {
         // Keep the local draft (incl. dealId) so re-opening the wizard
         // resumes this same backend draft instead of creating a new deal.
         setIsSavingDraft(false);
-        toast.success("Deal saved as draft");
+        toast.success(isUpdateMode ? "Deal changes saved as draft" : "Deal saved as draft");
         router.push(FRONTEND_ROUTES.DASHBOARD);
       }
     } catch (error: unknown) {
@@ -616,7 +546,9 @@ export const CreateDealContainer: React.FC = () => {
       toast.error(
         err.response?.data?.message ||
         err.message ||
-        (publish ? "Failed to create deal. Please try again." : "Failed to save draft. Please try again.")
+        (publish
+          ? (isUpdateMode ? "Failed to update deal. Please try again." : "Failed to create deal. Please try again.")
+          : "Failed to save draft. Please try again.")
       );
     }
   };
@@ -630,9 +562,17 @@ export const CreateDealContainer: React.FC = () => {
 
   const handleBack = () => {
     if (step > 1) {
-      setStep((prev) => prev - 1);
+      if (step === 4 && isInPerson) {
+        setStep(2);
+      } else {
+        setStep((prev) => prev - 1);
+      }
     } else {
-      router.push(FRONTEND_ROUTES.DASHBOARD);
+      if (isUpdateMode && dealId) {
+        router.push(FRONTEND_ROUTES.DEAL_DETAILS(dealId));
+      } else {
+        router.push(FRONTEND_ROUTES.DASHBOARD);
+      }
     }
   };
 
@@ -659,26 +599,21 @@ export const CreateDealContainer: React.FC = () => {
               <ArrowLeft className="w-5 h-5 text-muted-foreground" />
             </button>
           )}
-          <span className="font-extrabold text-xl text-foreground">New Deal</span>
+          <span className="font-extrabold text-xl text-foreground">{isUpdateMode ? "Update Deal" : "New Deal"}</span>
         </div>
 
         {/* Steps List */}
         {!isSuccess && (
           <div className="bg-card border border-border/40 rounded-3xl p-6 shadow-sm flex flex-col gap-6">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-              Deal Creation Steps
+              {isUpdateMode ? "Deal Update Steps" : "Deal Creation Steps"}
             </span>
             <div className="flex flex-col gap-4">
-              {[
-                "Item Details",
-                "Proof Verification",
-                "Shipping Terms",
-                "Fees Setup",
-                "Review & Publish",
-              ].map((name, index) => {
+              {stepsList.map((name, index) => {
                 const currentStepIndex = index + 1;
-                const isPast = step > currentStepIndex;
-                const isCurrent = step === currentStepIndex;
+                const visualStep = getVisualStep(step);
+                const isPast = visualStep > currentStepIndex;
+                const isCurrent = visualStep === currentStepIndex;
                 return (
                   <div
                     key={name}
@@ -748,7 +683,7 @@ export const CreateDealContainer: React.FC = () => {
           )}
 
           <div className="font-extrabold text-foreground text-base select-none mx-auto">
-            New deal
+            {isUpdateMode ? "Update deal" : "New deal"}
           </div>
 
           {!isSuccess && <div className="w-10" />}
@@ -757,7 +692,7 @@ export const CreateDealContainer: React.FC = () => {
         {/* Mobile Step Indicator (Hidden on Desktop) */}
         {!isSuccess && (
           <div className="lg:hidden px-6 py-2 shrink-0">
-            <StepIndicator currentStep={step} totalSteps={5} />
+            <StepIndicator currentStep={getVisualStep(step)} totalSteps={isInPerson ? 4 : 5} />
           </div>
         )}
 
@@ -793,7 +728,7 @@ export const CreateDealContainer: React.FC = () => {
                   onCaptureVideo={handleCaptureVideo}
                   onCaptureCertPhoto={handleCaptureCertPhoto}
                   uploadingSlots={uploadingSlots}
-                  onContinue={() => setStep(3)}
+                  onContinue={() => setStep(isInPerson ? 4 : 3)}
                   onBack={handleBack}
                   trustScore={trustScore}
                   nextStepName={nextStepName}
@@ -831,6 +766,8 @@ export const CreateDealContainer: React.FC = () => {
                   dealId={publishedDealId}
                   dealNumber={publishedDealNumber}
                   handlePublish={handlePublish}
+                  isUpdateMode={isUpdateMode}
+                  dealStatus={dealStatus}
                 />
               )}
             </motion.div>
@@ -852,7 +789,7 @@ export const CreateDealContainer: React.FC = () => {
                   Back
                 </Button>
               )}
-              {step === 5 && !isSuccess && (
+              {step === 5 && !isSuccess && (!isUpdateMode || dealStatus === "draft") && (
                 <Button
                   type="button"
                   onClick={handleSaveDraft}
@@ -860,7 +797,7 @@ export const CreateDealContainer: React.FC = () => {
                   disabled={isSubmitting || isSavingDraft}
                   className="flex-1 border-primary/40 text-primary hover:text-primary hover:bg-primary/5 rounded-2xl h-14 text-base font-bold active:scale-[0.98] transition-all"
                 >
-                  {isSavingDraft ? "Saving..." : "Save Draft"}
+                  {isSavingDraft ? "Saving..." : (isUpdateMode ? "Save as Draft" : "Save Draft")}
                 </Button>
               )}
               <Button
@@ -885,7 +822,7 @@ export const CreateDealContainer: React.FC = () => {
                         toast.error("Please take the main photo to continue");
                         return;
                       }
-                      setStep(3);
+                      setStep(isInPerson ? 4 : 3);
                     }
                     : isSuccess ? () => router.push(FRONTEND_ROUTES.DASHBOARD) : undefined
                 }
@@ -893,7 +830,11 @@ export const CreateDealContainer: React.FC = () => {
                 className="flex-1 bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/10 rounded-2xl h-14 text-base font-bold active:scale-[0.98] transition-all"
               >
                 {step === 5 && !isSuccess
-                  ? (isSubmitting ? "Publishing..." : "Publish Deal")
+                  ? (isSubmitting
+                    ? (isUpdateMode ? "Saving..." : "Publishing...")
+                    : (isUpdateMode
+                      ? (dealStatus === "draft" ? "Publish Deal" : "Save Changes")
+                      : "Publish Deal"))
                   : isSuccess
                     ? "Go to Dashboard"
                     : step === 2 && isUploadingMedia

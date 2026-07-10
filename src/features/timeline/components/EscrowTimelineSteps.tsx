@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ShieldCheck, Coins, Truck, Package, Unlock, AlertCircle } from "lucide-react";
+import { Check, ShieldCheck, Coins, Truck, Package, Unlock, AlertCircle, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +20,7 @@ interface EscrowTimelineStepsProps {
   onConfirmDelivery: () => void;
   onFileDispute: () => void;
   onReviewSeller: () => void;
+  onViewTracking?: () => void;
 }
 
 const IN_TRANSIT_OR_LATER = ["shipped", "delivered", "completed", "closed", "disputed"];
@@ -41,6 +42,7 @@ export function EscrowTimelineSteps({
   onConfirmDelivery,
   onFileDispute,
   onReviewSeller,
+  onViewTracking,
 }: EscrowTimelineStepsProps) {
   return (
     <div className="bg-background border border-border/80 rounded-[32px] p-5 shadow-xs flex flex-col gap-4">
@@ -145,12 +147,24 @@ export function EscrowTimelineSteps({
           )}
 
           {trackingNumber && (
-            <div className="mt-2 text-[11px] bg-slate-50 border border-slate-100 p-2.5 rounded-xl font-bold flex flex-col gap-0.5">
-              <div className="text-slate-400">Tracking Info</div>
-              <div className="text-foreground flex items-center justify-between">
-                <span>{carrier || "USPS"} ({shippingType || "Priority"})</span>
-                <span className="text-primary select-text">{trackingNumber}</span>
+            <div className="mt-2 flex flex-col gap-2">
+              <div className="text-[11px] bg-slate-50 border border-slate-100 p-2.5 rounded-xl font-bold flex flex-col gap-0.5">
+                <div className="text-slate-400">Tracking Info</div>
+                <div className="text-foreground flex items-center justify-between">
+                  <span>{carrier || "USPS"} ({shippingType || "Priority"})</span>
+                  <span className="text-primary select-text">{trackingNumber}</span>
+                </div>
               </div>
+              {onViewTracking && (
+                <Button
+                  onClick={onViewTracking}
+                  variant="outline"
+                  className="w-full border-slate-200 text-slate-700 hover:bg-slate-50 font-extrabold rounded-xl h-11 text-xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-sm"
+                >
+                  <span>Track Shipment</span>
+                  <ExternalLink size={12} className="text-slate-400" />
+                </Button>
+              )}
             </div>
           )}
         </div>

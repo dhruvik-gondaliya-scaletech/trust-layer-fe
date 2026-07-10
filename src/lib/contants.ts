@@ -64,7 +64,6 @@ export const FRONTEND_ROUTES = {
     VERIFY: "/verify",
     LOGIN: "/login",
     DASHBOARD: "/dashboard",
-    CREATE_DEAL: "/create-deal",
     WALLET: "/wallet",
     TIMELINE: "/timeline",
     NOTIFICATIONS: "/notifications",
@@ -73,9 +72,14 @@ export const FRONTEND_ROUTES = {
     DISPUTE_FLOW: (id: string) => `/dispute-flow/${id}`,
     REVIEW_SELLER: (id: string) => `/review-seller/${id}`,
     DEAL_TIMELINE: (id: string) => `/timeline/${id}`,
-    BUYER_VIEW: (id: string) => `/deal/${id}`,
-    DEAL_LISTING: `/deal-details`,
-    DEAL_DETAILS: (id: string) => `/deal-details/${id}`,
+    BUYER_VIEW: (id: string) => `/open-deal/${id}`,
+    CREATE_DEAL: "/deal/create",
+    DEAL_LISTING: `/deal/details`,
+    DEAL_DETAILS: (id: string) => `/deal/details/${id}`,
+    DEAL_UPDATE: (id: string) => `/deal/update?dealId=${id}&update=true`,
+    DEAL_DELETE: (id: string) => `/deal/delete/${id}`,
+    ADD_TRACKING: (id: string) => `/tracking/add/${id}`,
+    VIEW_TRACKING: (id: string) => `/tracking/view/${id}`,
 }
 
 export const AUTH_STORAGE_KEYS = {

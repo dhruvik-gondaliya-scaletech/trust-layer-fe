@@ -2,13 +2,12 @@
 
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { TrustScoreHeader, TrustScoreBreakdown } from "./TrustScoreHeader";
+import { TrustScoreCard, TrustScoreBreakdown } from "./TrustScoreCard";
 import { Form, FormField, FormControl, Field, FieldLabel, FieldError } from "@/components/ui/field";
 
 export interface Step1FormData {
@@ -44,9 +43,9 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
     defaultValues: {
       title: initialData?.title || "",
       price: initialData?.price || undefined,
-      category: initialData?.category || "Trading Cards",
-      condition: initialData?.condition || "Mint",
-      orderType: initialData?.orderType || "Online Transaction",
+      category: initialData?.category || "",
+      condition: initialData?.condition || "",
+      orderType: initialData?.orderType || "",
       isGraded: initialData?.isGraded ?? false,
       gradedSerial: initialData?.gradedSerial || "",
       description: initialData?.description || "",
@@ -68,7 +67,7 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
 
         {/* Trust Score card — scrolls with content */}
         {typeof trustScore === "number" && (
-          <TrustScoreHeader score={trustScore} nextStepName={nextStepName} breakdown={breakdown} />
+          <TrustScoreCard score={trustScore} nextStepName={nextStepName} breakdown={breakdown} />
         )}
 
         {/* Step heading */}
@@ -83,8 +82,8 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
             <FormControl>
               <Input
                 id="item-title"
-                placeholder="Charizard Holo 1999 Base Set"
-                className="rounded-2xl h-12 px-4 border text-base font-semibold bg-background"
+                placeholder="Enter Title"
+                className="rounded-2xl h-12 px-4 border text-base font-semibold bg-background placeholder:text-muted-foreground/50"
                 {...field}
               />
             </FormControl>
@@ -106,8 +105,8 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
                 <Input
                   id="item-price"
                   type="number"
-                  placeholder="4300"
-                  className="rounded-2xl h-12 px-4 border text-base font-semibold bg-background"
+                  placeholder="Enter Price"
+                  className="rounded-2xl h-12 px-4 border text-base font-semibold bg-background placeholder:text-muted-foreground/50"
                   {...field}
                   value={field.value ?? ""}
                   onChange={(e) => field.onChange(Number.isNaN(e.target.valueAsNumber) ? undefined : e.target.valueAsNumber)}
@@ -120,15 +119,15 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
 
         {/* Product Type & Condition Dropdowns Side-by-Side */}
         <div className="grid grid-cols-[1.3fr_1fr] gap-3">
-          <FormField control={form.control} name="category" render={({ field }) => (
+          <FormField control={form.control} name="category" rules={{ required: "Product type is required" }} render={({ field }) => (
             <Field className="flex flex-col gap-1.5 border-none p-0">
               <FieldLabel className="text-sm font-semibold text-foreground/80">
                 Product Type
               </FieldLabel>
               <FormControl>
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select value={field.value || ""} onValueChange={field.onChange}>
                   <SelectTrigger className="rounded-2xl border border-border/80 h-12 text-sm font-semibold">
-                    <SelectValue />
+                    <SelectValue placeholder="Select Product Type" />
                   </SelectTrigger>
                   <SelectContent>
                     {CATEGORIES.map((cat) => (
@@ -139,18 +138,19 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
                   </SelectContent>
                 </Select>
               </FormControl>
+              <FieldError className="text-xs font-medium mt-0.5" />
             </Field>
           )} />
 
-          <FormField control={form.control} name="condition" render={({ field }) => (
+          <FormField control={form.control} name="condition" rules={{ required: "Condition is required" }} render={({ field }) => (
             <Field className="flex flex-col gap-1.5 border-none p-0">
               <FieldLabel className="text-sm font-semibold text-foreground/80">
                 Condition
               </FieldLabel>
               <FormControl>
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select value={field.value || ""} onValueChange={field.onChange}>
                   <SelectTrigger className="rounded-2xl border border-border/80 h-12 text-sm font-semibold">
-                    <SelectValue />
+                    <SelectValue placeholder="Select Condition" />
                   </SelectTrigger>
                   <SelectContent>
                     {CONDITIONS.map((cond) => (
@@ -161,20 +161,21 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
                   </SelectContent>
                 </Select>
               </FormControl>
+              <FieldError className="text-xs font-medium mt-0.5" />
             </Field>
           )} />
         </div>
 
         {/* Order Type Dropdown */}
-        <FormField control={form.control} name="orderType" render={({ field }) => (
+        <FormField control={form.control} name="orderType" rules={{ required: "Order type is required" }} render={({ field }) => (
           <Field className="flex flex-col gap-1.5 border-none p-0">
             <FieldLabel className="text-sm font-semibold text-foreground/80">
               Order Type
             </FieldLabel>
             <FormControl>
-              <Select value={field.value} onValueChange={field.onChange}>
+              <Select value={field.value || ""} onValueChange={field.onChange}>
                 <SelectTrigger className="rounded-2xl border border-border/80 h-12 text-sm font-semibold">
-                  <SelectValue />
+                  <SelectValue placeholder="Select Order Type" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Online Transaction">Online Transaction</SelectItem>
@@ -182,6 +183,7 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
                 </SelectContent>
               </Select>
             </FormControl>
+            <FieldError className="text-xs font-medium mt-0.5" />
           </Field>
         )} />
 
@@ -236,8 +238,8 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
                     <FormControl>
                       <Input
                         id="item-serial"
-                        placeholder="Enter serial number..."
-                        className="rounded-2xl h-12 px-4 border text-base font-semibold bg-background"
+                        placeholder="Enter Serial Number"
+                        className="rounded-2xl h-12 px-4 border text-base font-semibold bg-background placeholder:text-muted-foreground/50"
                         {...field}
                       />
                     </FormControl>
@@ -258,9 +260,9 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
             <FormControl>
               <Textarea
                 id="item-desc"
-                placeholder="Mint condition. Kept in sleeve."
+                placeholder="Enter Description"
                 rows={3}
-                className="border-border/80 resize-none rounded-2xl p-4 text-base font-semibold bg-background"
+                className="border-border/80 resize-none rounded-2xl p-4 text-base font-semibold bg-background placeholder:text-muted-foreground/50"
                 {...field}
               />
             </FormControl>

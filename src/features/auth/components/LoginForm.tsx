@@ -47,59 +47,59 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
         <Form {...form}>
           <form id="login-form" onSubmit={onSubmit} className="space-y-4" noValidate>
-            <FormField control={form.control} name="email" render={({ field }) => (
-              <Field>
-                <FieldLabel className="text-[13px]">Email</FieldLabel>
+          <FormField control={form.control} name="email" render={({ field }) => (
+            <Field>
+              <FieldLabel className="text-[13px]">Email</FieldLabel>
+              <FormControl>
+                <Input
+                  autoComplete="email"
+                  required
+                  type="email"
+                  disabled={isPending}
+                  placeholder="john@example.com"
+                  {...field}
+                />
+              </FormControl>
+              <FieldError />
+            </Field>
+          )} />
+
+          <FormField control={form.control} name="password" render={({ field }) => (
+            <Field>
+              <FieldLabel className="text-[13px]">Password</FieldLabel>
+              <div className="relative">
                 <FormControl>
                   <Input
-                    autoComplete="email"
+                    autoComplete="current-password"
                     required
-                    type="email"
+                    type={showPassword ? "text" : "password"}
                     disabled={isPending}
-                    placeholder="john@example.com"
+                    placeholder="••••••••"
+                    className="pr-10"
                     {...field}
                   />
                 </FormControl>
-                <FieldError />
-              </Field>
-            )} />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  disabled={isPending}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <FieldError />
+            </Field>
+          )} />
 
-            <FormField control={form.control} name="password" render={({ field }) => (
-              <Field>
-                <FieldLabel className="text-[13px]">Password</FieldLabel>
-                <div className="relative">
-                  <FormControl>
-                    <Input
-                      autoComplete="current-password"
-                      required
-                      type={showPassword ? "text" : "password"}
-                      disabled={isPending}
-                      placeholder="••••••••"
-                      className="pr-10"
-                      {...field}
-                    />
-                  </FormControl>
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    disabled={isPending}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-                <FieldError />
-              </Field>
-            )} />
-
-            <div className="flex justify-end pt-1">
-              <Link
-                href="#"
-                className="text-[14px] font-bold text-primary hover:underline"
-              >
-                Forgot Password?
-              </Link>
-            </div>
+          <div className="flex justify-end pt-1">
+            <Link
+              href="#"
+              className="text-[14px] font-bold text-primary hover:underline"
+            >
+              Forgot Password?
+            </Link>
+          </div>
             <Button type="submit" disabled={isPending} className="w-full h-14 text-[16px] mt-4">
               {isPending ? (
                 <span className="flex items-center justify-center gap-2">

@@ -152,15 +152,15 @@ export const Step4Fees: React.FC<Step4FeesProps> = ({
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Total Platform Fee (3.5% + $0.30)</span>
+                    <span>Total Platform Fee (Non-Refundable)</span>
                     <span className="text-foreground">${platformFee.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
                   <div className="flex justify-between border-t border-dashed border-border/20 pt-1.5 font-bold">
-                    <span>Your Fee Share</span>
+                    <span>Your Platform Fee Share</span>
                     <span className="text-destructive">-${sellerFeeShare.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
                   <div className="flex justify-between font-bold">
-                    <span>Buyer Fee Share</span>
+                    <span>Buyer Platform Fee Share</span>
                     <span className="text-emerald-500">+${buyerFeeShare.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
                   <div className="flex justify-between border-t border-border/20 pt-2 font-extrabold text-foreground">

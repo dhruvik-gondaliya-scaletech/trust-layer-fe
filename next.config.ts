@@ -29,7 +29,12 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
         pathname: "/**",
-      }
+      },
+      {
+        protocol: "https",
+        hostname: "d1hxps3fc6n0fc.cloudfront.net",
+        pathname: "/**",
+      },
     ],
   },
   allowedDevOrigins: ['192.168.1.111'],

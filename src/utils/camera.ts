@@ -110,8 +110,8 @@ export const usePhotoCapture = () => {
 
 // Verification videos must fall within this window: long enough to prove
 // physical possession from multiple angles, short enough to stay uploadable.
-export const MIN_RECORDING_SECONDS = 60;
-export const MAX_RECORDING_SECONDS = 80;
+export const MIN_RECORDING_SECONDS = 10;
+export const MAX_RECORDING_SECONDS = 60;
 
 export const useVideoRecording = () => {
   const [recordingState, setRecordingState] = useState<RecordingState>('idle');

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useParams } from "next/navigation";
-import { useDeal, useShipDeal, useConfirmDelivery } from "@/hooks/queries/useDeals";
+import { useDeal, useConfirmDelivery } from "@/hooks/queries/useDeals";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -17,18 +17,8 @@ export default function TimelineContainer() {
   const { user } = useAuth();
   const { data: deal, isLoading, isError } = useDeal(dealNumber);
 
-  const shipMutation = useShipDeal({
-    dealNumber: dealNumber,
-    onSuccess: () => {
-      toast.success("Item marked as shipped!");
-    },
-    onError: (err) => {
-      toast.error("Failed to mark as shipped: " + err.message);
-    },
-  });
-
   const confirmDeliveryMutation = useConfirmDelivery({
-    dealNumber: dealNumber,
+    dealId: deal?.id ?? "",
     onSuccess: () => {
       toast.success("Delivery confirmed and funds released!");
     },
@@ -37,23 +27,9 @@ export default function TimelineContainer() {
     },
   });
 
-  const handleShip = async () => {
+  const handleShip = () => {
     if (!deal) return;
-    try {
-      await shipMutation.mutateAsync({
-        id: deal.id,
-        dto: {
-          carrier: "USPS",
-          shippingType: "priority",
-          trackingNumber: "940011189956" + Math.floor(Math.random() * 10000000000),
-          estimatedDeliveryAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-          isInsured: true,
-          notes: "USPS Priority Package label created.",
-        },
-      });
-    } catch (e) {
-      console.error(e);
-    }
+    router.push(FRONTEND_ROUTES.ADD_TRACKING(deal.dealNumber));
   };
 
   const handleConfirmDelivery = async () => {
@@ -119,6 +95,7 @@ export default function TimelineContainer() {
       onConfirmDelivery={handleConfirmDelivery}
       onFileDispute={() => router.push(FRONTEND_ROUTES.DISPUTE_FLOW(deal.dealNumber))}
       onReviewSeller={() => router.push(FRONTEND_ROUTES.REVIEW_SELLER(deal.dealNumber))}
+      onViewTracking={() => router.push(FRONTEND_ROUTES.VIEW_TRACKING(deal.dealNumber))}
     />
   );
 }

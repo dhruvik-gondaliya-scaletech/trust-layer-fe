@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useDealById, useConfirmDelivery, dealKeys } from "@/hooks/queries/useDeals";
+import { useDealById, useConfirmDelivery, usePublishDeal, useDeleteDeal, dealKeys } from "@/hooks/queries/useDeals";
 import { useAuth } from "@/providers/auth-provider";
 import { useRole } from "@/providers/role-provider";
 import { FRONTEND_ROUTES } from "@/lib/contants";
@@ -24,7 +24,7 @@ export default function DealDetailsContainer() {
   const { role } = useRole();
 
   const confirmDeliveryMutation = useConfirmDelivery({
-    dealNumber: deal?.dealNumber ?? "",
+    dealId: deal?.id ?? "",
     onSuccess: () => {
       if (deal) {
         queryClient.invalidateQueries({ queryKey: dealKeys.byId(deal.id) });
@@ -32,6 +32,25 @@ export default function DealDetailsContainer() {
       toast.success("Delivery confirmed — funds released to the seller.");
     },
     onError: (error) => toast.error(error.message || "Failed to confirm delivery."),
+  });
+
+  const publishDealMutation = usePublishDeal({
+    dealNumber: deal?.dealNumber,
+    onSuccess: () => {
+      if (deal) {
+        queryClient.invalidateQueries({ queryKey: dealKeys.byId(deal.id) });
+      }
+      toast.success("Deal published successfully!");
+    },
+    onError: (error) => toast.error(error.message || "Failed to publish deal."),
+  });
+
+  const deleteDealMutation = useDeleteDeal({
+    onSuccess: () => {
+      toast.success("Deal deleted successfully!");
+      router.push(FRONTEND_ROUTES.DASHBOARD);
+    },
+    onError: (error) => toast.error(error.message || "Failed to delete deal."),
   });
 
   if (isLoading) {
@@ -64,10 +83,7 @@ export default function DealDetailsContainer() {
   }
 
   const isBuyer = role === Role.BUYER || Boolean(user && deal.buyerId === user.id);
-
-  const sortedMedia = [...(deal.media ?? [])].sort((a, b) => a.sortOrder - b.sortOrder);
-  const heroImage = sortedMedia.find((m) => (m.mimeType ?? "").startsWith("image/"));
-  const heroImageUrl = heroImage?.url ?? null;
+  const isSeller = role === Role.SELLER || Boolean(user && deal.sellerId === user.id);
 
   let action: DealDetailsAction = null;
   if (isBuyer && (deal.status === "shipped" || deal.status === "delivered")) {
@@ -91,13 +107,16 @@ export default function DealDetailsContainer() {
   return (
     <DealDetailsView
       deal={deal}
-      heroImageUrl={heroImageUrl}
       onBack={() => router.back()}
       action={action}
       onPrimaryAction={handlePrimaryAction}
       onReportIssue={
         action?.type === "confirm-delivery" ? () => router.push(FRONTEND_ROUTES.DISPUTE_FLOW(deal.dealNumber)) : undefined
       }
+      onPublish={() => publishDealMutation.mutate(deal.id)}
+      isPublishPending={publishDealMutation.isPending}
+      onDelete={() => deleteDealMutation.mutate(deal.id)}
+      isDeletePending={deleteDealMutation.isPending}
     />
   );
 }

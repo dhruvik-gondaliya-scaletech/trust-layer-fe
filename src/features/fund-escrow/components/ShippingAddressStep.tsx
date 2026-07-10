@@ -120,7 +120,7 @@ export function ShippingAddressStep({
                         </p>
                       )}
 
-                      <div className="flex gap-4 mt-3 pt-2 border-t border-slate-50 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex gap-4 mt-3 pt-2 border-t border-slate-50 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                         {!address.isDefault && (
                           <button
                             onClick={(e) => {

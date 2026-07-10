@@ -127,7 +127,7 @@ export const DashboardContainer: React.FC = () => {
                   emailVerified={data.user.emailVerified}
                   phoneVerified={data.user.phoneVerified}
                   notificationCount={unreadNotificationsCount}
-                  onNotificationClick={handleNotificationClick}
+                // onNotificationClick={handleNotificationClick}
                 />
               </motion.div>
 
@@ -136,11 +136,11 @@ export const DashboardContainer: React.FC = () => {
                   availableBalance={data.wallet.availableBalance}
                   inEscrow={data.wallet.inEscrow}
                   readyToWithdraw={data.wallet.readyToWithdraw}
-                  onWalletClick={handleWalletClick}
+                // onWalletClick={handleWalletClick}
                 />
               </motion.div>
 
-              {data.quickActions.length > 0 && (
+              {/* {data.quickActions.length > 0 && (
                 <motion.div variants={slideUp} className="px-5">
                   <QuickActions
                     actions={data.quickActions}
@@ -148,7 +148,7 @@ export const DashboardContainer: React.FC = () => {
                     onActionClick={handleQuickActionClick}
                   />
                 </motion.div>
-              )}
+              )} */}
 
               <motion.div variants={slideUp} className="px-5">
                 <QuickInsights

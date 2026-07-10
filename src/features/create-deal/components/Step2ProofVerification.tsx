@@ -19,7 +19,7 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { TrustScoreHeader, TrustScoreBreakdown } from "./TrustScoreHeader";
+import { TrustScoreCard, TrustScoreBreakdown } from "./TrustScoreCard";
 import { cn } from "@/lib/utils";
 
 // Direct Camera Imports
@@ -360,7 +360,7 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
       <div className="flex-1 overflow-y-auto pr-0.5 space-y-6 scrollbar-none pb-28">
 
         {typeof trustScore === "number" && (
-          <TrustScoreHeader score={trustScore} nextStepName={nextStepName} breakdown={breakdown} />
+          <TrustScoreCard score={trustScore} nextStepName={nextStepName} breakdown={breakdown} />
         )}
 
         <div className="flex flex-col gap-2">
