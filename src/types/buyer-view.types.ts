@@ -1,3 +1,5 @@
+import type { User } from "./api.types";
+
 export interface MediaItem {
     id: string;
     url: string;
@@ -26,6 +28,7 @@ export interface Deal {
     gradedCompany?: string;
     gradedScore?: string;
     media: MediaItem[];
+    seller?: User;
 }
 
 export interface BuyerViewProps {

@@ -63,7 +63,7 @@ export default function BuyerView({
           confidenceMessage={confidenceMessage}
         />
 
-        <SellerProfileSection />
+        <SellerProfileSection seller={deal.seller} trustScore={deal.trustScore} />
 
         <FeeSummaryCard
           feePayer={deal.feePayer}
