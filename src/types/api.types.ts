@@ -119,6 +119,7 @@ export interface Deal {
   publishedAt: string | null;
   fundedAt: string | null;
   trackingNumber: string | null;
+  trackingUrl: string | null;
   shippingNotes: string | null;
   shippedAt: string | null;
   estimatedDeliveryAt: string | null;
@@ -245,6 +246,7 @@ export interface ShipDealDto {
   estimatedDeliveryAt: string;
   isInsured?: boolean;
   notes?: string;
+  trackingUrl?: string;
 }
 
 export interface DealStatusResponse {

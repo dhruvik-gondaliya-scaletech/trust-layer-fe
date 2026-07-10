@@ -53,6 +53,7 @@ export const QuickInsights: React.FC<QuickInsightsProps> = ({
         {cards.map((card, idx) => (
           <div
             key={idx}
+            // onClick={() => router.push(card.route)}
             className="bg-card rounded-[14px] border border-border h-[96px] md:h-[110px] flex flex-col items-center justify-center cursor-pointer hover:border-primary/40 hover:shadow-sm active:scale-95 transition-all duration-150 shadow-none"
           >
             <p className="text-[30px] font-bold leading-none mb-1 text-primary">

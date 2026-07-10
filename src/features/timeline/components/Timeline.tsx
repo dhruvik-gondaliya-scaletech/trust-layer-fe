@@ -22,7 +22,8 @@ export default function Timeline({
   onConfirmDelivery,
   onFileDispute,
   onReviewSeller,
-}: TimelineProps) {
+  onViewTracking,
+}: TimelineProps & { onViewTracking?: () => void }) {
   const { carouselItems, certPhoto, videoMedia } = useTimelineMedia(deal.media);
   const tier = useTrustTier(deal.trustScore);
 
@@ -85,6 +86,7 @@ export default function Timeline({
                 onConfirmDelivery={onConfirmDelivery}
                 onFileDispute={onFileDispute}
                 onReviewSeller={onReviewSeller}
+                onViewTracking={onViewTracking}
               />
 
               <PricingSummaryCard itemPrice={itemPrice} platformFee={platformFee} buyerPays={buyerPays} />

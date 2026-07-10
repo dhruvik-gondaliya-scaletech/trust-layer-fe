@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { Check, ChevronDown, ChevronUp, Image as ImageIcon, PenSquare, Shield } from "lucide-react";
+import { Check, Image as ImageIcon, PenSquare, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/carousel";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 import { cn } from "@/lib/utils";
+import { TrustScoreCard } from "./TrustScoreCard";
 
 interface Step5ReviewPublishProps {
   formData: {
@@ -54,6 +55,8 @@ interface Step5ReviewPublishProps {
   dealId: string;
   dealNumber: string;
   handlePublish: (e: React.FormEvent) => void;
+  isUpdateMode?: boolean;
+  dealStatus?: string | null;
 }
 
 export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
@@ -66,13 +69,13 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
   certPhoto,
   trustScore,
   onEdit,
-  dealId,
   dealNumber,
   isSuccess,
   handlePublish,
+  isUpdateMode = false,
 }) => {
   const router = useRouter();
-  const [showBreakdown, setShowBreakdown] = useState(false);
+
   const videoUrl = useMemo(() => {
     if (!verificationVideo) return null;
     if (typeof verificationVideo === "string") return verificationVideo;
@@ -139,10 +142,12 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
             </div>
 
             <h2 className="text-2xl font-black text-foreground tracking-tight mb-2">
-              Deal published
+              {isUpdateMode ? "Deal updated and published" : "Deal published"}
             </h2>
             <p className="text-sm text-muted-foreground font-medium leading-relaxed mb-8 max-w-[320px]">
-              Send this link to your buyer. {"It's"} the only place they can fund this deal.
+              {isUpdateMode
+                ? "Your deal has been updated and is live. Send this link to your buyer to complete the deal."
+                : "Send this link to your buyer. It's the only place they can fund this deal."}
             </p>
 
             {/* Shareable Link Box */}
@@ -173,155 +178,31 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
 
   const extraPhotosCount = Object.values(productPhotos).filter(Boolean).length;
 
-  // Determine tier and color scheme for premium card
-  let tier = "GETTING STARTED";
-  if (trustScore >= 1 && trustScore < 60) {
-    tier = "LOW";
-  } else if (trustScore >= 60 && trustScore < 80) {
-    tier = "MEDIUM";
-  } else if (trustScore >= 80 && trustScore < 100) {
-    tier = "HIGH";
-  } else if (trustScore === 100) {
-    tier = "EXCELLENT";
-  }
+  const breakdown = {
+    hasItemDetails: true,
+    hasMainPhoto: !!mainPhoto,
+    additionalPhotosCount: extraPhotosCount,
+    hasVideo: !!verificationVideo,
+    hasCertPhoto: !!certPhoto,
+    isGraded: formData.isGraded,
+  };
 
   return (
     <div className="flex flex-col h-full flex-1 overflow-hidden text-left select-none">
       <form id="step5-form" onSubmit={handlePublish} className="flex-1 flex flex-col overflow-hidden">
-        {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto pr-0.5 space-y-6 scrollbar-none pb-28">
           <div className="flex flex-col gap-1">
-            <h2 className="text-xl font-extrabold text-foreground tracking-tight">Review deal</h2>
+            <h2 className="text-xl font-extrabold text-foreground tracking-tight">
+              {isUpdateMode ? "Review updates" : "Review deal"}
+            </h2>
           </div>
 
           {/* Premium Trust Score Card */}
-          <div className="w-full bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-3xl p-6 shadow-md text-white flex flex-col gap-4 relative overflow-hidden">
-            {/* Ambient glows */}
-            <div className="absolute -right-10 -top-10 w-24 h-24 rounded-full bg-white/5 pointer-events-none" />
-
-            <div className="flex items-start justify-between relative z-10">
-              <div className="flex flex-col gap-1">
-                <span className="text-lg font-extrabold tracking-tight">Trust Score</span>
-                <span className="text-[9px] font-black px-2 py-0.5 rounded-md border-none uppercase tracking-wider w-fit mt-1 bg-white/20 text-white">
-                  {tier}
-                </span>
-              </div>
-              <div className="flex items-baseline text-white">
-                <span className="text-4xl font-extrabold tracking-tight">{trustScore}</span>
-                <span className="text-lg font-semibold text-blue-100/60">/100</span>
-              </div>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="w-full relative z-10">
-              <div className="w-full h-2.5 bg-blue-950/45 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-white rounded-full transition-all duration-700 ease-out"
-                  style={{ width: `${trustScore}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Expandable Action Link */}
-            <div
-              onClick={() => setShowBreakdown((prev) => !prev)}
-              className="flex items-center justify-center gap-1.5 cursor-pointer text-xs text-blue-100/80 font-bold hover:text-white transition-colors relative z-10 w-full pt-1"
-            >
-              <span>View Breakdown</span>
-              {showBreakdown ? (
-                <ChevronUp className="w-3.5 h-3.5" />
-              ) : (
-                <ChevronDown className="w-3.5 h-3.5" />
-              )}
-            </div>
-
-            {/* Score Breakdown List */}
-            <AnimatePresence initial={false}>
-              {showBreakdown && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="flex flex-col gap-2.5 pt-3 border-t border-white/10 relative z-10 text-xs text-blue-100/90 font-semibold">
-                    {/* Verified Seller Profile — always earned */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded-full bg-white/20 border border-white flex items-center justify-center shrink-0">
-                          <Check className="w-2.5 h-2.5 stroke-[3]" />
-                        </div>
-                        <span>Verified Seller Profile</span>
-                      </div>
-                      <span className="text-white font-extrabold">+20 pts</span>
-                    </div>
-
-                    {/* Item Details — always true in step 5 */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded-full bg-white/20 border border-white flex items-center justify-center shrink-0">
-                          <Check className="w-2.5 h-2.5 stroke-[3]" />
-                        </div>
-                        <span>Item Details</span>
-                      </div>
-                      <span className="text-white font-extrabold">+20 pts</span>
-                    </div>
-
-                    {/* Main Photo */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className={cn("w-4 h-4 rounded-full flex items-center justify-center border shrink-0", mainPhoto ? "bg-white/20 border-white" : "border-white/25")}>
-                          <Check className={cn("w-2.5 h-2.5 stroke-[3]", !mainPhoto && "opacity-30")} />
-                        </div>
-                        <span className={mainPhoto ? "" : "opacity-50"}>Main Photo</span>
-                      </div>
-                      <span className={mainPhoto ? "text-white font-extrabold" : "opacity-40"}>+15 pts</span>
-                    </div>
-
-                    {/* Additional Photos */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className={cn("w-4 h-4 rounded-full flex items-center justify-center border shrink-0", extraPhotosCount > 0 ? "bg-white/20 border-white" : "border-white/25")}>
-                          <Check className={cn("w-2.5 h-2.5 stroke-[3]", extraPhotosCount === 0 && "opacity-30")} />
-                        </div>
-                        <span className={extraPhotosCount > 0 ? "" : "opacity-50"}>Additional Photos ({extraPhotosCount}/4)</span>
-                      </div>
-                      <span className={extraPhotosCount > 0 ? "text-white font-extrabold" : "opacity-40"}>
-                        +{Math.round((extraPhotosCount / 4) * 15)} pts
-                      </span>
-                    </div>
-
-                    {/* Product Video */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className={cn("w-4 h-4 rounded-full flex items-center justify-center border shrink-0", verificationVideo ? "bg-white/20 border-white" : "border-white/25")}>
-                          <Check className={cn("w-2.5 h-2.5 stroke-[3]", !verificationVideo && "opacity-30")} />
-                        </div>
-                        <span className={verificationVideo ? "" : "opacity-50"}>Product Video</span>
-                      </div>
-                      <span className={verificationVideo ? "text-white font-extrabold" : "opacity-40"}>
-                        +{formData.isGraded ? 20 : 30} pts
-                      </span>
-                    </div>
-
-                    {/* Certificate Photo */}
-                    {formData.isGraded && (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className={cn("w-4 h-4 rounded-full flex items-center justify-center border shrink-0", certPhoto ? "bg-white/20 border-white" : "border-white/25")}>
-                            <Check className={cn("w-2.5 h-2.5 stroke-[3]", !certPhoto && "opacity-30")} />
-                          </div>
-                          <span className={certPhoto ? "" : "opacity-50"}>Certificate Photo</span>
-                        </div>
-                        <span className={certPhoto ? "text-white font-extrabold" : "opacity-40"}>+10 pts</span>
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          <TrustScoreCard
+            score={trustScore}
+            breakdown={breakdown}
+            variant="review"
+          />
 
           {/* Deal Detail Review Card */}
           <div className="w-full bg-background border border-border/80 rounded-[32px] p-5 shadow-xs flex flex-col gap-4 relative">
@@ -411,7 +292,7 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
 
               <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-xs text-muted-foreground font-semibold">Category</span>
+                  <span className="text-xs text-muted-foreground font-semibold">Product Type</span>
                   <span className="text-sm font-bold text-foreground">{formData.category}</span>
                 </div>
                 <div className="flex flex-col gap-0.5">
@@ -439,18 +320,22 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
                   <span className="text-xs text-muted-foreground font-semibold">Order Type</span>
                   <span className="text-sm font-bold text-foreground">{formData.orderType}</span>
                 </div>
+                {formData.orderType !== "In-Person Transaction" && (
+                  <>
+                    <div className="flex justify-between items-center py-0.5">
+                      <span className="text-xs text-muted-foreground font-semibold">Handling Time</span>
+                      <span className="text-sm font-bold text-foreground">{shippingData.handlingTime}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-0.5">
+                      <span className="text-xs text-muted-foreground font-semibold">Shipping Cost</span>
+                      <span className="text-sm font-extrabold text-emerald-500 uppercase">
+                        {(shippingData.shippingCost ?? 0) > 0 ? `$${(shippingData.shippingCost ?? 0).toFixed(2)}` : "FREE"}
+                      </span>
+                    </div>
+                  </>
+                )}
                 <div className="flex justify-between items-center py-0.5">
-                  <span className="text-xs text-muted-foreground font-semibold">Handling Time</span>
-                  <span className="text-sm font-bold text-foreground">{shippingData.handlingTime}</span>
-                </div>
-                <div className="flex justify-between items-center py-0.5">
-                  <span className="text-xs text-muted-foreground font-semibold">Shipping Cost</span>
-                  <span className="text-sm font-extrabold text-emerald-500 uppercase">
-                    {(shippingData.shippingCost ?? 0) > 0 ? `$${(shippingData.shippingCost ?? 0).toFixed(2)}` : "FREE"}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-0.5">
-                  <span className="text-xs text-muted-foreground font-semibold">Fee Structure</span>
+                  <span className="text-xs text-muted-foreground font-semibold">Platform Fee</span>
                   <span className="text-sm font-bold text-foreground">{feesData.feeStructure}</span>
                 </div>
               </div>

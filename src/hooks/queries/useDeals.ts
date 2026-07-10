@@ -231,11 +231,13 @@ export function useUploadDealMedia({
       file,
       sortOrder,
       fileName,
+      proofType = ProofType.ITEM_MEDIA,
     }: {
       dealId: string;
       file: File | Blob;
       sortOrder: number;
       fileName?: string;
+      proofType?: ProofType;
     }) => {
       // 1. Get presigned URL via S3 service — presigned into the deal's folder
       const presignedUrls = await s3Service.getPreSignedUrls({
@@ -257,7 +259,7 @@ export function useUploadDealMedia({
         mimeType: file.type || "image/jpeg",
         sizeBytes: file.size,
         sortOrder,
-        proofType: ProofType.ITEM_MEDIA,
+        proofType,
       });
     },
     onSuccess: () => {
@@ -341,11 +343,11 @@ export function useDeclineDeal({
  * Marks a deal as shipped. Invalidates my-deals and by-number caches.
  */
 export function useShipDeal({
-  dealNumber,
+  dealId,
   onSuccess,
   onError,
 }: {
-  dealNumber: string;
+  dealId: string;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }) {
@@ -357,7 +359,7 @@ export function useShipDeal({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: dealKeys.myDeals() });
       queryClient.invalidateQueries({
-        queryKey: dealKeys.byDealNumber(dealNumber),
+        queryKey: dealKeys.byId(dealId),
       });
       onSuccess?.();
     },
@@ -372,11 +374,11 @@ export function useShipDeal({
  * Confirms delivery of a deal. Invalidates my-deals and by-number caches.
  */
 export function useConfirmDelivery({
-  dealNumber,
+  dealId,
   onSuccess,
   onError,
 }: {
-  dealNumber: string;
+  dealId: string;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }) {
@@ -387,7 +389,7 @@ export function useConfirmDelivery({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: dealKeys.myDeals() });
       queryClient.invalidateQueries({
-        queryKey: dealKeys.byDealNumber(dealNumber),
+        queryKey: dealKeys.byId(dealId),
       });
       onSuccess?.();
     },

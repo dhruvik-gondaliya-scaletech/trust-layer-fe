@@ -34,20 +34,22 @@ export function PaymentSummaryCard({ deal }: PaymentSummaryCardProps) {
         <h3 className="font-bold text-[16px] text-gray-900 mb-4 flex items-center gap-2">
           <CreditCard className={cn("w-4 h-4", theme.text)} /> Payment Summary
         </h3>
-        
+
         <div className="space-y-3 text-[14px]">
           <div className="flex justify-between items-center text-gray-600 font-medium">
             <span>Item Price</span>
             <span className="text-gray-900 font-bold">${formatCurrency(deal.price)}</span>
           </div>
-          
-          {deal.orderType !== "in_person" && shippingCost > 0 && (
+
+          {deal.orderType !== "in_person" && (
             <div className="flex justify-between items-center text-gray-600 font-medium">
               <span>Shipping (Reimbursed to Seller)</span>
-              <span className="text-gray-900 font-bold">${formatCurrency(shippingCost)}</span>
+              <span className="text-gray-900 font-bold">
+                {shippingCost > 0 ? `$${formatCurrency(shippingCost)}` : "Free"}
+              </span>
             </div>
           )}
-          
+
           <div className="flex justify-between items-center text-gray-600 font-medium">
             <span>Platform Fee</span>
             <span className="text-gray-900 font-bold">
@@ -56,7 +58,7 @@ export function PaymentSummaryCard({ deal }: PaymentSummaryCardProps) {
           </div>
         </div>
       </div>
-      
+
       <div className="bg-gray-50 p-4 border-t border-gray-100 space-y-2">
         <div className="flex justify-between items-center">
           <span className="text-[13px] font-bold text-gray-500 uppercase tracking-wider">

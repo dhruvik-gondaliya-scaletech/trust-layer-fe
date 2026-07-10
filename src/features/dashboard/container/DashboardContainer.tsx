@@ -136,6 +136,7 @@ export const DashboardContainer: React.FC = () => {
                   availableBalance={data.wallet.availableBalance}
                   inEscrow={data.wallet.inEscrow}
                   readyToWithdraw={data.wallet.readyToWithdraw}
+                // onWalletClick={handleWalletClick}
                 />
               </motion.div>
 

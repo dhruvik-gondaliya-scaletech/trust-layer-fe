@@ -2,11 +2,9 @@
 
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Info } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Form, FormField, FormControl, Field, FieldLabel, FieldError } from "@/components/ui/field";
 
 export interface Step3ShippingData {
@@ -99,8 +97,8 @@ export const Step3Shipping: React.FC<Step3ShippingProps> = ({
                 type="number"
                 min={0}
                 step="0.01"
-                placeholder="Enter shipping cost"
-                className="rounded-2xl border h-12 text-sm font-semibold border-border/80 placeholder:text-muted-foreground/50 placeholder:font-normal"
+                placeholder="Enter Shipping Cost"
+                className="rounded-2xl border h-12 text-sm font-semibold border-border/80 placeholder:text-muted-foreground/50"
                 value={field.value ?? ""}
                 onChange={(e) =>
                   field.onChange(
