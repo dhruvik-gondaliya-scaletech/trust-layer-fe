@@ -70,7 +70,7 @@ export const DealListingView: React.FC<DealListingViewProps> = ({
   return (
     <div className="w-full bg-background min-h-screen py-6 md:py-10">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        
+
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div className="space-y-1">
@@ -137,7 +137,6 @@ export const DealListingView: React.FC<DealListingViewProps> = ({
 
           {/* Search Input */}
           <div className="relative w-full">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/85" />
             <Input
               type="text"
               placeholder="Search by title, deal number..."
@@ -217,7 +216,7 @@ export const DealListingView: React.FC<DealListingViewProps> = ({
             ))}
           </div>
         )}
-        
+
       </div>
     </div>
   );

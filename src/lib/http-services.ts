@@ -67,7 +67,7 @@ const PUBLIC_ROUTES: string[] = [
     FRONTEND_ROUTES.LOGIN,
     FRONTEND_ROUTES.REGISTER,
     FRONTEND_ROUTES.VERIFY,
-    "/deal",
+    "/open-deal",
 ];
 
 class HttpService {

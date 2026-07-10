@@ -51,7 +51,7 @@ function PublicLayoutContent({
           }
         }
       }
-    } else if (pathname.startsWith("/deal/")) {
+    } else if (pathname.startsWith("/deal/") || pathname.startsWith("/open-deal/")) {
       // Allow authenticated or unauthenticated users to view public deals without redirect
       return;
     } else {
@@ -84,7 +84,7 @@ function PublicLayoutContent({
         const profileComplete = !!user.username;
         if (emailVerified && phoneVerified && profileComplete) return true;
       }
-    } else if (pathname.startsWith("/deal/")) {
+    } else if (pathname.startsWith("/deal/") || pathname.startsWith("/open-deal/")) {
       // Never force redirect/loading state for deals based on auth status
       return false;
     } else {
@@ -98,7 +98,7 @@ function PublicLayoutContent({
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-dvh bg-background">
       {/* Left side: branding/marketing (desktop only) */}
       <div className="hidden lg:flex lg:w-[45%] xl:w-[50%] bg-[#0B0F19] text-white flex-col justify-between p-12 relative overflow-hidden select-none border-r border-slate-800/80">
         {/* Glow effects */}
@@ -138,7 +138,7 @@ function PublicLayoutContent({
 
       {/* Right side: form area */}
       <div
-        className="flex-1 w-full lg:w-[55%] xl:w-[50%] h-screen relative bg-background flex flex-col justify-center items-center select-text"
+        className="flex-1 w-full lg:w-[55%] xl:w-[50%] h-dvh relative bg-background flex flex-col justify-center items-center select-text"
         style={{ transform: "translate3d(0, 0, 0)" }}
       >
         <div className="w-full h-full overflow-y-auto">

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { ChevronRight, Flame, Gamepad2, Heart, User, Package, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -16,6 +17,7 @@ interface DealItem {
   statusType: "warning" | "success" | "muted" | string;
   price: string;
   image: string;
+  mediaUrl?: string | null;
 }
 
 interface RecentDealsProps {
@@ -75,9 +77,18 @@ export const RecentDeals: React.FC<RecentDealsProps> = ({
             >
               {/* Left: thumbnail + info */}
               <div className="flex items-center gap-3.5">
-                {/* Thumbnail — Icon badge */}
+                {/* Thumbnail — real image or icon fallback */}
                 <div className="w-12 h-12 bg-card rounded-xl overflow-hidden shrink-0 border border-border flex items-center justify-center text-primary shadow-sm">
-                  {(() => {
+                  {deal.mediaUrl ? (
+                    <Image
+                      src={deal.mediaUrl}
+                      alt={deal.title}
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-cover"
+                      unoptimized
+                    />
+                  ) : (() => {
                     const IconComponent = PRODUCT_ICONS[deal.image] || Package;
                     return <IconComponent className="w-6 h-6" />;
                   })()}

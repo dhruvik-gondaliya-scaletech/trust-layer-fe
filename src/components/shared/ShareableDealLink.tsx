@@ -5,6 +5,7 @@ import { Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { FRONTEND_ROUTES } from "@/lib/contants";
 
 interface ShareableDealLinkProps {
   dealNumber: string;
@@ -22,8 +23,8 @@ export function ShareableDealLink({ dealNumber, className }: ShareableDealLinkPr
   }, []);
 
   const shareableUrl = typeof window !== "undefined"
-    ? `${window.location.origin}/deal/${dealNumber}`
-    : `https://trustlayer.com/deal/${dealNumber}`;
+    ? `${window.location.origin}${FRONTEND_ROUTES.BUYER_VIEW(dealNumber)}`
+    : `https://trustlayer.com${FRONTEND_ROUTES.BUYER_VIEW(dealNumber)}`;
 
   const handleCopy = async () => {
     try {
@@ -43,7 +44,7 @@ export function ShareableDealLink({ dealNumber, className }: ShareableDealLinkPr
       </span>
       <div className="relative flex items-center bg-background border border-border/80 rounded-2xl p-3 pr-14 shadow-xs w-full min-w-0">
         <span className="text-xs font-bold text-foreground/80 truncate select-all pl-1 w-full block min-w-0">
-          {host}/deal/{dealNumber}
+          {host}/open-deal/{dealNumber}
         </span>
         <button
           type="button"
