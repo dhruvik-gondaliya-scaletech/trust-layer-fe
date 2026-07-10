@@ -29,6 +29,7 @@ export interface DashboardData {
     statusType: "warning" | "success" | "muted" | string;
     price: string;
     image: string;
+    mediaUrl: string | null;
   }>;
   insights: {
     activeListings: number;
@@ -161,6 +162,11 @@ export function useDashboardData(role: "seller" | "buyer", stateOverride?: "succ
         const role: "selling" | "buying" = isSeller ? "selling" : "buying";
         const friendly = getFriendlyStatus(deal.status, role);
 
+        // Pick the image with the lowest sortOrder (primary thumbnail)
+        const primaryMedia = deal.media
+          ?.filter((m) => m.mimeType?.startsWith("image/"))
+          .sort((a, b) => a.sortOrder - b.sortOrder)[0];
+
         return {
           id: deal.id,
           dealNumber: deal.dealNumber,
@@ -171,6 +177,7 @@ export function useDashboardData(role: "seller" | "buyer", stateOverride?: "succ
           statusType: friendly.type,
           price: formatCurrency(deal.buyerPaysAmount),
           image: deal.productType,
+          mediaUrl: primaryMedia?.url ?? null,
         };
       });
 

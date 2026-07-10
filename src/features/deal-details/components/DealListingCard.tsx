@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { ChevronRight, Flame, Gamepad2, Heart, User, Package, Layers, Calendar } from "lucide-react";
 import type { Deal } from "@/types/api.types";
 import { getStatusBadgeMeta } from "../utils/dealStatusMeta";
@@ -32,6 +33,11 @@ export const DealListingCard: React.FC<DealListingCardProps> = ({
   const { label: statusLabel, className: statusClass } = getStatusBadgeMeta(deal.status);
   const IconComponent = PRODUCT_ICONS[deal.productType] || Package;
 
+  // Pick the image with sortOrder 0 (or lowest) as the primary thumbnail
+  const primaryImageUrl = deal.media
+    ?.filter((m) => m.mimeType?.startsWith("image/"))
+    .sort((a, b) => a.sortOrder - b.sortOrder)[0]?.url ?? null;
+
   // Format date safely
   const formattedDate = deal.createdAt
     ? new Date(deal.createdAt).toLocaleDateString(undefined, {
@@ -47,9 +53,20 @@ export const DealListingCard: React.FC<DealListingCardProps> = ({
       className="group relative bg-card hover:bg-slate-50/50 dark:hover:bg-slate-900/50 border border-border/80 rounded-2xl p-4 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4"
     >
       <div className="flex items-start gap-4">
-        {/* Product Type Icon */}
-        <div className="w-12 h-12 rounded-xl bg-primary/5 dark:bg-primary/10 border border-primary/10 flex items-center justify-center text-primary shrink-0 transition-transform group-hover:scale-105">
-          <IconComponent className="w-6 h-6" />
+        {/* Product Thumbnail — real image or category icon fallback */}
+        <div className="w-12 h-12 rounded-xl overflow-hidden bg-primary/5 dark:bg-primary/10 border border-primary/10 flex items-center justify-center text-primary shrink-0 transition-transform group-hover:scale-105">
+          {primaryImageUrl ? (
+            <Image
+              src={primaryImageUrl}
+              alt={deal.title}
+              width={48}
+              height={48}
+              className="w-full h-full object-cover"
+              unoptimized
+            />
+          ) : (
+            <IconComponent className="w-6 h-6" />
+          )}
         </div>
 
         {/* Details */}
