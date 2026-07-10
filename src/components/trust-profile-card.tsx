@@ -5,11 +5,13 @@ import Image from "next/image"
 export interface TrustProfileCardProps {
   user: {
     username: string
+    firstName?: string | null
+    lastName?: string | null
     avatarUrl: string
     trustScore: number
-    rating: number
-    reviewCount: number
-    successfulDeals: number
+    rating?: number
+    reviewCount?: number
+    successfulDeals?: number
     memberSince: string | number
     isTrustedMember?: boolean
   }
@@ -73,9 +75,20 @@ export function TrustProfileCard({ user, variant = 'medium', className, onClick 
         <div className="flex flex-col min-w-0 flex-1">
           <div className="flex flex-wrap justify-between items-start gap-x-2 gap-y-2 w-full">
             <div className="flex flex-col min-w-0 shrink">
-              <p className={cn("font-extrabold text-foreground mb-1.5 truncate", nameSizes[variant])}>
-                {user.username}
-              </p>
+              {user.firstName || user.lastName ? (
+                <>
+                  <p className={cn("font-extrabold text-foreground mb-0.5 truncate", nameSizes[variant])}>
+                    {[user.firstName, user.lastName].filter(Boolean).join(" ")}
+                  </p>
+                  <p className="text-[13px] font-medium text-muted-foreground mb-1.5 truncate">
+                    {user.username}
+                  </p>
+                </>
+              ) : (
+                <p className={cn("font-extrabold text-foreground mb-1.5 truncate", nameSizes[variant])}>
+                  {user.username}
+                </p>
+              )}
               {user.isTrustedMember && (
                 <div className="flex items-center">
                   <span className="bg-green-50 text-green-700 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full flex items-center gap-1 w-max">
@@ -84,26 +97,26 @@ export function TrustProfileCard({ user, variant = 'medium', className, onClick 
                 </div>
               )}
             </div>
-            <div className="text-right flex flex-col items-end shrink-0 ml-auto">
+            {/* <div className="text-right flex flex-col items-end shrink-0 ml-auto">
               <div className="text-[11px] sm:text-[12px] font-medium text-muted-foreground tracking-[0.05em] sm:tracking-[0.08em] uppercase mb-0.5 sm:mb-1">User Trust Score</div>
               <div className={cn("font-black text-blue-600 leading-none", scoreSizes[variant])}>
                 {user.trustScore}
               </div>
-            </div>
+            </div> */}
           </div>
 
-          <div className="flex items-center gap-1 mt-2.5 sm:mt-1.5 flex-wrap">
+          {/* <div className="flex items-center gap-1 mt-2.5 sm:mt-1.5 flex-wrap">
             <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
             <span className="text-[13px] font-bold text-gray-900">{Number(user.rating).toFixed(1)}</span>
             <span className="text-[12px] font-medium text-gray-400 mx-0.5 shrink-0">•</span>
             <span className="text-[12px] font-medium text-gray-500 underline decoration-gray-300 underline-offset-2 hover:text-gray-700 transition-colors whitespace-nowrap">
               {user.reviewCount} Reviews
             </span>
-          </div>
+          </div> */}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      {/* <div className="grid grid-cols-2 gap-3">
         <div className="bg-[#F7F8FA] p-5 rounded-[20px] flex flex-col items-start justify-center overflow-hidden">
           <div className="text-[11px] sm:text-[12px] text-muted-foreground uppercase font-medium tracking-[0.08em] mb-2 whitespace-nowrap">Successful Deals</div>
           <div className={cn("font-bold text-foreground leading-none", statSizes[variant])}>{user.successfulDeals}</div>
@@ -112,7 +125,7 @@ export function TrustProfileCard({ user, variant = 'medium', className, onClick 
           <div className="text-[11px] sm:text-[12px] text-muted-foreground uppercase font-medium tracking-[0.08em] mb-2 whitespace-nowrap">Member Since</div>
           <div className={cn("font-bold text-foreground leading-none", statSizes[variant])}>{user.memberSince}</div>
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }

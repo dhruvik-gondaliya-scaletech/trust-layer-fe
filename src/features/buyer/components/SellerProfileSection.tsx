@@ -1,22 +1,38 @@
 "use client";
 
 import { TrustProfileCard } from "@/components/trust-profile-card";
+import type { User } from "@/types/api.types";
 
-// Mock seller profile until deal.seller is wired up from the API.
-export function SellerProfileSection() {
+interface SellerProfileSectionProps {
+  seller?: User;
+  trustScore?: number;
+}
+
+export function SellerProfileSection({ seller, trustScore }: SellerProfileSectionProps) {
+  if (!seller) return null;
+
+  const displayName = seller.username
+    ? `@${seller.username}`
+    : [seller.firstName, seller.lastName].filter(Boolean).join(" ") || "Seller";
+
+  const memberSinceYear = seller.createdAt
+    ? new Date(seller.createdAt).getFullYear()
+    : new Date().getFullYear();
+
+  const isVerified = Boolean(seller.emailVerifiedAt && seller.phoneVerifiedAt);
+
   return (
     <div>
       <TrustProfileCard
         variant="medium"
         user={{
-          username: "@vintage_vault",
-          avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop",
-          trustScore: 96,
-          rating: 4.9,
-          reviewCount: 184,
-          successfulDeals: 184,
-          memberSince: 2022,
-          isTrustedMember: true,
+          username: seller.username ? `@${seller.username}` : "Seller",
+          firstName: seller.firstName,
+          lastName: seller.lastName,
+          avatarUrl: seller.profilePhotoUrl || "",
+          trustScore: trustScore ?? 95,
+          memberSince: memberSinceYear,
+          isTrustedMember: isVerified,
         }}
       />
     </div>

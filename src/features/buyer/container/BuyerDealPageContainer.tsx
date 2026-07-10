@@ -88,6 +88,7 @@ export default function BuyerDealPageContainer() {
       mimeType: m.mimeType || "image/jpeg",
       sortOrder: m.sortOrder,
     })) || [],
+    seller: deal.seller,
   };
 
   return (
