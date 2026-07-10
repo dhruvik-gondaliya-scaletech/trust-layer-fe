@@ -1,5 +1,6 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import Image from "next/image";
@@ -8,7 +9,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Form, FormField, FormControl, Field, FieldLabel, FieldError } from "@/components/ui/field";
 
@@ -187,7 +188,7 @@ export default function ReviewSeller({
               className="w-full h-14 bg-[#7C9BF3] hover:bg-[#6B8AE2] text-white rounded-2xl font-bold text-[15px] transition-all active:scale-[0.98] shadow-sm shadow-[#7C9BF3]/20 flex items-center justify-center gap-2 cursor-pointer"
             >
               {isSubmitting ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <Spinner className="w-5 h-5" />
               ) : (
                 "Submit Review"
               )}

@@ -1,5 +1,6 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -8,7 +9,7 @@ import {
   useDeleteAddress,
 } from "@/hooks/queries/useAddresses";
 import ShippingAddressList from "./ShippingAddressList";
-import { Loader2 } from "lucide-react";
+
 import { FRONTEND_ROUTES } from "@/lib/contants";
 
 export default function SelectShippingAddressContainer() {
@@ -25,7 +26,7 @@ export default function SelectShippingAddressContainer() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
-        <Loader2 size={36} className="text-primary animate-spin" />
+        <Spinner className="text-primary size-9" />
         <p className="text-[13px] text-slate-400 font-bold mt-3">Loading addresses...</p>
       </div>
     );

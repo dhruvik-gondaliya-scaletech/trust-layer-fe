@@ -1,7 +1,8 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import React, { useState, useEffect, useRef } from "react";
-import { Camera, Video, Image as ImageIcon, Check, RefreshCw, AlertCircle, Award, Loader2 } from "lucide-react";
+import { Camera, Video, Image as ImageIcon, Check, RefreshCw, AlertCircle, Award } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -60,7 +61,7 @@ const PHOTO_SLOTS = [
 // Dim + spinner shown over a media preview while its live upload is in flight
 const UploadingOverlay = () => (
   <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] flex flex-col items-center justify-center gap-1.5 z-10">
-    <Loader2 className="w-6 h-6 text-white animate-spin" />
+    <Spinner className="w-6 h-6 text-white" />
     <span className="text-[10px] font-bold text-white uppercase tracking-wider">Uploading</span>
   </div>
 );
@@ -200,7 +201,7 @@ const DirectCameraOverlay = ({ type, title, onCapture, onCaptureVideo, onClose }
           <div className="absolute top-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-20">
             {analysisStatus === 'loading' && (
               <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 shadow-xl text-xs font-bold text-blue-300 whitespace-nowrap">
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <Spinner className="w-3.5 h-3.5" />
                 <span>Loading verification engine...</span>
               </div>
             )}

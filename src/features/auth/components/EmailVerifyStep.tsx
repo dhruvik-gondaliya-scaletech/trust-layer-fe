@@ -1,12 +1,13 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import React, { useState, useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { EmailVerifyInput } from "@/lib/validations/verify";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Label } from "@/components/ui/label";
-import { Mail, Shield, Loader2, ChevronLeft, Check } from "lucide-react";
+import { Mail, Shield, ChevronLeft, Check } from "lucide-react";
 import { BottomActionBar } from "@/components/ui/bottom-action-bar";
 import { toast } from "sonner";
 import { CODE_RESEND_TIME_OUT } from "@/lib/contants";
@@ -192,7 +193,7 @@ export const EmailVerifyStep: React.FC<EmailVerifyStepProps> = ({
             <Button form="verify-form" type="submit" disabled={isPending} className="w-full lg:flex-1 h-14 text-[15px] font-bold rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/10 transition-all duration-200 active:scale-[0.98]">
               {isPending ? (
                 <span className="flex items-center justify-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Spinner className="w-4 h-4" />
                   Verifying...
                 </span>
               ) : (
@@ -208,7 +209,7 @@ export const EmailVerifyStep: React.FC<EmailVerifyStepProps> = ({
             >
               {isResending ? (
                 <span className="flex items-center justify-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Spinner className="w-4 h-4" />
                   Resending...
                 </span>
               ) : resendCountdown > 0 ? (

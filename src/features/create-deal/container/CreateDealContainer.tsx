@@ -1,7 +1,8 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import React, { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useConfetti } from "@/providers/confetti-provider";
 import { FRONTEND_ROUTES } from "@/lib/contants";
@@ -579,7 +580,7 @@ export const CreateDealContainer: React.FC = () => {
   if (!isInitialized) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center p-6 min-h-[400px]">
-        <Loader2 className="w-8 h-8 text-primary animate-spin mb-2" />
+        <Spinner className="w-8 h-8 text-primary mb-2" />
         <p className="text-sm text-muted-foreground font-semibold">Loading draft...</p>
       </div>
     );

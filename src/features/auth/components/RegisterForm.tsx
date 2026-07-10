@@ -1,11 +1,12 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import React, { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { RegisterInput } from "@/lib/validations/register";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Shield, Loader2, Eye, EyeOff } from "lucide-react";
+import { Shield, Eye, EyeOff } from "lucide-react";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -201,7 +202,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             <Button type="submit" disabled={isPending} className="w-full h-14 text-[16px]">
               {isPending ? (
                 <span className="flex items-center justify-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Spinner className="w-4 h-4" />
                   Creating Account...
                 </span>
               ) : (

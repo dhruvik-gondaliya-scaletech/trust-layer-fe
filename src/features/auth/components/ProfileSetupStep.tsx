@@ -1,5 +1,6 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import React, { useState, useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
 import Image from "next/image";
@@ -10,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Slider } from "@/components/ui/slider";
-import { ChevronLeft, Loader2, Camera } from "lucide-react";
+import { ChevronLeft, Camera } from "lucide-react";
 import { BottomActionBar } from "@/components/ui/bottom-action-bar";
 import { Form, FormField, FormControl, Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { useUploadProfilePhoto } from "@/hooks/queries/useUsers";
@@ -225,7 +226,7 @@ export const ProfileSetupStep: React.FC<ProfileSetupStepProps> = ({
                 >
                   {isUploading ? (
                     <span className="flex items-center justify-center gap-1.5">
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <Spinner className="w-3.5 h-3.5" />
                       Saving...
                     </span>
                   ) : (
@@ -338,7 +339,7 @@ export const ProfileSetupStep: React.FC<ProfileSetupStepProps> = ({
           <Button form="profile-form" type="submit" disabled={isPending || cropMode} className="w-full h-14 text-[15px] font-bold rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/10 transition-all duration-200 active:scale-[0.98]">
             {isPending ? (
               <span className="flex items-center justify-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Spinner className="w-4 h-4" />
                 Saving Profile...
               </span>
             ) : (
