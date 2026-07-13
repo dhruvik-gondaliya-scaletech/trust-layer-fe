@@ -7,13 +7,14 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { getBlurScore } from "@/utils/blur";
 import { getDistanceRatio } from "@/utils/distance";
+import { CameraMode } from "@/types/enums";
 
 interface CameraValidationProps {
   isOpen: boolean;
   onClose: () => void;
   onCapture: (dataUrl: string) => void;
   onCaptureVideo?: (videoBlob: Blob) => void;
-  type: "main" | "front" | "back" | "side" | "detail" | "video";
+  type: CameraMode;
   title: string;
 }
 
@@ -160,11 +161,11 @@ export const CameraValidation: React.FC<CameraValidationProps> = ({
       let stream: MediaStream;
       try {
         stream = await getUserMediaWithTimeout(
-          { video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: type === "video" },
+          { video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: type === CameraMode.VIDEO },
           timeout
         );
       } catch {
-        stream = await getUserMediaWithTimeout({ video: true, audio: type === "video" }, timeout);
+        stream = await getUserMediaWithTimeout({ video: true, audio: type === CameraMode.VIDEO }, timeout);
       }
 
       streamRef.current = stream;
@@ -297,7 +298,7 @@ export const CameraValidation: React.FC<CameraValidationProps> = ({
           setFeedback(CameraFeedback.MOVE_BACK);
           setFeedbackColor("text-amber-400");
         } else {
-          setFeedback(type === "video" ? CameraFeedback.PERFECT_RECORD : CameraFeedback.PERFECT_PHOTO);
+          setFeedback(type === CameraMode.VIDEO ? CameraFeedback.PERFECT_RECORD : CameraFeedback.PERFECT_PHOTO);
           setFeedbackColor("text-emerald-400");
         }
       } catch (err) {
@@ -615,10 +616,10 @@ export const CameraValidation: React.FC<CameraValidationProps> = ({
               </Button>
               <Button
                 type="button"
-                onClick={type === "video" ? handleSimulateVideo : handleSimulateCapture}
+                onClick={type === CameraMode.VIDEO ? handleSimulateVideo : handleSimulateCapture}
                 className="bg-primary text-primary-foreground hover:bg-primary/95 rounded-xl h-11 text-xs font-bold active:scale-[0.98] shadow-lg shadow-primary/20"
               >
-                Simulate {type === "video" ? "Video Capture" : "Photo Capture"} (Dev Bypass)
+                Simulate {type === CameraMode.VIDEO ? "Video Capture" : "Photo Capture"} (Dev Bypass)
               </Button>
             </div>
           </div>
@@ -713,7 +714,7 @@ export const CameraValidation: React.FC<CameraValidationProps> = ({
         {/* ── Live camera controls ── */}
         {!inPreview && !errorMsg && (
           <>
-            {type === "video" ? (
+            {type === CameraMode.VIDEO ? (
               <div className="flex items-center justify-center">
                 {isRecording ? (
                   <button

@@ -26,6 +26,8 @@ import { cn } from "@/lib/utils";
 // Direct Camera Imports
 import { useCamera, usePhotoCapture, useVideoRecording } from '@/utils/camera';
 import { useAnalysis } from '@/utils/analysis';
+import { MediaSlot } from "@/types/deal.types";
+import { CameraMode } from "@/types/enums";
 
 interface Step2ProofVerificationProps {
   mainPhoto: string | null;
@@ -43,7 +45,7 @@ interface Step2ProofVerificationProps {
   onCaptureVideo: (videoBlob: Blob) => void;
   onCaptureCertPhoto: (dataUrl: string) => void;
   /** Slots with a live backend upload in flight — shows a loading overlay on that slot */
-  uploadingSlots?: Partial<Record<"main" | "back" | "leftSide" | "rightSide" | "detail" | "video" | "cert", boolean>>;
+  uploadingSlots?: Partial<Record<MediaSlot, boolean>>;
   onContinue: () => void;
   onBack: () => void;
   trustScore?: number;
@@ -104,7 +106,15 @@ const UploadProgressBar: React.FC<{ isUploading: boolean }> = ({ isUploading }) 
 };
 
 
-const DirectCameraOverlay = ({ type, title, onCapture, onCaptureVideo, onClose }: any) => {
+interface DirectCameraOverlayProps {
+  type: CameraMode;
+  title: string;
+  onCapture: (dataUrl: string) => void;
+  onCaptureVideo: (videoBlob: Blob) => void;
+  onClose: () => void;
+}
+
+const DirectCameraOverlay: React.FC<DirectCameraOverlayProps> = ({ type, title, onCapture, onCaptureVideo, onClose }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { stream, error, isStarting, open, close } = useCamera();
   const { capturePhoto } = usePhotoCapture();
@@ -125,7 +135,7 @@ const DirectCameraOverlay = ({ type, title, onCapture, onCaptureVideo, onClose }
   useEffect(() => {
     if (hasAutoStarted.current) return;
     hasAutoStarted.current = true;
-    open(type === 'video');
+    open(type === CameraMode.VIDEO);
   }, [open, type]);
 
 
@@ -267,7 +277,7 @@ const DirectCameraOverlay = ({ type, title, onCapture, onCaptureVideo, onClose }
             )}
 
             {/* Recording timer + progress, enforcing the 60-80s window */}
-            {type === 'video' && recordingState === 'recording' && (
+            {type === CameraMode.VIDEO && recordingState === 'recording' && (
               <div className="flex flex-col items-center gap-1.5 mt-1">
                 <div className="flex items-center gap-2 bg-red-600 px-4 py-1.5 rounded-full text-white font-extrabold text-xs tracking-wider animate-pulse shadow-md">
                   <Video className="w-3.5 h-3.5" />
@@ -313,7 +323,7 @@ const DirectCameraOverlay = ({ type, title, onCapture, onCaptureVideo, onClose }
       </div>
 
       <div className="px-6 py-8 bg-gradient-to-t from-black/90 to-transparent flex flex-col items-center gap-4 z-20 absolute bottom-0 left-0 right-0">
-        {type === 'video' ? (
+        {type === CameraMode.VIDEO ? (
           <Button
             onClick={handleCaptureVideo}
             disabled={recordingState === 'recording' && recordingSeconds < minRecordingSeconds}
@@ -359,10 +369,10 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
   const [activeAccordion, setActiveAccordion] = useState<string>("main-photo");
 
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [sheetType, setSheetType] = useState<"main" | "back" | "leftSide" | "rightSide" | "detail" | "video" | "cert" | null>(null);
+  const [sheetType, setSheetType] = useState<MediaSlot | null>(null);
 
   const [cameraOpen, setCameraOpen] = useState(false);
-  const [cameraType, setCameraType] = useState<"main" | "back" | "leftSide" | "rightSide" | "detail" | "video" | "cert" | null>(null);
+  const [cameraType, setCameraType] = useState<MediaSlot | null>(null);
 
   const capturedPhotosCount = Object.values(productPhotos).filter(Boolean).length;
   const isProductPhotosComplete = capturedPhotosCount === 4;
@@ -378,6 +388,26 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
       setCameraType(sheetType);
       setCameraOpen(true);
     }
+  };
+
+  const handleGalleryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      if (dataUrl) {
+        onCaptureCertPhoto(dataUrl);
+        toast.success("Certificate uploaded from gallery!");
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const videoUrl = React.useMemo(() => {
@@ -701,24 +731,50 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                       </div>
                     </div>
                     <UploadProgressBar isUploading={!!uploadingSlots.cert} />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={uploadingSlots.cert}
-                      onClick={() => handleOpenGuidelines("cert")}
-                      className="rounded-xl font-bold text-[11px] tracking-wider uppercase h-9 flex items-center gap-1.5 border-border/80 active:scale-[0.98] transition-all"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5" /> Retake Photo
-                    </Button>
+                    <div className="flex gap-3 justify-center w-full max-w-[280px] mt-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={uploadingSlots.cert}
+                        onClick={() => handleOpenGuidelines("cert")}
+                        className="flex-1 rounded-full font-extrabold text-[11px] tracking-wider uppercase h-10 flex items-center justify-center gap-2 border-border/80 hover:bg-muted/50 active:scale-[0.98] transition-all"
+                      >
+                        <Camera className="w-4 h-4" /> CAMERA
+                      </Button>
+                      <label className={cn(
+                        "flex-1 flex items-center justify-center gap-2 rounded-full border border-border/80 bg-background hover:bg-muted/50 text-foreground font-extrabold text-[11px] tracking-wider uppercase h-10 cursor-pointer transition-all active:scale-[0.98]",
+                        uploadingSlots.cert && "pointer-events-none opacity-50"
+                      )}>
+                        <ImageIcon className="w-4 h-4" /> GALLERY
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleGalleryUpload}
+                          disabled={uploadingSlots.cert}
+                        />
+                      </label>
+                    </div>
                   </div>
                 ) : (
-                  <Button
-                    type="button"
-                    onClick={() => handleOpenGuidelines("cert")}
-                    className="w-full bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/10 rounded-xl h-10 text-xs font-bold active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                  >
-                    <Camera className="w-4 h-4" /> Take Certificate Photo
-                  </Button>
+                  <div className="flex gap-3 justify-center w-full max-w-[280px] mx-auto mt-1">
+                    <Button
+                      type="button"
+                      onClick={() => handleOpenGuidelines("cert")}
+                      className="flex-1 bg-background border border-border/80 text-foreground hover:bg-muted/50 shadow-xs rounded-full h-10 text-[11px] font-extrabold uppercase tracking-wider active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                    >
+                      <Camera className="w-4 h-4" /> CAMERA
+                    </Button>
+                    <label className="flex-1 flex items-center justify-center gap-2 bg-background border border-border/80 text-foreground hover:bg-muted/50 shadow-xs rounded-full h-10 text-[11px] font-extrabold uppercase tracking-wider cursor-pointer active:scale-[0.98] transition-all">
+                      <ImageIcon className="w-4 h-4" /> GALLERY
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleGalleryUpload}
+                      />
+                    </label>
+                  </div>
                 )}
               </AccordionContent>
             </AccordionItem>
@@ -823,7 +879,7 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
             )}
           </div>
 
-          <div className="flex gap-3 max-w-[340px] mx-auto pt-2 pb-6">
+          <div className="flex gap-3 max-w-[340px] mx-auto pt-2 pb-6 w-full">
             {sheetType === "video" ? (
               <>
                 <Button
@@ -842,6 +898,28 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                   Start Recording
                 </Button>
               </>
+            ) : sheetType === "cert" ? (
+              <>
+                <Button
+                  type="button"
+                  onClick={handleContinueToCamera}
+                  className="flex-1 bg-primary text-primary-foreground hover:bg-primary/95 shadow-md rounded-xl h-11 text-xs font-bold active:scale-[0.98] transition-all uppercase tracking-wider flex items-center justify-center gap-1.5"
+                >
+                  <Camera className="w-3.5 h-3.5" /> Camera
+                </Button>
+                <label className="flex-1 flex items-center justify-center gap-1.5 bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border/50 shadow-sm rounded-xl h-11 text-xs font-bold cursor-pointer active:scale-[0.98] transition-all uppercase tracking-wider">
+                  <ImageIcon className="w-3.5 h-3.5" /> Gallery
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      setSheetOpen(false);
+                      handleGalleryUpload(e);
+                    }}
+                  />
+                </label>
+              </>
             ) : (
               <Button
                 type="button"
@@ -857,16 +935,16 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
 
       {/* Direct Camera Overlay */}
       {cameraOpen && cameraType && (() => {
-        const mappedType: "main" | "front" | "back" | "side" | "detail" | "video" =
+        const mappedType: CameraMode =
           cameraType === "video"
-            ? "video"
+            ? CameraMode.VIDEO
             : cameraType === "main"
-              ? "main"
+              ? CameraMode.MAIN
               : cameraType === "back"
-                ? "back"
+                ? CameraMode.BACK
                 : cameraType === "detail" || cameraType === "cert"
-                  ? "detail"
-                  : "side";
+                  ? CameraMode.DETAIL
+                  : CameraMode.SIDE;
 
         return (
           <DirectCameraOverlay

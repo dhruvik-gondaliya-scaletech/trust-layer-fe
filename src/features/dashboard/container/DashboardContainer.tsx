@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useDashboardData } from "@/hooks/queries/useDashboardData";
 import { useUnreadNotificationsCount } from "@/hooks/queries/useNotifications";
 import { useRole } from "@/providers/role-provider";
+import { useAuth } from "@/providers/auth-provider";
 import { fadeIn, slideUp, staggerContainer } from "@/lib/motion";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 import { DashboardHeader } from "../components/DashboardHeader";
@@ -23,10 +24,17 @@ import { cn } from "@/lib/utils";
 
 export const DashboardContainer: React.FC = () => {
   const router = useRouter();
-  const { role } = useRole();
+  const { role, mounted } = useRole();
+  const { user } = useAuth();
 
-  const { data, isLoading, isError, error, refetch } = useDashboardData(role);
-  const { data: unreadNotificationsCount = 0 } = useUnreadNotificationsCount();
+  const { data, isLoading, isError, error, refetch } = useDashboardData(
+    role,
+    user,
+    { enabled: mounted && !!user }
+  );
+  const { data: unreadNotificationsCount = 0 } = useUnreadNotificationsCount({
+    enabled: mounted && !!user,
+  });
 
 
 
@@ -64,7 +72,7 @@ export const DashboardContainer: React.FC = () => {
   };
 
   // ── State Guards ─────────────────────────────────────────────────────────
-  if (isLoading) {
+  if (isLoading || !mounted || !user) {
     return <DashboardSkeleton />;
   }
 

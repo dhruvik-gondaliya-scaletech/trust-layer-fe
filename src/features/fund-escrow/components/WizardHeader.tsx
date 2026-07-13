@@ -1,7 +1,7 @@
 "use client";
 
-import { ChevronLeft, Shield, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Shield, X } from "lucide-react";
+import { BackButton } from "@/components/shared/BackButton";
 
 interface WizardHeaderProps {
   title?: string;
@@ -15,12 +15,10 @@ export function WizardHeader({ title, onBack, onRequestExit }: WizardHeaderProps
     <div className="bg-background border-b border-slate-100 sticky top-0 z-20">
       <div className="max-w-2xl mx-auto flex items-center justify-between px-4 py-3 w-full">
         {/* Back Button */}
-        <button
+        <BackButton
           onClick={onBack}
-          className="p-2 -ml-2 rounded-full text-foreground hover:bg-gray-100 transition-colors"
-        >
-          <ChevronLeft className="h-6 w-6" />
-        </button>
+          className="-ml-2"
+        />
 
         {/* Secure Checkout Badge */}
         <div className="flex items-center gap-1.5 text-primary bg-primary/10 px-3 py-1 rounded-full">

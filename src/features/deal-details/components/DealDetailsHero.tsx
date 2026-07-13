@@ -1,18 +1,17 @@
 "use client";
 
-import { ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getStatusBadgeMeta } from "../utils/dealStatusMeta";
 import { formatCurrency } from "../utils/format";
 import type { Deal } from "@/types/api.types";
 import { OrderType } from "@/types/enums";
+import { BackButton } from "@/components/shared/BackButton";
 
 interface DealDetailsHeroProps {
   deal: Deal;
-  onBack: () => void;
 }
 
-export function DealDetailsHero({ deal, onBack }: DealDetailsHeroProps) {
+export function DealDetailsHero({ deal }: DealDetailsHeroProps) {
   const badge = getStatusBadgeMeta(deal.status);
   const subtitleParts = [
     deal.condition,
@@ -36,12 +35,7 @@ export function DealDetailsHero({ deal, onBack }: DealDetailsHeroProps) {
       <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent" />
 
       <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10 max-w-2xl mx-auto">
-        <button
-          onClick={onBack}
-          className="p-2 rounded-full bg-black/20 backdrop-blur-md text-white hover:bg-black/40 transition-colors"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </button>
+        <BackButton />
 
         <div className={cn(
           "px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider backdrop-blur-md border",
@@ -61,8 +55,8 @@ export function DealDetailsHero({ deal, onBack }: DealDetailsHeroProps) {
               <span className="text-white text-[24px] md:text-[28px] font-black shrink-0">${formatCurrency(deal.buyerPaysAmount)}</span>
               {deal.orderType !== OrderType.IN_PERSON && (
                 <p className="text-[11px] font-bold text-white/60 -mt-0.5">
-                  {Number(deal.shippingCost) > 0 
-                    ? `Includes $${formatCurrency(deal.shippingCost)} shipping` 
+                  {Number(deal.shippingCost) > 0
+                    ? `Includes $${formatCurrency(deal.shippingCost)} shipping`
                     : "Includes free shipping"}
                 </p>
               )}

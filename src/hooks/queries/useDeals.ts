@@ -22,12 +22,13 @@ export const dealKeys = {
  * Fetches all deals belonging to the authenticated user.
  * Cached for 30 seconds.
  */
-export function useMyDeals(role?: "seller" | "buyer" | "all") {
+export function useMyDeals(role?: "seller" | "buyer" | "all", options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: dealKeys.myDeals(role),
     queryFn: () => dealsService.getMyDeals(role),
     staleTime: 30_000,
     retry: 1,
+    enabled: options?.enabled,
   });
 }
 

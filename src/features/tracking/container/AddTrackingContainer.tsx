@@ -113,7 +113,6 @@ export default function AddTrackingContainer() {
     <AddTracking
       onSubmit={handleTrackingSubmit}
       isSubmitting={isSubmitting}
-      onBack={() => router.push(FRONTEND_ROUTES.DEAL_TIMELINE(dealId))}
     />
   );
 }

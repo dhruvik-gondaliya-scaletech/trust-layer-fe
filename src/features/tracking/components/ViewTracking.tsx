@@ -12,12 +12,12 @@ import { getCarrierTrackingUrl } from "../../deal-details/utils/format";
 import type { Deal } from "@/types/api.types";
 import { DealStatus } from "@/types/enums";
 import { cn } from "@/lib/utils";
+import { BackButton } from "@/components/shared/BackButton";
 
 interface ViewTrackingProps {
   deal: Deal;
   isBuyer: boolean;
   isSeller: boolean;
-  onBack: () => void;
   onConfirmDelivery: () => Promise<void>;
   onReportIssue: () => void;
   isConfirming: boolean;
@@ -34,8 +34,6 @@ const STEPPER_STEPS = [
 export default function ViewTracking({
   deal,
   isBuyer,
-  isSeller,
-  onBack,
   onConfirmDelivery,
   onReportIssue,
   isConfirming,
@@ -114,15 +112,7 @@ export default function ViewTracking({
       {/* ─── Header ─── */}
       <div className="bg-white border-b border-slate-100/80 sticky top-0 z-30">
         <div className="max-w-2xl mx-auto flex items-center justify-between px-4 py-4 w-full">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onBack}
-            className="w-10 h-10 rounded-full text-slate-500 hover:bg-slate-50 transition-colors active:scale-95"
-          >
-            <ChevronLeft size={20} />
-          </Button>
-
+          <BackButton />
           <div className="flex items-center gap-1.5 font-black text-slate-800 text-[16px] tracking-tight">
             <Shield className="w-5 h-5 text-blue-600 fill-blue-50" />
             <span>TrustLayer</span>

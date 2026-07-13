@@ -9,7 +9,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ChevronLeft } from "lucide-react";
+import { BackButton } from "@/components/shared/BackButton";
 import { cn } from "@/lib/utils";
 import { Form, FormField, FormControl, Field, FieldLabel, FieldError } from "@/components/ui/field";
 
@@ -68,14 +68,10 @@ export default function ReviewSeller({
       {/* ─── Header ─── */}
       <div className="bg-white border-b border-slate-100 sticky top-0 z-10 w-full shrink-0">
         <div className="flex items-center justify-between px-4 py-4 w-full">
-          <Button
-            variant="ghost"
-            size="icon"
+          <BackButton
             onClick={onBack}
-            className="w-10 h-10 rounded-full text-slate-800 hover:bg-slate-50 shrink-0 flex items-center justify-center cursor-pointer"
-          >
-            <ChevronLeft size={20} className="stroke-[2.5]" />
-          </Button>
+            className="-ml-2"
+          />
           <span className="text-[16px] font-extrabold text-slate-900 tracking-tight">Review Seller</span>
           <div className="w-10 h-10 shrink-0" />
         </div>

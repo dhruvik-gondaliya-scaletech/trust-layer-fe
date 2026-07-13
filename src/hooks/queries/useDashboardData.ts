@@ -3,6 +3,7 @@ import usersService from "@/services/users.service";
 import dealsService from "@/services/deals.service";
 import walletService from "@/services/wallet.service";
 import { formatCurrency } from "@/lib/utils";
+import type { User } from "@/types/api.types";
 
 export interface DashboardData {
   user: {
@@ -50,7 +51,7 @@ export interface DashboardData {
 
 export const dashboardKeys = {
   all: ["dashboardData"] as const,
-  byRole: (role: "seller" | "buyer", stateOverride?: string) => [...dashboardKeys.all, role, stateOverride] as const,
+  byRole: (role: "seller" | "buyer", userId?: string, stateOverride?: string) => [...dashboardKeys.all, role, userId || "", stateOverride] as const,
 };
 
 
@@ -87,14 +88,20 @@ function getFriendlyStatus(status: string, role: "selling" | "buying"): { text: 
   }
 }
 
-export function useDashboardData(role: "seller" | "buyer", stateOverride?: "success" | "loading" | "error" | "empty") {
+export function useDashboardData(
+  role: "seller" | "buyer",
+  user: User | null | undefined,
+  options?: { enabled?: boolean },
+  stateOverride?: "success" | "loading" | "error" | "empty"
+) {
   return useQuery<DashboardData, Error>({
-    queryKey: dashboardKeys.byRole(role, stateOverride),
+    queryKey: dashboardKeys.byRole(role, user?.id, stateOverride),
     queryFn: async () => {
-      // 1. Fetch current user
-      const user = await usersService.getMe();
+      if (!user) {
+        throw new Error("User session is not initialized.");
+      }
 
-      // 2. Fetch my deals
+      // 1. Fetch my deals
       const deals = await dealsService.getMyDeals(role);
 
       // 3. Fetch wallet with lazy initialization (404) handling
@@ -223,6 +230,7 @@ export function useDashboardData(role: "seller" | "buyer", stateOverride?: "succ
         },
       };
     },
-    staleTime: 5000,
+    staleTime: 30_000,
+    enabled: options?.enabled,
   });
 }

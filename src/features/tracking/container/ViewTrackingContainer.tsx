@@ -114,7 +114,6 @@ export default function ViewTrackingContainer() {
       deal={deal}
       isBuyer={isBuyer}
       isSeller={isSeller}
-      onBack={() => router.push(FRONTEND_ROUTES.DEAL_TIMELINE(deal.dealNumber))}
       onConfirmDelivery={handleConfirmDelivery}
       onReportIssue={handleReportIssue}
       isConfirming={confirmDeliveryMutation.isPending}

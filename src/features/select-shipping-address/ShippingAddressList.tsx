@@ -3,7 +3,8 @@ import React from "react";
 import { ShippingAddress } from "@/types/address.types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2, Home, Briefcase, MapPin, Plus, ChevronLeft, Check } from "lucide-react";
+import { Trash2, Home, Briefcase, MapPin, Plus, Check } from "lucide-react";
+import { BackButton } from "@/components/shared/BackButton";
 import { cn } from "@/lib/utils";
 import { BottomActionBar } from "@/components/ui/bottom-action-bar";
 
@@ -33,14 +34,10 @@ export default function ShippingAddressList({
       {/* ─── Header ─── */}
       <div className="bg-white border-b border-slate-100 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto flex items-center p-4 w-full">
-          <Button
-            variant="ghost"
-            size="icon"
+          <BackButton
             onClick={onBack}
-            className="w-10 h-10 rounded-full text-slate-500 hover:bg-slate-50 -ml-2"
-          >
-            <ChevronLeft size={20} />
-          </Button>
+            className="-ml-2"
+          />
         </div>
       </div>
 
