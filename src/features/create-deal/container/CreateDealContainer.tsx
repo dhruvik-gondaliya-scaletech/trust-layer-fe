@@ -834,8 +834,8 @@ export const CreateDealContainer: React.FC = () => {
                   ? (isSubmitting
                     ? (isUpdateMode ? "Saving..." : "Publishing...")
                     : (isUpdateMode
-                      ? (dealStatus === "draft" ? "Publish Deal" : "Save Changes")
-                      : "Publish Deal"))
+                      ? (dealStatus === "draft" ? "Publish" : "Save Changes")
+                      : "Publish"))
                   : isSuccess
                     ? "Go to Dashboard"
                     : step === 2 && isUploadingMedia
