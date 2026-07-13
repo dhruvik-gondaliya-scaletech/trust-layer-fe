@@ -9,6 +9,26 @@ import cvImport from '@techstark/opencv-js';
 
 import type { ValidationConfig, AnalysisResult, AnalysisMetric } from '@/utils/analysis';
 
+const VALIDATION_MESSAGES = {
+  blur: {
+    pass: 'Image sharpness is acceptable',
+    warn: 'Image is slightly blurry',
+    fail: 'Image is blurry',
+  },
+  brightness: {
+    pass: 'Brightness is optimal',
+    warnDark: 'Image is a bit dark',
+    warnBright: 'Image is a bit bright',
+    fail: 'Lighting needs improvement',
+  },
+  coverage: {
+    pass: 'Item coverage is optimal',
+    warn: 'Move closer to the item',
+    fail: `Item isn't clearly visible`,
+    error: 'Analysis failed',
+  },
+} as const;
+
 let cv: any = null;
 
 async function getCv(): Promise<any> {
@@ -68,14 +88,14 @@ function analyzeBlur(mat: any, config: ValidationConfig): AnalysisMetric {
     const variance = Math.pow(stddev.doubleAt(0, 0), 2);
 
     let status: 'pass' | 'fail' | 'warning' = 'fail';
-    let message = 'Image is too blurry';
+    let message: string = VALIDATION_MESSAGES.blur.fail;
 
     if (variance >= config.blurPass) {
       status = 'pass';
-      message = 'Image sharpness is acceptable';
+      message = VALIDATION_MESSAGES.blur.pass;
     } else if (variance >= config.blurWarn) {
       status = 'warning';
-      message = 'Image is slightly blurry';
+      message = VALIDATION_MESSAGES.blur.warn;
     }
 
     return { score: variance, status, message };
@@ -102,14 +122,16 @@ function analyzeBrightness(mat: any, config: ValidationConfig): AnalysisMetric {
     const luminance = mean.doubleAt(0, 0);
 
     let status: 'pass' | 'fail' | 'warning' = 'fail';
-    let message = 'Image is too dark or too bright';
+    let message: string = VALIDATION_MESSAGES.brightness.fail;
 
     if (luminance >= config.brightnessMinPass && luminance <= config.brightnessMaxPass) {
       status = 'pass';
-      message = 'Brightness is optimal';
+      message = VALIDATION_MESSAGES.brightness.pass;
     } else if (luminance >= config.brightnessMinWarn && luminance <= config.brightnessMaxWarn) {
       status = 'warning';
-      message = luminance < config.brightnessMinPass ? 'Image is a bit dark' : 'Image is a bit bright';
+      message = luminance < config.brightnessMinPass
+        ? VALIDATION_MESSAGES.brightness.warnDark
+        : VALIDATION_MESSAGES.brightness.warnBright;
     }
 
     return { score: luminance, status, message };
@@ -220,20 +242,20 @@ function analyzeCoverage(mat: any, config: ValidationConfig): AnalysisMetric {
     }
 
     let status: 'pass' | 'fail' | 'warning' = 'fail';
-    let message = 'Subject is too small or missing';
+    let message: string = VALIDATION_MESSAGES.coverage.fail;
 
     if (coverageRatio >= config.coveragePass) {
       status = 'pass';
-      message = 'Subject coverage is optimal';
+      message = VALIDATION_MESSAGES.coverage.pass;
     } else if (coverageRatio >= config.coverageWarn) {
       status = 'warning';
-      message = 'Move closer to the subject';
+      message = VALIDATION_MESSAGES.coverage.warn;
     }
 
     return { score: coverageRatio * 100, status, message, rect: maxRect || undefined };
   } catch (err) {
     console.error('Error in coverage analysis', err);
-    return { score: 0, status: 'fail', message: 'Analysis failed' };
+    return { score: 0, status: 'fail', message: VALIDATION_MESSAGES.coverage.error };
   } finally {
     gray.delete();
     laplacian.delete();
@@ -286,4 +308,4 @@ self.onmessage = (event: MessageEvent<AnalyzeMessage>) => {
   }
 };
 
-export {};
+export { };
