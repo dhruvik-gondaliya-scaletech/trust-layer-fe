@@ -66,6 +66,44 @@ const UploadingOverlay = () => (
   </div>
 );
 
+const UploadProgressBar: React.FC<{ isUploading: boolean }> = ({ isUploading }) => {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    if (!isUploading) {
+      setProgress(0);
+      return;
+    }
+    setProgress(5);
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 92) return prev;
+        const diff = Math.max(1, Math.floor((100 - prev) / 8));
+        return prev + diff;
+      });
+    }, 200);
+    return () => clearInterval(interval);
+  }, [isUploading]);
+
+  if (!isUploading) return null;
+
+  return (
+    <div className="w-full max-w-[140px] flex flex-col items-center gap-1.5 py-1 select-none animate-in fade-in duration-200">
+      <div className="w-full bg-muted/80 h-1.5 rounded-full overflow-hidden border border-border/5">
+        <div
+          className="bg-primary h-full transition-all duration-300 ease-out rounded-full"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+      <div className="flex items-center justify-between w-full text-[9px] font-bold text-muted-foreground/80 tracking-wider uppercase px-0.5">
+        <span>Uploading</span>
+        <span className="tabular-nums font-extrabold text-primary">{progress}%</span>
+      </div>
+    </div>
+  );
+};
+
+
 const DirectCameraOverlay = ({ type, title, onCapture, onCaptureVideo, onClose }: any) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { stream, error, isStarting, open, close } = useCamera();
@@ -426,6 +464,7 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                       <Check className="w-3.5 h-3.5 stroke-[3]" />
                     </div>
                   </div>
+                  <UploadProgressBar isUploading={!!uploadingSlots.main} />
                   <Button
                     type="button"
                     variant="outline"
@@ -488,54 +527,57 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                   const image = productPhotos[slot.id];
                   const isUploading = uploadingSlots[slot.id];
                   return (
-                    <div
-                      key={slot.id}
-                      onClick={() => {
-                        if (isUploading) return;
-                        handleOpenGuidelines(slot.id);
-                      }}
-                      className={cn(
-                        "aspect-square rounded-xl border overflow-hidden relative group flex flex-col items-center justify-center p-2.5 transition-all",
-                        isUploading ? "cursor-wait" : "cursor-pointer",
-                        image
-                          ? "border-emerald-500/50 bg-background/50"
-                          : "border-dashed border-border/80 hover:border-primary/50 bg-muted/20 hover:bg-primary/5"
-                      )}
-                    >
-                      {image ? (
-                        <>
-                          <Image src={image} alt={slot.label} fill className="object-cover" />
-                          {isUploading ? (
-                            <UploadingOverlay />
-                          ) : (
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
-                                <RefreshCw className="w-3.5 h-3.5" />
+                    <div key={slot.id} className="flex flex-col items-center w-full">
+                      <div
+                        onClick={() => {
+                          if (isUploading) return;
+                          handleOpenGuidelines(slot.id);
+                        }}
+                        className={cn(
+                          "w-full aspect-square rounded-xl border overflow-hidden relative group flex flex-col items-center justify-center p-2.5 transition-all",
+                          isUploading ? "cursor-wait" : "cursor-pointer",
+                          image
+                            ? "border-emerald-500/50 bg-background/50"
+                            : "border-dashed border-border/80 hover:border-primary/50 bg-muted/20 hover:bg-primary/5"
+                        )}
+                      >
+                        {image ? (
+                          <>
+                            <Image src={image} alt={slot.label} fill className="object-cover" />
+                            {isUploading ? (
+                              <UploadingOverlay />
+                            ) : (
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
+                                  <RefreshCw className="w-3.5 h-3.5" />
+                                </div>
                               </div>
+                            )}
+                            <div className="absolute top-1.5 right-1.5 bg-emerald-500 text-white rounded-full p-0.5 shadow-sm">
+                              <Check className="w-2.5 h-2.5 stroke-[3]" />
                             </div>
-                          )}
-                          <div className="absolute top-1.5 right-1.5 bg-emerald-500 text-white rounded-full p-0.5 shadow-sm">
-                            <Check className="w-2.5 h-2.5 stroke-[3]" />
-                          </div>
-                          <div className="absolute bottom-1.5 left-1.5 right-1.5 bg-black/60 backdrop-blur-md py-0.5 px-1.5 rounded border border-white/10 text-center">
-                            <span className="text-[7.5px] font-extrabold text-white uppercase tracking-wider truncate block">
+                            <div className="absolute bottom-1.5 left-1.5 right-1.5 bg-black/60 backdrop-blur-md py-0.5 px-1.5 rounded border border-white/10 text-center">
+                              <span className="text-[7.5px] font-extrabold text-white uppercase tracking-wider truncate block">
+                                {slot.label}
+                              </span>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="w-8 h-8 rounded-full bg-background border border-border/50 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform mb-2">
+                              <Camera className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                            </div>
+                            <span className="text-xs font-bold text-foreground text-center group-hover:text-primary transition-colors">
                               {slot.label}
                             </span>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="w-8 h-8 rounded-full bg-background border border-border/50 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform mb-2">
-                            <Camera className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                          </div>
-                          <span className="text-xs font-bold text-foreground text-center group-hover:text-primary transition-colors">
-                            {slot.label}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground text-center leading-normal mt-0.5 max-w-[100px] truncate">
-                            {slot.desc}
-                          </span>
-                        </>
-                      )}
+                            <span className="text-[10px] text-muted-foreground text-center leading-normal mt-0.5 max-w-[100px] truncate">
+                              {slot.desc}
+                            </span>
+                            {isUploading && <UploadingOverlay />}
+                          </>
+                        )}
+                      </div>
+                      <UploadProgressBar isUploading={!!isUploading} />
                     </div>
                   );
                 })}
@@ -587,6 +629,7 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                     <video src={videoUrl} controls className="w-full h-full object-cover" />
                     {uploadingSlots.video && <UploadingOverlay />}
                   </div>
+                  <UploadProgressBar isUploading={!!uploadingSlots.video} />
                   <Button
                     type="button"
                     variant="outline"
@@ -657,6 +700,7 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                         <Check className="w-3.5 h-3.5 stroke-[3]" />
                       </div>
                     </div>
+                    <UploadProgressBar isUploading={!!uploadingSlots.cert} />
                     <Button
                       type="button"
                       variant="outline"
