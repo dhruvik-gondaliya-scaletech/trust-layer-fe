@@ -4,7 +4,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Dashboard - TrustLayer",
-  description: "View and manage your secure escrow deals, wallet balance, and recent activities.",
+  description: "View and manage your secure deals, wallet balance, and recent activities.",
 };
 
 export default function DashboardPage() {

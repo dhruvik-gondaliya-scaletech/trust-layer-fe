@@ -3,6 +3,7 @@ import dealsService from "@/services/deals.service";
 import s3Service from "@/services/s3.service";
 import type { CreateDealDto, UpdateDealDto, Deal, DeclineDealDto, ShipDealDto, DealStatusResponse } from "@/types/api.types";
 import { ProofType, UploadPurpose } from "@/types/enums";
+import { dashboardKeys } from "@/hooks/queries/useDashboardData";
 
 // ─── Query Keys ───────────────────────────────────────────────────────────────
 
@@ -103,7 +104,8 @@ export function useCreateDeal({
   return useMutation({
     mutationFn: (dto: CreateDealDto) => dealsService.createDeal(dto),
     onSuccess: (deal) => {
-      queryClient.invalidateQueries({ queryKey: dealKeys.myDeals() });
+      queryClient.invalidateQueries({ queryKey: [...dealKeys.all, "my"] });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
       onSuccess?.(deal.id);
     },
     onError: (error: Error) => {
@@ -124,7 +126,7 @@ export function useUpdateDeal({
   onError,
 }: {
   dealNumber?: string;
-  onSuccess?: () => void;
+  onSuccess?: (deal: Deal) => void;
   onError?: (error: Error) => void;
 } = {}) {
   const queryClient = useQueryClient();
@@ -132,14 +134,13 @@ export function useUpdateDeal({
   return useMutation({
     mutationFn: ({ id, dto }: { id: string; dto: UpdateDealDto }) =>
       dealsService.updateDeal(id, dto),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: dealKeys.myDeals() });
-      if (dealNumber) {
-        queryClient.invalidateQueries({
-          queryKey: dealKeys.byDealNumber(dealNumber),
-        });
-      }
-      onSuccess?.();
+    onSuccess: (deal) => {
+      queryClient.invalidateQueries({ queryKey: [...dealKeys.all, "my"] });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+      queryClient.invalidateQueries({ queryKey: dealKeys.byId(deal.id) });
+      queryClient.invalidateQueries({ queryKey: dealKeys.byDealNumber(deal.dealNumber) });
+      queryClient.invalidateQueries({ queryKey: dealKeys.statusByDealNumber(deal.dealNumber) });
+      onSuccess?.(deal);
     },
     onError: (error: Error) => {
       onError?.(error);
@@ -159,21 +160,20 @@ export function usePublishDeal({
   onError,
 }: {
   dealNumber?: string;
-  onSuccess?: () => void;
+  onSuccess?: (deal: Deal) => void;
   onError?: (error: Error) => void;
 } = {}) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: string) => dealsService.updateDeal(id, { publish: true }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: dealKeys.myDeals() });
-      if (dealNumber) {
-        queryClient.invalidateQueries({
-          queryKey: dealKeys.byDealNumber(dealNumber),
-        });
-      }
-      onSuccess?.();
+    onSuccess: (deal) => {
+      queryClient.invalidateQueries({ queryKey: [...dealKeys.all, "my"] });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+      queryClient.invalidateQueries({ queryKey: dealKeys.byId(deal.id) });
+      queryClient.invalidateQueries({ queryKey: dealKeys.byDealNumber(deal.dealNumber) });
+      queryClient.invalidateQueries({ queryKey: dealKeys.statusByDealNumber(deal.dealNumber) });
+      onSuccess?.(deal);
     },
     onError: (error: Error) => {
       onError?.(error);
@@ -198,8 +198,15 @@ export function useDeleteDeal({
 
   return useMutation({
     mutationFn: (id: string) => dealsService.deleteDeal(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: dealKeys.myDeals() });
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: [...dealKeys.all, "my"] });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+      queryClient.invalidateQueries({ queryKey: dealKeys.byId(id) });
+      const cachedDeal = queryClient.getQueryData<Deal>(dealKeys.byId(id));
+      if (cachedDeal?.dealNumber) {
+        queryClient.invalidateQueries({ queryKey: dealKeys.byDealNumber(cachedDeal.dealNumber) });
+        queryClient.invalidateQueries({ queryKey: dealKeys.statusByDealNumber(cachedDeal.dealNumber) });
+      }
       onSuccess?.();
     },
     onError: (error: Error) => {
@@ -262,8 +269,15 @@ export function useUploadDealMedia({
         proofType,
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: dealKeys.all });
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [...dealKeys.all, "my"] });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+      queryClient.invalidateQueries({ queryKey: dealKeys.byId(variables.dealId) });
+      const cachedDeal = queryClient.getQueryData<Deal>(dealKeys.byId(variables.dealId));
+      if (cachedDeal?.dealNumber) {
+        queryClient.invalidateQueries({ queryKey: dealKeys.byDealNumber(cachedDeal.dealNumber) });
+        queryClient.invalidateQueries({ queryKey: dealKeys.statusByDealNumber(cachedDeal.dealNumber) });
+      }
       onSuccess?.();
     },
     onError: (error: Error) => {
@@ -292,12 +306,15 @@ export function useDeleteDealMedia({
   return useMutation({
     mutationFn: ({ dealId, mediaId }: { dealId: string; mediaId: string }) =>
       dealsService.deleteMedia(dealId, mediaId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: dealKeys.myDeals() });
-      if (dealNumber) {
-        queryClient.invalidateQueries({
-          queryKey: dealKeys.byDealNumber(dealNumber),
-        });
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [...dealKeys.all, "my"] });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+      queryClient.invalidateQueries({ queryKey: dealKeys.byId(variables.dealId) });
+      const cachedDeal = queryClient.getQueryData<Deal>(dealKeys.byId(variables.dealId));
+      const targetDealNumber = dealNumber || cachedDeal?.dealNumber;
+      if (targetDealNumber) {
+        queryClient.invalidateQueries({ queryKey: dealKeys.byDealNumber(targetDealNumber) });
+        queryClient.invalidateQueries({ queryKey: dealKeys.statusByDealNumber(targetDealNumber) });
       }
       onSuccess?.();
     },
@@ -325,11 +342,12 @@ export function useDeclineDeal({
   return useMutation({
     mutationFn: ({ id, dto }: { id: string; dto: DeclineDealDto }) =>
       dealsService.declineDeal(id, dto),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: dealKeys.myDeals() });
-      queryClient.invalidateQueries({
-        queryKey: dealKeys.byDealNumber(dealNumber),
-      });
+    onSuccess: (deal) => {
+      queryClient.invalidateQueries({ queryKey: [...dealKeys.all, "my"] });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+      queryClient.invalidateQueries({ queryKey: dealKeys.byId(deal.id) });
+      queryClient.invalidateQueries({ queryKey: dealKeys.byDealNumber(deal.dealNumber) });
+      queryClient.invalidateQueries({ queryKey: dealKeys.statusByDealNumber(deal.dealNumber) });
       onSuccess?.();
     },
     onError: (error: Error) => {
@@ -356,11 +374,12 @@ export function useShipDeal({
   return useMutation({
     mutationFn: ({ id, dto }: { id: string; dto: ShipDealDto }) =>
       dealsService.shipDeal(id, dto),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: dealKeys.myDeals() });
-      queryClient.invalidateQueries({
-        queryKey: dealKeys.byId(dealId),
-      });
+    onSuccess: (deal) => {
+      queryClient.invalidateQueries({ queryKey: [...dealKeys.all, "my"] });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+      queryClient.invalidateQueries({ queryKey: dealKeys.byId(deal.id) });
+      queryClient.invalidateQueries({ queryKey: dealKeys.byDealNumber(deal.dealNumber) });
+      queryClient.invalidateQueries({ queryKey: dealKeys.statusByDealNumber(deal.dealNumber) });
       onSuccess?.();
     },
     onError: (error: Error) => {
@@ -386,11 +405,12 @@ export function useConfirmDelivery({
 
   return useMutation({
     mutationFn: (id: string) => dealsService.confirmDelivery(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: dealKeys.myDeals() });
-      queryClient.invalidateQueries({
-        queryKey: dealKeys.byId(dealId),
-      });
+    onSuccess: (deal) => {
+      queryClient.invalidateQueries({ queryKey: [...dealKeys.all, "my"] });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+      queryClient.invalidateQueries({ queryKey: dealKeys.byId(deal.id) });
+      queryClient.invalidateQueries({ queryKey: dealKeys.byDealNumber(deal.dealNumber) });
+      queryClient.invalidateQueries({ queryKey: dealKeys.statusByDealNumber(deal.dealNumber) });
       onSuccess?.();
     },
     onError: (error: Error) => {

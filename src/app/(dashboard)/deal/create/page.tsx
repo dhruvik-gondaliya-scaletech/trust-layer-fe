@@ -4,8 +4,8 @@ import { Metadata } from "next";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Create Secure Escrow Deal | TrustLayer",
-  description: "Create a new verified transaction protected by TrustLayer escrow.",
+  title: "Create Secure Deal | TrustLayer",
+  description: "Create a new verified transaction protected by TrustLayer.",
 };
 
 export default function CreateDealPage() {

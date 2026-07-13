@@ -4,6 +4,7 @@ import { CreditCard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "../utils/format";
 import type { Deal } from "@/types/api.types";
+import { DealStatus, OrderType } from "@/types/enums";
 import { useRole } from "@/providers/role-provider";
 import { Card } from "@/components/ui/card";
 
@@ -25,7 +26,7 @@ export function PaymentSummaryCard({ deal }: PaymentSummaryCardProps) {
   };
 
   const hasBeenFunded = Boolean(deal.fundedAt);
-  const fundsReleased = deal.status === "closed" || (deal.status as string) === "completed";
+  const fundsReleased = deal.status === DealStatus.CLOSED;
   const shippingCost = Number(deal.shippingCost);
 
   return (
@@ -41,7 +42,7 @@ export function PaymentSummaryCard({ deal }: PaymentSummaryCardProps) {
             <span className="text-gray-900 font-bold">${formatCurrency(deal.price)}</span>
           </div>
 
-          {deal.orderType !== "in_person" && (
+          {deal.orderType !== OrderType.IN_PERSON && (
             <div className="flex justify-between items-center text-gray-600 font-medium">
               <span>Shipping (Reimbursed to Seller)</span>
               <span className="text-gray-900 font-bold">

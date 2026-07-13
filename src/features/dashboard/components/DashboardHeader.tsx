@@ -8,6 +8,8 @@ import { useRole } from "@/providers/role-provider";
 import { cn } from "@/lib/utils";
 import { Role } from "@/types/enums";
 
+import { ProfileSheet } from "@/components/shared/ProfileSheet";
+
 interface DashboardHeaderProps {
   name: string;
   welcomeMessage: string;
@@ -44,9 +46,14 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4, type: "spring" }}
-            className="h-[52px] w-[52px] bg-primary/10 rounded-full flex items-center justify-center border-2 border-primary/20 shadow-sm shrink-0 overflow-hidden text-primary"
           >
-            <User className="w-6 h-6" />
+            <ProfileSheet>
+              <button
+                className="h-[52px] w-[52px] bg-primary/10 rounded-full flex items-center justify-center border-2 border-primary/20 shadow-sm shrink-0 overflow-hidden text-primary cursor-pointer hover:scale-105 active:scale-95 transition-all outline-none"
+              >
+                <User className="w-6 h-6" />
+              </button>
+            </ProfileSheet>
           </motion.div>
 
           {/* Greeting */}

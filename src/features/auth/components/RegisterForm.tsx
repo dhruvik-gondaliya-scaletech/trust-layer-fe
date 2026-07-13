@@ -185,7 +185,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                       </Link>
                       , and{" "}
                       <Link href="#" className="text-primary hover:underline">
-                        Escrow Terms
+                        Transaction Terms
                       </Link>
                       .
                     </FieldLabel>

@@ -85,12 +85,12 @@ const BANNER_COPY: Record<DealStatus, { title: string; lines: string[] }> = {
   },
   open: {
     title: "Awaiting Payment",
-    lines: ["This deal is live and waiting for a buyer to fund escrow."],
+    lines: ["This deal is live and waiting for a buyer to secure payment."],
   },
   funded: {
     title: "Payment Secured",
     lines: [
-      "Your payment is safely held in TrustLayer escrow.",
+      "Your payment is safely held by TrustLayer.",
       "The seller has been notified to ship your item.",
     ],
   },
@@ -148,14 +148,12 @@ const BANNER_COPY: Record<DealStatus, { title: string; lines: string[] }> = {
 };
 
 export function getStatusBadgeMeta(status: DealStatus) {
-  const s = (status as string) === "completed" ? "closed" : status;
-  return { label: BADGE_LABELS[s], className: TONE_CLASSES[TONE_BY_STATUS[s]].badge };
+  return { label: BADGE_LABELS[status], className: TONE_CLASSES[TONE_BY_STATUS[status]].badge };
 }
 
 export function getStatusBanner(status: DealStatus) {
-  const s = ((status as string) === "completed" ? "closed" : status) as DealStatus;
-  const tone = TONE_BY_STATUS[s];
-  return { ...BANNER_COPY[s], tone, className: TONE_CLASSES[tone].card, iconClassName: TONE_CLASSES[tone].iconWrap };
+  const tone = TONE_BY_STATUS[status];
+  return { ...BANNER_COPY[status], tone, className: TONE_CLASSES[tone].card, iconClassName: TONE_CLASSES[tone].iconWrap };
 }
 
 // Statuses reachable today only via the local demo/simulation override
@@ -203,13 +201,11 @@ const STEP_DEFS: { key: string; label: string; rank: number }[] = [
   { key: "shipped", label: "Shipped", rank: 3 },
   { key: "delivered", label: "Delivered", rank: 4 },
   { key: "released", label: "Funds Released", rank: 5 },
-  { key: "completed", label: "Completed", rank: 5 },
 ];
 
 export function getProgressSteps(status: DealStatus): ProgressStep[] {
-  const s = ((status as string) === "completed" ? "closed" : status) as DealStatus;
-  const rank = STATUS_RANK[s];
-  const halted = HALTED_STATUSES.includes(s);
+  const rank = STATUS_RANK[status];
+  const halted = HALTED_STATUSES.includes(status);
   let markedActive = false;
 
   return STEP_DEFS.map((step) => {

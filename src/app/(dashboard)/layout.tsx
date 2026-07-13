@@ -22,6 +22,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useUnreadNotificationsCount } from "@/hooks/queries/useNotifications";
 import { cn } from "@/lib/utils";
+import { ProfileSheet } from "@/components/shared/ProfileSheet";
 
 export default function DashboardLayout({
   children,
@@ -248,16 +249,18 @@ export default function DashboardLayout({
             </div>
 
             {/* User avatar */}
-            <div
-              className={cn(
-                "h-9 w-9 rounded-full flex items-center justify-center border-2 shadow-sm",
-                isBuyer
-                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"
-                  : "bg-primary/10 border-primary/20 text-primary"
-              )}
-            >
-              <User className="w-4.5 h-4.5" />
-            </div>
+            <ProfileSheet>
+              <button
+                className={cn(
+                  "h-9 w-9 rounded-full flex items-center justify-center border-2 shadow-sm cursor-pointer hover:scale-105 active:scale-95 transition-all outline-none",
+                  isBuyer
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"
+                    : "bg-primary/10 border-primary/20 text-primary"
+                )}
+              >
+                <User className="w-4.5 h-4.5" />
+              </button>
+            </ProfileSheet>
           </div>
         </header>
 

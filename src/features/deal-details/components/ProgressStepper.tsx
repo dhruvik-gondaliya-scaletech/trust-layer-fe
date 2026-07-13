@@ -23,7 +23,7 @@ export function ProgressStepper({ status }: ProgressStepperProps) {
 
   const filledCount = steps.filter(s => s.state === "done" || s.state === "current").length;
   
-  // 5 steps total -> 4 segments
+  // 4 steps total -> 3 segments
   const progressPercentage = Math.max(0, (filledCount - 1) / (steps.length - 1)) * 100;
 
   return (
@@ -46,7 +46,7 @@ export function ProgressStepper({ status }: ProgressStepperProps) {
           const halted = step.state === "halted";
           
           return (
-            <div key={step.key} className="relative z-10 flex flex-col items-center gap-2 group" style={{ width: '20%' }}>
+            <div key={step.key} className="relative z-10 flex flex-col items-center gap-2 group" style={{ width: '25%' }}>
               <div className={cn(
                 "w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-[12px] font-bold leading-none transition-colors shadow-sm",
                 halted 

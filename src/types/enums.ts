@@ -28,6 +28,11 @@ export enum PaymentMethodType {
     WALLET = "wallet",
 }
 
+export enum OrderType {
+    ONLINE = "online",
+    IN_PERSON = "in_person",
+}
+
 export enum UploadPurpose {
     PROFILE_PHOTO = 'profile_photo',
     DEAL_MEDIA = 'deal_media',
@@ -58,4 +63,10 @@ export enum DealStatus {
     RETURN_COMPLETED = 'return_completed',
     CANCELLED = 'cancelled',
     CLOSED = 'closed',
+}
+
+export enum DealDetailsActionType {
+    CONFIRM_DELIVERY = 'confirm-delivery',
+    REVIEW = 'review',
+    PUBLISH = 'publish',
 }

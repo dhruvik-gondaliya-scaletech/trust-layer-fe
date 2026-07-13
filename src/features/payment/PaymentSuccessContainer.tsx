@@ -6,7 +6,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BottomActionBar } from "@/components/ui/bottom-action-bar";
-import { useDeal, useDealStatus } from "@/hooks/queries/useDeals";
+import { useQueryClient } from "@tanstack/react-query";
+import { useDeal, useDealStatus, dealKeys } from "@/hooks/queries/useDeals";
+import { dashboardKeys } from "@/hooks/queries/useDashboardData";
 import { SuccessStep } from "@/features/fund-escrow/components/SuccessStep";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 
@@ -33,15 +35,20 @@ export default function PaymentSuccessContainer() {
     }
   }, [isStatusError]);
 
+  const queryClient = useQueryClient();
+
   useEffect(() => {
     if (statusData) {
       if (statusData.status === "funded") {
+        queryClient.invalidateQueries({ queryKey: dealKeys.byDealNumber(dealNumber) });
+        queryClient.invalidateQueries({ queryKey: [...dealKeys.all, "my"] });
+        queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
         setIsFunded(true);
       } else {
         setAttempts((prev) => prev + 1);
       }
     }
-  }, [statusData]);
+  }, [statusData, dealNumber, queryClient]);
 
   const hasFailed = (attempts >= 4 && !isFunded) || hasError;
 

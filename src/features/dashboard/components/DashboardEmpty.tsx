@@ -28,8 +28,8 @@ export const DashboardEmpty: React.FC<DashboardEmptyProps> = ({
       </h2>
       <p className="text-sm text-muted-foreground max-w-[270px] leading-relaxed mb-8">
         {isSeller
-          ? "You haven't started any secure escrow deals yet. Create a transaction link to trade safely with buyers."
-          : "You haven't purchased any items yet. Wait for a seller to send you a secure escrow deal link."}
+          ? "You haven't started any secure deals yet. Create a transaction link to trade safely with buyers."
+          : "You haven't purchased any items yet. Wait for a seller to send you a secure deal link."}
       </p>
 
       {isSeller && (

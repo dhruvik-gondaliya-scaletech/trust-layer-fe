@@ -2,7 +2,7 @@
 
 import { Spinner } from "@/components/ui/spinner";
 import { useState } from "react";
-import { Star, Edit, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BottomActionBar } from "@/components/ui/bottom-action-bar";
 import { AnimatedModal } from "@/components/shared/animated-modal";
@@ -14,7 +14,10 @@ import { MediaDetailsCard } from "./MediaDetailsCard";
 import { PaymentSummaryCard } from "./PaymentSummaryCard";
 import { PartyCard } from "./PartyCard";
 import { TrackingCard } from "./TrackingCard";
+import { SellerActions } from "./SellerActions";
+import { BuyerActions } from "./BuyerActions";
 import type { Deal } from "@/types/api.types";
+import { DealStatus, DealDetailsActionType } from "@/types/enums";
 import { cn } from "@/lib/utils";
 import { useRole } from "@/providers/role-provider";
 import { ShareableDealLink } from "@/components/shared/ShareableDealLink";
@@ -22,9 +25,9 @@ import { useRouter } from "next/navigation";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 
 export type DealDetailsAction =
-  | { type: "confirm-delivery"; isPending: boolean }
-  | { type: "review" }
-  | { type: "publish"; isPending: boolean }
+  | { type: DealDetailsActionType.CONFIRM_DELIVERY; isPending: boolean }
+  | { type: DealDetailsActionType.REVIEW }
+  | { type: DealDetailsActionType.PUBLISH; isPending: boolean }
   | null;
 
 interface DealDetailsViewProps {
@@ -37,6 +40,8 @@ interface DealDetailsViewProps {
   isPublishPending?: boolean;
   onDelete?: () => void;
   isDeletePending?: boolean;
+  isSeller: boolean;
+  isBuyer: boolean;
 }
 
 export function DealDetailsView({
@@ -49,21 +54,19 @@ export function DealDetailsView({
   isPublishPending = false,
   onDelete,
   isDeletePending = false,
+  isSeller,
+  isBuyer,
 }: DealDetailsViewProps) {
   const router = useRouter();
-  const { role } = useRole();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const isSellerView = role === "seller";
+  const isSellerView = isSeller;
   const showBuyer = isSellerView && deal.buyer;
 
   const partyLabel = showBuyer ? "Buyer" : "Seller";
   const partyUser = showBuyer ? deal.buyer : deal.seller;
 
-  const showSellerActions = isSellerView;
-  const showBuyerActions = !isSellerView && action !== null;
-
-  const hasBottomBar = showSellerActions || showBuyerActions;
+  const hasBottomBar = isSeller || isBuyer;
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -74,7 +77,7 @@ export function DealDetailsView({
         hasBottomBar ? "pb-[150px]" : "pb-10"
       )}>
         <StatusBanner deal={deal} />
-        {isSellerView && deal.status !== "draft" && (
+        {isSellerView && deal.status !== DealStatus.DRAFT && (
           <ShareableDealLink dealNumber={deal.dealNumber} />
         )}
         <ProgressStepper status={deal.status} />
@@ -86,115 +89,23 @@ export function DealDetailsView({
 
       {hasBottomBar && (
         <BottomActionBar>
-          {showBuyerActions && action?.type === "confirm-delivery" && (
-            <>
-              <Button
-                onClick={onPrimaryAction}
-                disabled={action.isPending}
-                className="w-full h-14 text-[15px] font-bold rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center gap-2"
-              >
-                {action.isPending ? (
-                  <>
-                    <Spinner className="size-4" /> Confirming...
-                  </>
-                ) : (
-                  "Confirm Delivery"
-                )}
-              </Button>
-              {onReportIssue && (
-                <Button
-                  variant="outline"
-                  onClick={onReportIssue}
-                  disabled={action.isPending}
-                  className="w-full h-12 text-[14px] font-bold rounded-2xl border-destructive/40 text-destructive hover:bg-destructive/5"
-                >
-                  Report an Issue
-                </Button>
-              )}
-            </>
+          {isSeller && (
+            <SellerActions
+              deal={deal}
+              onPublish={onPublish}
+              isPublishPending={isPublishPending}
+              onDeleteClick={() => setIsDeleteModalOpen(true)}
+              isDeletePending={isDeletePending}
+            />
           )}
 
-          {showBuyerActions && action?.type === "review" && (
-            <Button
-              onClick={onPrimaryAction}
-              className="w-full h-14 text-[15px] font-bold rounded-2xl bg-primary hover:bg-primary/95 text-white flex items-center justify-center gap-2 shadow-md shadow-primary/10 transition-all active:scale-[0.98]"
-            >
-              <Star size={16} className="fill-current text-white shrink-0" />
-              <span>Leave Review</span>
-            </Button>
-          )}
-
-          {showSellerActions && (
-            <>
-              {deal.status === "draft" && (
-                <div className="flex gap-3 w-full">
-                  <Button
-                    variant="outline"
-                    onClick={() => router.push(FRONTEND_ROUTES.DEAL_UPDATE(deal.id))}
-                    className="flex-1 h-14 text-[15px] font-bold rounded-2xl border-slate-200 text-slate-700 hover:bg-slate-50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-                  >
-                    <Edit className="w-4 h-4 text-slate-500" />
-                    <span>Edit Deal</span>
-                  </Button>
-                  <Button
-                    onClick={onPublish}
-                    disabled={isPublishPending}
-                    className="flex-1 h-14 text-[15px] font-bold rounded-2xl bg-primary hover:bg-primary/95 text-white shadow-md shadow-primary/10 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-                  >
-                    {isPublishPending ? (
-                      <>
-                        <Spinner className="w-4 h-4" />
-                        <span>Publishing...</span>
-                      </>
-                    ) : (
-                      <span>Publish Deal</span>
-                    )}
-                  </Button>
-                </div>
-              )}
-
-              {deal.status === "open" && (
-                <div className="flex gap-3 w-full">
-                  <Button
-                    variant="outline"
-                    onClick={() => router.push(FRONTEND_ROUTES.DEAL_UPDATE(deal.id))}
-                    className="flex-1 h-14 text-[15px] font-bold rounded-2xl border-slate-200 text-slate-700 hover:bg-slate-50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-                  >
-                    <Edit className="w-4 h-4 text-slate-500" />
-                    <span>Edit Deal</span>
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={() => setIsDeleteModalOpen(true)}
-                    disabled={isDeletePending}
-                    className="flex-1 h-14 text-[15px] font-bold rounded-2xl bg-destructive hover:bg-destructive/90 text-white flex items-center justify-center gap-2 shadow-md shadow-destructive/10 transition-all active:scale-[0.98]"
-                  >
-                    {isDeletePending ? (
-                      <>
-                        <Spinner className="w-4 h-4" />
-                        <span>Deleting...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Trash2 className="w-4 h-4 text-white" />
-                        <span>Delete Deal</span>
-                      </>
-                    )}
-                  </Button>
-                </div>
-              )}
-
-              {deal.status !== "draft" && deal.status !== "open" && (
-                <Button
-                  variant="outline"
-                  onClick={() => router.push(FRONTEND_ROUTES.DEAL_UPDATE(deal.id))}
-                  className="w-full h-14 text-[15px] font-bold rounded-2xl border-slate-200 text-slate-700 hover:bg-slate-50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-                >
-                  <Edit className="w-4 h-4 text-slate-500" />
-                  <span>Edit Deal</span>
-                </Button>
-              )}
-            </>
+          {isBuyer && (
+            <BuyerActions
+              deal={deal}
+              action={action}
+              onPrimaryAction={onPrimaryAction}
+              onReportIssue={onReportIssue}
+            />
           )}
         </BottomActionBar>
       )}

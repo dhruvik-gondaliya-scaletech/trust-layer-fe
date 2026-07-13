@@ -9,13 +9,13 @@ const inter = { variable: "font-sans" };
 const geistMono = { variable: "font-mono" };
 
 export const metadata: Metadata = {
-  title: "TrustLayer – Safe Escrow for Private Deals",
+  title: "TrustLayer – Safe Payments for Private Deals",
   description: "Met on Marketplace, Instagram, or Discord? Send your transaction through TrustLayer. You make the deal, we protect it!",
-  keywords: ["private deals", "safe escrow", "marketplace security", "instagram trade", "discord trade", "buyer protection", "seller protection"],
+  keywords: ["private deals", "safe payments", "marketplace security", "instagram trade", "discord trade", "buyer protection", "seller protection"],
   authors: [{ name: "TrustLayer Engineering" }],
   openGraph: {
-    title: "TrustLayer – Safe Escrow for Private Deals",
-    description: "You found the deal. We make it safe. TrustLayer escrow protects your transaction from fraud.",
+    title: "TrustLayer – Safe Payments for Private Deals",
+    description: "You found the deal. We make it safe. TrustLayer protects your transaction from fraud.",
     url: "https://trustlayer.com",
     siteName: "TrustLayer",
     locale: "en_US",
@@ -23,8 +23,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "TrustLayer – Safe Escrow for Private Deals",
-    description: "You found the deal. We make it safe. TrustLayer escrow protects your transaction from fraud.",
+    title: "TrustLayer – Safe Payments for Private Deals",
+    description: "You found the deal. We make it safe. TrustLayer protects your transaction from fraud.",
   },
 };
 

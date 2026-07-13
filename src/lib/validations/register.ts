@@ -22,7 +22,7 @@ export const registerSchema = z
       .string()
       .min(1, { message: "Please confirm your password" }),
     agreeTerms: z.boolean().refine((val) => val === true, {
-      message: "You must agree to the terms, privacy policy, and escrow terms",
+      message: "You must agree to the terms, privacy policy, and transaction terms",
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {

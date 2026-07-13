@@ -70,7 +70,7 @@ export default function FundEscrowContainer() {
         </div>
         <h2 className="text-[18px] font-extrabold tracking-tight">Deal Invalid</h2>
         <p className="text-[13px] text-slate-500 mt-2 max-w-[280px] mx-auto">
-          We could not load the escrow transaction details.
+          We could not load the transaction details.
         </p>
         <Button
           onClick={() => router.push(FRONTEND_ROUTES.DASHBOARD)}

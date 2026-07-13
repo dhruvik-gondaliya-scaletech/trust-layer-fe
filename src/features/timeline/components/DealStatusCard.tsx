@@ -1,9 +1,9 @@
-"use client";
-
 import { cn } from "@/lib/utils";
+import type { DealStatus } from "@/types/api.types";
+
 interface DealStatusCardProps {
   dealNumber: string;
-  currentStatus: string;
+  currentStatus: DealStatus;
   title: string;
   itemPrice: number;
 }
@@ -17,7 +17,7 @@ export function DealStatusCard({ dealNumber, currentStatus, title, itemPrice }: 
         </span>
         <span className={cn(
           "text-[10px] font-black px-2.5 py-0.5 rounded-md border uppercase tracking-wider",
-          currentStatus === "completed"
+          currentStatus === "closed"
             ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600"
             : currentStatus === "disputed"
               ? "bg-destructive/10 border-destructive/30 text-destructive"

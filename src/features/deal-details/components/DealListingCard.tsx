@@ -2,10 +2,22 @@
 
 import React from "react";
 import Image from "next/image";
-import { ChevronRight, Flame, Gamepad2, Heart, User, Package, Layers, Calendar } from "lucide-react";
+import { motion } from "framer-motion";
+import { toast } from "sonner";
+import {
+  ChevronRight,
+  Flame,
+  Gamepad2,
+  Heart,
+  User,
+  Package,
+  Layers,
+  Archive
+} from "lucide-react";
 import type { Deal } from "@/types/api.types";
 import { getStatusBadgeMeta } from "../utils/dealStatusMeta";
 import { formatCurrency, cn } from "@/lib/utils";
+import { getStatusBadgeStyle, getStatusDotColor } from "@/utils/deal";
 
 const PRODUCT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   trading_cards: Flame,
@@ -27,10 +39,11 @@ export const DealListingCard: React.FC<DealListingCardProps> = ({
   currentUserId,
   onClick,
 }) => {
+  const [isDragging, setIsDragging] = React.useState(false);
   const isSeller = deal.sellerId === currentUserId;
   const dealRole = isSeller ? "Selling" : "Buying";
 
-  const { label: statusLabel, className: statusClass } = getStatusBadgeMeta(deal.status);
+  const { label: statusLabel } = getStatusBadgeMeta(deal.status);
   const IconComponent = PRODUCT_ICONS[deal.productType] || Package;
 
   // Pick the image with sortOrder 0 (or lowest) as the primary thumbnail
@@ -38,85 +51,126 @@ export const DealListingCard: React.FC<DealListingCardProps> = ({
     ?.filter((m) => m.mimeType?.startsWith("image/"))
     .sort((a, b) => a.sortOrder - b.sortOrder)[0]?.url ?? null;
 
-  // Format date safely
-  const formattedDate = deal.createdAt
-    ? new Date(deal.createdAt).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : "";
-
   return (
-    <div
-      onClick={() => onClick(deal)}
-      className="group relative bg-card hover:bg-slate-50/50 dark:hover:bg-slate-900/50 border border-border/80 rounded-2xl p-4 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-    >
-      <div className="flex items-start gap-4">
-        {/* Product Thumbnail — real image or category icon fallback */}
-        <div className="w-12 h-12 rounded-xl overflow-hidden bg-primary/5 dark:bg-primary/10 border border-primary/10 flex items-center justify-center text-primary shrink-0 transition-transform group-hover:scale-105">
-          {primaryImageUrl ? (
-            <Image
-              src={primaryImageUrl}
-              alt={deal.title}
-              width={48}
-              height={48}
-              className="w-full h-full object-cover"
-              unoptimized
-            />
-          ) : (
-            <IconComponent className="w-6 h-6" />
-          )}
+    <div className="relative overflow-hidden rounded-2xl select-none group w-full h-[76px]">
+      {/* Background Actions Zone (revealed under swipe) */}
+      <div className="absolute inset-0 flex items-center justify-between bg-muted/20 pointer-events-none rounded-2xl">
+        {/* Left Action (swipe right to reveal) */}
+        <div className="h-full w-24 bg-primary/10 flex items-center justify-center text-primary border-r border-primary/10 pointer-events-auto">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toast.info(`Opening Quick Actions for ${deal.dealNumber}`);
+            }}
+            className="h-full w-full flex flex-col items-center justify-center gap-1 active:scale-90 transition-transform cursor-pointer"
+          >
+            <Layers className="w-5 h-5 text-primary" />
+            <span className="text-[10px] font-extrabold uppercase tracking-wide">Actions</span>
+          </button>
         </div>
 
-        {/* Details */}
-        <div className="flex flex-col gap-1 text-left">
-          <h3 className="font-bold text-[16px] text-foreground leading-tight group-hover:text-primary transition-colors line-clamp-1">
-            {deal.title}
-          </h3>
-          
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted-foreground">
-            <span className="font-semibold text-foreground/80">{deal.dealNumber}</span>
-            <span className="text-border/60">•</span>
-            {/* Role indicator */}
+        {/* Right Action (swipe left to reveal) */}
+        <div className="h-full w-24 bg-rose-500/10 flex items-center justify-center text-rose-600 border-l border-rose-500/10 ml-auto pointer-events-auto">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toast.success(`Deal ${deal.dealNumber} archived`);
+            }}
+            className="h-full w-full flex flex-col items-center justify-center gap-1 active:scale-90 transition-transform cursor-pointer"
+          >
+            <Archive className="w-5 h-5 text-rose-600" />
+            <span className="text-[10px] font-extrabold uppercase tracking-wide">Archive</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Foreground Card */}
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: -96, right: 96 }}
+        dragElastic={0.15}
+        dragSnapToOrigin
+        onDragStart={() => setIsDragging(true)}
+        onDragEnd={(event, info) => {
+          if (info.offset.x < -70) {
+            toast.success(`Deal ${deal.dealNumber} archived`);
+          } else if (info.offset.x > 70) {
+            toast.info(`Opening Quick Actions for ${deal.dealNumber}`);
+          }
+          setTimeout(() => setIsDragging(false), 80);
+        }}
+        whileHover={{
+          scale: 1.01,
+          y: -1,
+        }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => {
+          if (!isDragging) {
+            onClick(deal);
+          }
+        }}
+        className="absolute inset-0 bg-card hover:bg-accent/20 border border-border/40 rounded-2xl px-4 flex items-center justify-between shadow-xs cursor-pointer transition-all duration-200 z-10"
+      >
+        {/* Left: Avatar + Title & Meta Stack */}
+        <div className="flex items-center gap-4 min-w-0">
+          {/* Avatar Area with Indicator Dot */}
+          <div className="relative shrink-0">
+            <div className="w-12 h-12 rounded-full border border-border bg-muted flex items-center justify-center text-muted-foreground shadow-xs overflow-hidden font-bold text-xs uppercase">
+              {primaryImageUrl ? (
+                <Image
+                  src={primaryImageUrl}
+                  alt={deal.title}
+                  width={48}
+                  height={48}
+                  className="w-full h-full object-cover"
+                  unoptimized
+                />
+              ) : (
+                <IconComponent className="w-5.5 h-5.5 text-primary" />
+              )}
+            </div>
+            {/* Status dot indicator */}
             <span className={cn(
-              "px-2 py-0.5 rounded-full text-[11px] font-extrabold tracking-wide uppercase",
-              isSeller 
-                ? "bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400"
-                : "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
-            )}>
-              {dealRole}
-            </span>
-            {formattedDate && (
-              <>
-                <span className="text-border/60">•</span>
-                <span className="flex items-center gap-1 font-medium">
-                  <Calendar className="w-3.5 h-3.5 text-muted-foreground/80" />
-                  {formattedDate}
-                </span>
-              </>
-            )}
+              "absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-card shadow-xs",
+              getStatusDotColor(deal.status)
+            )} />
           </div>
-        </div>
-      </div>
 
-      <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-3 sm:pt-0 border-border/60">
-        <div className="flex items-center gap-3">
-          {/* Status Badge */}
-          <span className={cn("px-3 py-1 rounded-full text-[12px] font-bold text-center", statusClass)}>
-            {statusLabel}
-          </span>
-          
-          {/* Price */}
-          <div className="text-right sm:min-w-[80px]">
-            <span className="text-[16px] font-extrabold text-foreground tracking-tight">
-              {formatCurrency(deal.buyerPaysAmount)}
+          {/* Info stack */}
+          <div className="flex flex-col justify-center min-w-0">
+            <span className="font-bold text-[15px] text-foreground leading-tight tracking-tight mb-1 truncate">
+              {deal.title}
             </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[12px] font-semibold text-muted-foreground/80 leading-none">
+                {deal.dealNumber}
+              </span>
+              <span className={cn(
+                "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold tracking-wide border leading-none uppercase shrink-0",
+                isSeller
+                  ? "bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 border-blue-100 dark:border-blue-900/50"
+                  : "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/50"
+              )}>
+                {dealRole}
+              </span>
+              <span className={cn(
+                "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold tracking-wide border leading-none uppercase shrink-0",
+                getStatusBadgeStyle(deal.status)
+              )}>
+                {statusLabel}
+              </span>
+            </div>
           </div>
         </div>
-        
-        <ChevronRight className="w-5 h-5 text-muted-foreground/60 transition-transform group-hover:translate-x-1 hidden sm:block" />
-      </div>
+
+        {/* Right: Price & Navigation Arrow */}
+        <div className="flex items-center gap-3 shrink-0 pl-2">
+          <span className="font-extrabold text-[16px] text-foreground tracking-tight text-right">
+            {formatCurrency(deal.buyerPaysAmount)}
+          </span>
+          <ChevronRight className="w-4.5 h-4.5 text-muted-foreground/45 transition-transform group-hover:translate-x-0.5 shrink-0" />
+        </div>
+      </motion.div>
     </div>
   );
 };

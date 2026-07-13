@@ -1,4 +1,4 @@
-import type { ProofType, UploadPurpose, NotificationType } from "@/types/enums";
+import type { ProofType, UploadPurpose, NotificationType, OrderType } from "@/types/enums";
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
@@ -12,7 +12,7 @@ export type ProductType =
   | "plush"
   | "figure"
   | "other";
-export type OrderType = "online" | "in_person";
+export type { OrderType };
 export type HandlingTime = "1-2" | "3-5";
 export type Carrier = "USPS" | "UPS" | "FedEx" | "Other";
 export type ShippingType = "standard" | "priority";

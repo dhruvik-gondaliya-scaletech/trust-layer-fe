@@ -49,7 +49,7 @@ export const WalletCard: React.FC<WalletCardProps> = ({
           <div className="grid grid-cols-2 gap-4 border-t pt-4 border-primary-foreground/20">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 text-primary-foreground/70">
-                Funds in Escrow
+                Funds Secured
               </p>
               <p className="font-bold text-[17px] text-primary-foreground">{inEscrow}</p>
             </div>

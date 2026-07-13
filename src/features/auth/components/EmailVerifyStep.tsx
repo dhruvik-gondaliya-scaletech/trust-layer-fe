@@ -180,7 +180,7 @@ export const EmailVerifyStep: React.FC<EmailVerifyStepProps> = ({
                 <div className="space-y-1 text-left">
                   <p className="text-xs font-bold text-slate-800">Why verify your email?</p>
                   <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
-                    We need to confirm your email so we can send important escrow and shipping updates securely.
+                    We need to confirm your email so we can send important payment and shipping updates securely.
                   </p>
                 </div>
               </div>

@@ -5,6 +5,7 @@ import { AUTH_STORAGE_KEYS } from "@/lib/contants";
 import { getStorageItem } from "@/lib/storage";
 import { UploadPurpose } from "@/types/enums";
 import type { UpdateProfileDto, User } from "@/types/api.types";
+import { dashboardKeys } from "@/hooks/queries/useDashboardData";
 
 // ─── Query Keys ───────────────────────────────────────────────────────────────
 
@@ -62,7 +63,8 @@ export function useUpdateProfile({
   return useMutation({
     mutationFn: (dto: UpdateProfileDto) => usersService.updateMe(dto),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.me() });
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
       onSuccess?.();
     },
     onError: (error: Error) => {
@@ -109,7 +111,8 @@ export function useUploadProfilePhoto({
       });
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: userKeys.me() });
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
       onSuccess?.(data);
     },
     onError: (error: Error) => {
