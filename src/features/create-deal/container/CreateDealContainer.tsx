@@ -23,6 +23,7 @@ import type { Deal, HandlingTime, FeePayer } from "@/types/api.types";
 import { ProofType, UploadPurpose, OrderType } from "@/types/enums";
 import { MediaSlot, MediaSlotIds } from "@/types/deal.types";
 import { dataURLtoBlob, mapProductTypeToCategory, mapStep1ToDto, SLOT_FILE_NAMES, SLOT_SORT_ORDER } from "@/utils/deal";
+import { BackButton } from "@/components/shared/BackButton";
 
 export const CreateDealContainer: React.FC = () => {
   const router = useRouter();
@@ -593,12 +594,7 @@ export const CreateDealContainer: React.FC = () => {
         {/* Title */}
         <div className="flex items-center gap-3">
           {!isSuccess && (
-            <button
-              onClick={handleBack}
-              className="w-10 h-10 rounded-full border border-border/60 flex items-center justify-center hover:bg-muted/10 active:scale-95 transition-all bg-card shadow-sm"
-            >
-              <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-            </button>
+            <BackButton />
           )}
           <span className="font-extrabold text-xl text-foreground">{isUpdateMode ? "Update Deal" : "New Deal"}</span>
         </div>
@@ -675,12 +671,7 @@ export const CreateDealContainer: React.FC = () => {
         {/* Mobile Header (Hidden on Desktop) */}
         <div className="lg:hidden flex items-center justify-between w-full p-6 pb-2 shrink-0 select-none">
           {!isSuccess && (
-            <button
-              onClick={handleBack}
-              className="w-10 h-10 rounded-full border border-border/60 flex items-center justify-center hover:bg-muted/10 active:scale-95 transition-all"
-            >
-              <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-            </button>
+            <BackButton />
           )}
 
           <div className="font-extrabold text-foreground text-base select-none mx-auto">

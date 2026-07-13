@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertCircle, ChevronLeft, Upload, FileText, Image as ImageIcon, Video, X } from "lucide-react";
+import { AlertCircle, Upload, FileText, Image as ImageIcon, Video, X } from "lucide-react";
+import { BackButton } from "@/components/shared/BackButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Form, FormField, FormControl, Field, FieldLabel, FieldError } from "@/components/ui/field";
@@ -84,9 +85,7 @@ export default function DisputeFlow({ onSubmit, isSubmitting, onBack }: DisputeF
       {/* ─── Header ─── */}
       <div className="bg-white border-b border-slate-100 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto flex items-center justify-between px-4 py-4 w-full">
-          <Button variant="ghost" size="icon" onClick={onBack} className="w-10 h-10 rounded-full text-slate-500">
-            <ChevronLeft size={20} />
-          </Button>
+          <BackButton onClick={onBack} className="-ml-2" />
           <span className="text-[15px] font-bold">File a Dispute</span>
           <div className="w-8" />
         </div>

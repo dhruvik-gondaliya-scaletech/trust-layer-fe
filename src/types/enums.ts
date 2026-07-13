@@ -70,3 +70,12 @@ export enum DealDetailsActionType {
     REVIEW = 'review',
     PUBLISH = 'publish',
 }
+
+export enum CameraMode {
+    MAIN = "main",
+    FRONT = "front",
+    BACK = "back",
+    SIDE = "side",
+    DETAIL = "detail",
+    VIDEO = "video",
+}

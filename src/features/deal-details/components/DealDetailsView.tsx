@@ -19,10 +19,7 @@ import { BuyerActions } from "./BuyerActions";
 import type { Deal } from "@/types/api.types";
 import { DealStatus, DealDetailsActionType } from "@/types/enums";
 import { cn } from "@/lib/utils";
-import { useRole } from "@/providers/role-provider";
 import { ShareableDealLink } from "@/components/shared/ShareableDealLink";
-import { useRouter } from "next/navigation";
-import { FRONTEND_ROUTES } from "@/lib/contants";
 
 export type DealDetailsAction =
   | { type: DealDetailsActionType.CONFIRM_DELIVERY; isPending: boolean }
@@ -32,7 +29,6 @@ export type DealDetailsAction =
 
 interface DealDetailsViewProps {
   deal: Deal;
-  onBack: () => void;
   action: DealDetailsAction;
   onPrimaryAction: () => void;
   onReportIssue?: () => void;
@@ -46,7 +42,6 @@ interface DealDetailsViewProps {
 
 export function DealDetailsView({
   deal,
-  onBack,
   action,
   onPrimaryAction,
   onReportIssue,
@@ -57,7 +52,6 @@ export function DealDetailsView({
   isSeller,
   isBuyer,
 }: DealDetailsViewProps) {
-  const router = useRouter();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const isSellerView = isSeller;
@@ -70,7 +64,7 @@ export function DealDetailsView({
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <DealDetailsHero deal={deal} onBack={onBack} />
+      <DealDetailsHero deal={deal} />
 
       <div className={cn(
         "max-w-2xl mx-auto w-full px-4 sm:px-6 flex flex-col gap-4 -mt-4 relative z-20",
@@ -136,7 +130,7 @@ export function DealDetailsView({
           >
             <Trash2 size={26} className="text-red-500 dark:text-red-400" />
           </motion.div>
-          
+
           {/* Animated Header */}
           <motion.h3
             initial={{ y: 8, opacity: 0 }}
@@ -146,7 +140,7 @@ export function DealDetailsView({
           >
             Delete Deal
           </motion.h3>
-          
+
           {/* Animated Description */}
           <motion.p
             initial={{ y: 8, opacity: 0 }}
@@ -156,7 +150,7 @@ export function DealDetailsView({
           >
             Are you sure you want to delete this deal? This action cannot be undone, and all transaction details will be permanently removed.
           </motion.p>
-          
+
           {/* Animated Actions */}
           <motion.div
             initial={{ y: 12, opacity: 0 }}

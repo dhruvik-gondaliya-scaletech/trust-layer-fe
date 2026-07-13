@@ -17,11 +17,11 @@ import ReceiptUpload from "./ReceiptUpload";
 import InsuranceCard from "./InsuranceCard";
 import { BottomActionBar } from "@/components/ui/bottom-action-bar";
 import { motion, AnimatePresence } from "framer-motion";
+import { BackButton } from "@/components/shared/BackButton";
 
 interface AddTrackingProps {
   onSubmit: (data: TrackingFormInput & { receiptFile: File | null }) => Promise<void>;
   isSubmitting: boolean;
-  onBack: () => void;
 }
 
 const CARRIERS = ["USPS", "UPS", "FedEx", "DHL", "Other"];
@@ -29,7 +29,6 @@ const CARRIERS = ["USPS", "UPS", "FedEx", "DHL", "Other"];
 export default function AddTracking({
   onSubmit,
   isSubmitting,
-  onBack,
 }: AddTrackingProps) {
   const form = useForm<TrackingFormInput>({
     resolver: zodResolver(trackingSchema),
@@ -58,14 +57,7 @@ export default function AddTracking({
       {/* ─── Header ─── */}
       <div className="bg-white border-b border-slate-100/80 sticky top-0 z-30">
         <div className="max-w-2xl mx-auto flex items-center justify-between px-4 py-4 w-full">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onBack}
-            className="w-10 h-10 rounded-full text-slate-500 hover:bg-slate-50"
-          >
-            <ChevronLeft size={20} />
-          </Button>
+          <BackButton />
           <span className="text-[16px] font-black tracking-tight text-slate-800">Upload Tracking Details</span>
           <div className="w-10" />
         </div>

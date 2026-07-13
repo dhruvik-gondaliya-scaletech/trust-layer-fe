@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Check, Image as ImageIcon, PenSquare, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { ShareableDealLink } from "@/components/shared/ShareableDealLink";
@@ -17,7 +16,6 @@ import {
   CarouselDots,
 } from "@/components/ui/carousel";
 import { FRONTEND_ROUTES } from "@/lib/contants";
-import { cn } from "@/lib/utils";
 import { TrustScoreCard } from "./TrustScoreCard";
 
 interface Step5ReviewPublishProps {

@@ -35,9 +35,6 @@ export function BuyerActions({
     case DealStatus.OPEN:
       return (
         <div className="flex flex-col gap-3 w-full">
-          <div className="text-center text-xs font-semibold text-slate-500 bg-slate-100/80 rounded-xl py-2 px-3 flex items-center justify-center gap-1.5 border border-slate-100">
-            <span>Proceed to payment to secure the item</span>
-          </div>
           <Button
             onClick={() => router.push(FRONTEND_ROUTES.FUND_ESCROW(deal.dealNumber))}
             className="w-full h-14 text-[15px] font-bold rounded-2xl bg-primary hover:bg-primary/95 text-white shadow-md shadow-primary/10 transition-all active:scale-[0.98] flex items-center justify-center gap-2"

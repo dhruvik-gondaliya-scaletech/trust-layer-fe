@@ -3,9 +3,9 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDistanceToNow, isToday, isYesterday, differenceInCalendarDays } from "date-fns";
-import { ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { ChevronRight, Check, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { BackButton } from "@/components/shared/BackButton";
 import { cn } from "@/lib/utils";
 import type { Notification } from "@/types/api.types";
 import { NotificationType } from "@/types/enums";
@@ -87,17 +87,14 @@ export const NotificationsList: React.FC<NotificationsListProps> = ({
       {/* Header */}
       <div className="bg-card sticky top-0 z-20 shadow-sm border-b border-border/40">
         <div className="flex items-center justify-between p-4 max-w-2xl mx-auto w-full">
-          <button
+          <BackButton
             onClick={onBack}
-            className="p-2 -ml-2 rounded-full text-foreground hover:bg-muted/40 transition-colors"
-            aria-label="Back"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </button>
+            className="-ml-2"
+          />
           <span className="font-extrabold text-[17px] text-foreground">Notifications</span>
           <div className="w-6" />
         </div>
-        
+
         {/* Tabs */}
         <div className="max-w-2xl mx-auto w-full px-4 pb-4">
           <div className="flex items-center bg-muted/60 p-1 rounded-[20px]">

@@ -1,14 +1,14 @@
 "use client";
 
 import React from "react";
-import { Search, Plus, AlertCircle, RefreshCw, Layers, ChevronLeft } from "lucide-react";
+import { AlertCircle, RefreshCw, Layers, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Deal } from "@/types/api.types";
 import { DealListingCard } from "./DealListingCard";
 import { cn } from "@/lib/utils";
+import { BackButton } from "@/components/shared/BackButton";
 
 interface DealListingViewProps {
   deals: Deal[];
@@ -18,14 +18,10 @@ interface DealListingViewProps {
   currentUserId: string;
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  roleFilter: "all" | "seller" | "buyer";
-  onRoleFilterChange: (value: "all" | "seller" | "buyer") => void;
   statusFilter: string;
   onStatusFilterChange: (value: string) => void;
   onDealClick: (deal: Deal) => void;
-  onCreateDealClick: () => void;
   onRetry: () => void;
-  onBack: () => void;
 }
 
 const STATUS_OPTIONS = [
@@ -60,14 +56,10 @@ export const DealListingView: React.FC<DealListingViewProps> = ({
   currentUserId,
   searchTerm,
   onSearchChange,
-  roleFilter,
-  onRoleFilterChange,
   statusFilter,
   onStatusFilterChange,
   onDealClick,
-  onCreateDealClick,
   onRetry,
-  onBack,
 }) => {
   return (
     <div className="w-full bg-background min-h-screen py-6 md:py-10">
@@ -76,13 +68,7 @@ export const DealListingView: React.FC<DealListingViewProps> = ({
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
           <div className="flex items-start gap-3">
-            <button
-              onClick={onBack}
-              className="p-2 -ml-2 rounded-xl text-foreground hover:bg-muted/40 transition-colors cursor-pointer mt-1"
-              aria-label="Back"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </button>
+            <BackButton />
             <div className="space-y-1">
               <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground">
                 Deals Directory
@@ -92,38 +78,23 @@ export const DealListingView: React.FC<DealListingViewProps> = ({
               </p>
             </div>
           </div>
-          <Button
-            onClick={onCreateDealClick}
-            className="sm:w-auto w-full h-12 bg-primary hover:bg-primary/95 text-primary-foreground font-bold rounded-2xl shadow-md shadow-primary/10 transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer shrink-0"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Create Deal</span>
-          </Button>
         </div>
 
         {/* Filters and Search Bar Container */}
-        <Card className="flex flex-col gap-4 border-border/60 rounded-2xl p-4 shadow-sm space-y-4 mb-6">
-          {/* Role Filter Tabs & Status Filter */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            {/* Custom Tab list for Role Filter */}
-            <div className="bg-slate-100 dark:bg-slate-900 p-1 rounded-xl flex gap-1 self-start sm:self-auto">
-              {(["all", "seller", "buyer"] as const).map((r) => (
-                <button
-                  key={r}
-                  onClick={() => onRoleFilterChange(r)}
-                  className={cn(
-                    "px-4 py-2 text-[13px] font-bold rounded-lg uppercase tracking-wider transition-all duration-150 cursor-pointer",
-                    roleFilter === r
-                      ? "bg-white dark:bg-slate-800 text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {r === "all" ? "All" : r === "seller" ? "Selling" : "Buying"}
-                </button>
-              ))}
-            </div>
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
+          {/* Search Input */}
+          <div className="relative flex-1">
+            <Input
+              type="text"
+              placeholder="Search by title, deal number..."
+              value={searchTerm}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="pl-10 h-11 w-full bg-background border-border rounded-xl text-[14px]"
+            />
+          </div>
 
-            {/* Status Dropdown */}
+          {/* Status Select Dropdown */}
+          <div className="w-full sm:w-48">
             <Select
               value={STATUS_OPTIONS.find((opt) => opt.value === statusFilter)?.label || "All Statuses"}
               onValueChange={(label) => {
@@ -131,7 +102,7 @@ export const DealListingView: React.FC<DealListingViewProps> = ({
                 if (opt) onStatusFilterChange(opt.value);
               }}
             >
-              <SelectTrigger className="w-full sm:w-[180px] h-10 rounded-xl font-semibold text-[13px] flex items-center gap-2">
+              <SelectTrigger className="w-full h-11 rounded-xl font-semibold text-[13px] flex items-center gap-2">
                 <span className={cn("w-2 h-2 rounded-full shrink-0", STATUS_DOT_CLASSES[statusFilter] || STATUS_DOT_CLASSES.all)} />
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
@@ -145,18 +116,7 @@ export const DealListingView: React.FC<DealListingViewProps> = ({
               </SelectContent>
             </Select>
           </div>
-
-          {/* Search Input */}
-          <div className="relative w-full">
-            <Input
-              type="text"
-              placeholder="Search by title, deal number..."
-              value={searchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10 h-11 w-full bg-background border-border rounded-xl text-[14px]"
-            />
-          </div>
-        </Card>
+        </div>
 
         {/* Content Section */}
         {isLoading ? (
@@ -207,12 +167,6 @@ export const DealListingView: React.FC<DealListingViewProps> = ({
             <p className="text-[13px] text-muted-foreground mt-1 mb-6 max-w-sm">
               We couldn&apos;t find any deals matching your search criteria or selected filters.
             </p>
-            <Button
-              onClick={onCreateDealClick}
-              className="h-11 px-6 font-bold rounded-xl text-[13px] cursor-pointer"
-            >
-              Start Your First Deal
-            </Button>
           </div>
         ) : (
           /* Deals List */
