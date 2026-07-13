@@ -3,7 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useDashboardData } from "@/hooks/queries/useDashboardData";
@@ -27,6 +27,11 @@ export const DashboardContainer: React.FC = () => {
 
   const { data, isLoading, isError, error, refetch } = useDashboardData(role);
   const { data: unreadNotificationsCount = 0 } = useUnreadNotificationsCount();
+
+  // Pull to refresh states
+  const [scrollTop, setScrollTop] = React.useState(0);
+  const [pullProgress, setPullProgress] = React.useState(0);
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
 
   // ── Action Handlers ─────────────────────────────────────────────────────
   const handleNotificationClick = () => {
@@ -85,36 +90,57 @@ export const DashboardContainer: React.FC = () => {
     );
   }
 
-  const isEmpty = data.recentDeals.length === 0;
 
-  if (isEmpty) {
-    return (
-      <DashboardResponsiveShell>
-        <DashboardHeader
-          name={data.user.name}
-          welcomeMessage={data.user.welcomeMessage}
-          emailVerified={data.user.emailVerified}
-          phoneVerified={data.user.phoneVerified}
-          notificationCount={unreadNotificationsCount}
-          onNotificationClick={handleNotificationClick}
-        />
-        <DashboardEmpty name={data.user.name} onCreateDeal={handleCreateNewDeal} />
-        {role === "seller" && (
-          <MobileCreateDealBar onCreateNewDeal={handleCreateNewDeal} />
-        )}
-      </DashboardResponsiveShell>
-    );
-  }
 
   return (
     <>
       {/* ─── MOBILE LAYOUT (< md) ──────────────────────────────────────────── */}
       <div className="md:hidden w-full min-h-dvh bg-background flex flex-col">
         <div className="w-full max-w-[430px] mx-auto flex flex-col flex-1 relative bg-background shadow-2xl overflow-x-hidden">
+          {/* Pull to Refresh Spinner Overlay */}
           <div
+            className="absolute top-0 left-0 right-0 z-50 pointer-events-none flex items-center justify-center transition-all duration-150"
+            style={{
+              height: "60px",
+              transform: `translateY(${pullProgress * 40 - 40}px)`,
+              opacity: pullProgress,
+            }}
+          >
+            <div className="bg-card border border-border/40 shadow-md p-2 rounded-full flex items-center justify-center mt-4">
+              <RefreshCw className={cn("w-5 h-5 text-primary", isRefreshing && "animate-spin")} />
+            </div>
+          </div>
+
+          <div
+            onScroll={(e) => setScrollTop(e.currentTarget.scrollTop)}
             className={cn("flex-1 overflow-y-auto scrollbar-none", role === "seller" ? "pb-28" : "pb-8")}
           >
             <motion.div
+              drag={scrollTop <= 0 && !isRefreshing ? "y" : false}
+              dragConstraints={{ top: 0, bottom: 80 }}
+              dragElastic={0.3}
+              dragSnapToOrigin
+              onDrag={(event, info) => {
+                if (info.offset.y > 0) {
+                  setPullProgress(Math.min(info.offset.y / 70, 1));
+                }
+              }}
+              onDragEnd={async (event, info) => {
+                if (info.offset.y > 60 && !isRefreshing) {
+                  setIsRefreshing(true);
+                  try {
+                    await refetch();
+                    toast.success("Dashboard data updated");
+                  } catch {
+                    toast.error("Failed to refresh dashboard");
+                  } finally {
+                    setIsRefreshing(false);
+                    setPullProgress(0);
+                  }
+                } else {
+                  setPullProgress(0);
+                }
+              }}
               initial="hidden"
               animate="visible"
               variants={staggerContainer}
@@ -164,6 +190,8 @@ export const DashboardContainer: React.FC = () => {
                   deals={data.recentDeals.slice(0, 3)}
                   onViewAllClick={handleViewAllDeals}
                   onDealClick={handleDealClick}
+                  onCreateDeal={handleCreateNewDeal}
+                  isLoading={isRefreshing}
                 />
               </motion.div>
             </motion.div>
@@ -214,6 +242,8 @@ export const DashboardContainer: React.FC = () => {
                 deals={data.recentDeals.slice(0, 3)}
                 onViewAllClick={handleViewAllDeals}
                 onDealClick={handleDealClick}
+                onCreateDeal={handleCreateNewDeal}
+                isLoading={isRefreshing}
               />
             </motion.div>
 

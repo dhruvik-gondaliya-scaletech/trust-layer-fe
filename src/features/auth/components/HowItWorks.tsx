@@ -19,7 +19,7 @@ const steps: Step[] = [
   },
   {
     id: 2,
-    title: "Buyer funds escrow",
+    title: "Buyer secures payment",
     description: "Funds are held by TrustLayer. Seller is cleared to ship.",
     icon: Lock,
   },

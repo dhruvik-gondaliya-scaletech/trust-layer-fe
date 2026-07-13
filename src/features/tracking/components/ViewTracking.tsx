@@ -93,8 +93,6 @@ export default function ViewTracking({
       case DealStatus.RETURN_COMPLETED:
         return 5;
       default:
-        // Fallbacks for direct string values not explicitly matching enum properties
-        if (status === "completed") return 5;
         return 2;
     }
   };

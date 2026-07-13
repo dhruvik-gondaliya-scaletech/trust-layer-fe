@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Search, Plus, AlertCircle, RefreshCw, Layers } from "lucide-react";
+import { Search, Plus, AlertCircle, RefreshCw, Layers, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -25,6 +25,7 @@ interface DealListingViewProps {
   onDealClick: (deal: Deal) => void;
   onCreateDealClick: () => void;
   onRetry: () => void;
+  onBack: () => void;
 }
 
 const STATUS_OPTIONS = [
@@ -66,24 +67,34 @@ export const DealListingView: React.FC<DealListingViewProps> = ({
   onDealClick,
   onCreateDealClick,
   onRetry,
+  onBack,
 }) => {
   return (
     <div className="w-full bg-background min-h-screen py-6 md:py-10">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
 
         {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <div className="space-y-1">
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground">
-              Deals Directory
-            </h1>
-            <p className="text-[14px] text-muted-foreground font-medium">
-              Manage, monitor, and track your escrow transactions.
-            </p>
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+          <div className="flex items-start gap-3">
+            <button
+              onClick={onBack}
+              className="p-2 -ml-2 rounded-xl text-foreground hover:bg-muted/40 transition-colors cursor-pointer mt-1"
+              aria-label="Back"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <div className="space-y-1">
+              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground">
+                Deals Directory
+              </h1>
+              <p className="text-[14px] text-muted-foreground font-medium">
+                Manage, monitor, and track your secure transactions.
+              </p>
+            </div>
           </div>
           <Button
             onClick={onCreateDealClick}
-            className="sm:w-auto w-full h-12 bg-primary hover:bg-primary/95 text-primary-foreground font-bold rounded-2xl shadow-md shadow-primary/10 transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
+            className="sm:w-auto w-full h-12 bg-primary hover:bg-primary/95 text-primary-foreground font-bold rounded-2xl shadow-md shadow-primary/10 transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer shrink-0"
           >
             <Plus className="w-5 h-5" />
             <span>Create Deal</span>

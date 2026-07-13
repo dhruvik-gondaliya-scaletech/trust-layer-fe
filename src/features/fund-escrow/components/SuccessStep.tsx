@@ -38,7 +38,7 @@ export function SuccessStep({ deal, totalAmount }: SuccessStepProps) {
           transition={{ delay: 0.4 }}
           className="text-[28px] font-extrabold tracking-tight text-slate-900 dark:text-slate-50"
         >
-          Deal Funded
+          Payment Secured
         </motion.h1>
         <motion.div
           initial={{ opacity: 0, y: 20 }}

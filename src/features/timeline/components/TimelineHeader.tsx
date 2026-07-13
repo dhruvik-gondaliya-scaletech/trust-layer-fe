@@ -22,7 +22,7 @@ export function TimelineHeader({ onBack }: TimelineHeaderProps) {
 
         <div className="flex items-center gap-1.5 font-black text-foreground tracking-tight text-base">
           <Shield className="w-4.5 h-4.5 text-primary fill-primary/10" />
-          <span>Escrow Deal</span>
+          <span>Secure Deal</span>
         </div>
 
         <div className="w-10 h-10" />

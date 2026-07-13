@@ -101,7 +101,7 @@ export default function DisputeFlow({ onSubmit, isSubmitting, onBack }: DisputeF
             <div>
               <p className="font-bold text-[13px]">Dispute Collateral Lock</p>
               <p className="text-[11.5px] text-amber-700 mt-0.5 leading-relaxed">
-                Filing a dispute pauses seller payouts and retains funds in secure escrow. TrustLayer arbitrators will review submitted evidence.
+                Filing a dispute pauses seller payouts and retains funds securely. TrustLayer arbitrators will review submitted evidence.
               </p>
             </div>
           </div>

@@ -3,9 +3,10 @@
 import { Check, ShieldCheck, Coins, Truck, Package, Unlock, AlertCircle, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import type { DealStatus } from "@/types/api.types";
 
 interface EscrowTimelineStepsProps {
-  currentStatus: string;
+  currentStatus: DealStatus;
   carrier?: string;
   shippingType?: string;
   buyerPays: number;
@@ -23,8 +24,17 @@ interface EscrowTimelineStepsProps {
   onViewTracking?: () => void;
 }
 
-const IN_TRANSIT_OR_LATER = ["shipped", "delivered", "completed", "closed", "disputed"];
-const DELIVERED_OR_LATER = ["delivered", "completed", "closed", "disputed"];
+const IN_TRANSIT_OR_LATER: DealStatus[] = [
+  "shipped",
+  "delivered",
+  "closed",
+  "disputed"
+];
+const DELIVERED_OR_LATER: DealStatus[] = [
+  "delivered",
+  "closed",
+  "disputed"
+];
 
 export function EscrowTimelineSteps({
   currentStatus,
@@ -52,7 +62,7 @@ export function EscrowTimelineSteps({
         </span>
         <span className="text-[9px] font-extrabold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md flex items-center gap-1">
           <ShieldCheck className="w-3.5 h-3.5" />
-          <span>Protected Escrow</span>
+          <span>Protected Vault</span>
         </span>
       </div>
 
@@ -86,11 +96,11 @@ export function EscrowTimelineSteps({
             )}
           </div>
           <span className={cn("text-xs font-extrabold", currentStatus !== "open" ? "text-foreground" : "text-muted-foreground")}>
-            2. Escrow Funded
+            2. Payment Secured
           </span>
           <span className="text-[11px] font-medium text-muted-foreground">
             {currentStatus === "open"
-              ? "Waiting for the buyer to deposit transaction collateral into escrow."
+              ? "Waiting for the buyer to secure payment."
               : `Buyer paid $${buyerPays.toLocaleString(undefined, { minimumFractionDigits: 2 })}. Funds safely held by TrustLayer.`}
           </span>
           {currentStatus === "open" && !isSeller && (
@@ -98,7 +108,7 @@ export function EscrowTimelineSteps({
               onClick={onFundEscrow}
               className="w-full mt-2 bg-primary hover:bg-primary/95 text-white font-extrabold rounded-xl h-11 border-none cursor-pointer text-xs"
             >
-              Deposit &amp; Fund Escrow (${buyerPays.toLocaleString(undefined, { minimumFractionDigits: 2 })})
+              Deposit &amp; Secure Payment (${buyerPays.toLocaleString(undefined, { minimumFractionDigits: 2 })})
             </Button>
           )}
         </div>
@@ -226,13 +236,13 @@ export function EscrowTimelineSteps({
         <div className="relative flex flex-col gap-1 text-left">
           <div className={cn(
             "absolute -left-[23px] top-1.5 w-5 h-5 rounded-full flex items-center justify-center ring-4 ring-background z-10",
-            currentStatus === "completed" || currentStatus === "closed"
+            currentStatus === "closed"
               ? "bg-emerald-500 text-white"
               : currentStatus === "disputed"
                 ? "bg-destructive text-white"
                 : "bg-muted border border-border/80 text-muted-foreground"
           )}>
-            {currentStatus === "completed" || currentStatus === "closed" ? (
+            {currentStatus === "closed" ? (
               <Check className="w-3.5 h-3.5 stroke-[2.5]" />
             ) : currentStatus === "disputed" ? (
               <AlertCircle className="w-3.5 h-3.5" />
@@ -242,23 +252,23 @@ export function EscrowTimelineSteps({
           </div>
           <span className={cn(
             "text-xs font-extrabold",
-            currentStatus === "completed" || currentStatus === "closed"
+            currentStatus === "closed"
               ? "text-emerald-500"
               : currentStatus === "disputed"
                 ? "text-destructive"
                 : "text-muted-foreground"
           )}>
-            {currentStatus === "disputed" ? "Escrow Locked (Disputed)" : "5. Escrow Release"}
+            {currentStatus === "disputed" ? "Payment Locked (Disputed)" : "5. Payment Release"}
           </span>
           <span className="text-[11px] font-medium text-muted-foreground">
-            {currentStatus === "completed" || currentStatus === "closed"
+            {currentStatus === "closed"
               ? `Funds released. Seller received $${sellerReceivesAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}.`
               : currentStatus === "disputed"
                 ? "Transaction locked. TrustLayer review board is arbitrating."
                 : "Buyer verifies item details match certified proof, releasing locked collateral."}
           </span>
 
-          {(currentStatus === "completed" || currentStatus === "closed") && (
+          {currentStatus === "closed" && (
             <>
               {isBuyer && (
                 <>

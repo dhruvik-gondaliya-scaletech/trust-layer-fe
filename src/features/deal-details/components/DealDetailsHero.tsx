@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { getStatusBadgeMeta } from "../utils/dealStatusMeta";
 import { formatCurrency } from "../utils/format";
 import type { Deal } from "@/types/api.types";
+import { OrderType } from "@/types/enums";
 
 interface DealDetailsHeroProps {
   deal: Deal;
@@ -58,7 +59,7 @@ export function DealDetailsHero({ deal, onBack }: DealDetailsHeroProps) {
             <span className="text-white/80 text-[14px] font-medium truncate pr-4">{productCondition}</span>
             <div className="text-right">
               <span className="text-white text-[24px] md:text-[28px] font-black shrink-0">${formatCurrency(deal.buyerPaysAmount)}</span>
-              {deal.orderType !== "in_person" && (
+              {deal.orderType !== OrderType.IN_PERSON && (
                 <p className="text-[11px] font-bold text-white/60 -mt-0.5">
                   {Number(deal.shippingCost) > 0 
                     ? `Includes $${formatCurrency(deal.shippingCost)} shipping` 

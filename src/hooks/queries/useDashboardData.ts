@@ -133,7 +133,7 @@ export function useDashboardData(role: "seller" | "buyer", stateOverride?: "succ
           quickActions.push({
             id: deal.dealNumber,
             title: deal.title,
-            description: "Secure escrow funds for this item",
+            description: "Secure payment for this item",
             actionLabel: "Pay Now",
             type: "fund_escrow",
           });

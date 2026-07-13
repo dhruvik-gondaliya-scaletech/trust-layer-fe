@@ -8,6 +8,7 @@ import {
   removeStorageItems,
 } from "@/lib/storage";
 import { userKeys } from "@/hooks/queries/useUsers";
+import { dashboardKeys } from "@/hooks/queries/useDashboardData";
 import type {
   EmailVerifyInput,
   PhoneInputInput,
@@ -40,7 +41,8 @@ export function useResendOtpMutation({
       if (data.registrationToken) {
         setStorageItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN, data.registrationToken);
       }
-      queryClient.invalidateQueries({ queryKey: userKeys.me() });
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
       onSuccess?.(data, type);
     },
     onError,
@@ -82,7 +84,8 @@ export function useVerifyEmailMutation({
           [AUTH_STORAGE_KEYS.PROFILE_COMPLETE]: "false",
         });
       }
-      queryClient.invalidateQueries({ queryKey: userKeys.me() });
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
       onSuccess?.(data);
     },
     onError,
@@ -122,7 +125,8 @@ export function useSendPhoneMutation({
       if (data.registrationToken) {
         setStorageItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN, data.registrationToken);
       }
-      queryClient.invalidateQueries({ queryKey: userKeys.me() });
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
       onSuccess?.({ success: true, phoneNumber: data.formattedPhone });
     },
     onError,
@@ -164,7 +168,8 @@ export function useVerifyPhoneMutation({
           [AUTH_STORAGE_KEYS.PROFILE_COMPLETE]: "false",
         });
       }
-      queryClient.invalidateQueries({ queryKey: userKeys.me() });
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
       onSuccess?.(data);
     },
     onError,
@@ -194,7 +199,8 @@ export function useProfileSetupMutation({
         [AUTH_STORAGE_KEYS.PHONE_VERIFIED]: "true",
         [AUTH_STORAGE_KEYS.PROFILE_COMPLETE]: "true",
       });
-      queryClient.invalidateQueries({ queryKey: userKeys.me() });
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
       onSuccess?.(data);
     },
     onError,

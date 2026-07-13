@@ -52,6 +52,10 @@ export default function DealListingContainer() {
     router.push(FRONTEND_ROUTES.CREATE_DEAL);
   };
 
+  const handleBack = () => {
+    router.push(FRONTEND_ROUTES.DASHBOARD);
+  };
+
   return (
     <DealListingView
       deals={filteredDeals}
@@ -68,6 +72,7 @@ export default function DealListingContainer() {
       onDealClick={handleDealClick}
       onCreateDealClick={handleCreateDealClick}
       onRetry={refetch}
+      onBack={handleBack}
     />
   );
 }

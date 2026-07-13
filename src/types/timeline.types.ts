@@ -1,3 +1,5 @@
+import type { DealStatus } from "./api.types";
+
 export interface TimelineMediaItem {
     type?: string;
     url: string;
@@ -14,7 +16,7 @@ export interface TimelineDeal {
     dealNumber: string;
     title: string;
     price: number | string;
-    status: string;
+    status: DealStatus;
     trustScore: number;
     isGraded?: boolean;
     serialNumber?: string;
@@ -40,7 +42,7 @@ export interface TimelineDeal {
 
 export interface TimelineProps {
     deal: TimelineDeal;
-    currentStatus: string;
+    currentStatus: DealStatus;
     isSeller: boolean;
     isBuyer: boolean;
     onBack: () => void;

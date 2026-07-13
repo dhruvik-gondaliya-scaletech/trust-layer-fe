@@ -43,7 +43,7 @@ export function FundingStep({
       <div>
         <h2 className="text-[20px] font-extrabold tracking-tight">Fund Deal</h2>
         <p className="text-[13px] text-slate-500 mt-1">
-          Lock collateral securely in TrustLayer Escrow. Funds are protected until verified.
+          Lock collateral securely with TrustLayer. Funds are protected until verified.
         </p>
       </div>
 
@@ -67,7 +67,7 @@ export function FundingStep({
         <div>
           <p className="font-bold text-blue-800">Your funds are protected</p>
           <p className="text-blue-600/90 text-[12px] mt-0.5">
-            Funds are held securely in escrow. The seller will only be paid after they ship the item and you verify its condition.
+            Funds are held securely. The seller will only be paid after they ship the item and you verify its condition.
           </p>
         </div>
       </div>
@@ -171,10 +171,10 @@ export function FundingStep({
         </Card>
       )}
 
-      {/* Secure Escrow Footnote */}
+      {/* Secure Payment Footnote */}
       <div className="flex justify-center items-center gap-1.5 text-[11px] text-slate-400 mt-2">
         <Lock size={12} className="text-slate-300" />
-        <span>Security Secured. Standard SSL & AES-256 escrow protection.</span>
+        <span>Security Secured. Standard SSL & AES-256 vault protection.</span>
       </div>
     </motion.div>
   );

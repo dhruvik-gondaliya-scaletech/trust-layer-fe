@@ -38,7 +38,7 @@ export function useVerificationChecklist(
 
   let confidenceTitle = "Standard Protection";
   let confidenceMessage =
-    "This deal has basic verification. You are protected by TrustLayer escrow, but seller documentation is limited.";
+    "This deal has basic verification. You are protected by TrustLayer's secure vault, but seller documentation is limited.";
 
   if (deal.trustScore >= 90) {
     confidenceTitle = "High Trust Transaction";

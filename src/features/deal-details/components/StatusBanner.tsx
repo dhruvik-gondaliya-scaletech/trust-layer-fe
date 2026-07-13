@@ -9,7 +9,7 @@ import type { Deal } from "@/types/api.types";
 import { motion } from "framer-motion";
 import { useRole } from "@/providers/role-provider";
 
-const ICON_BY_STATUS: Record<Deal["status"] | "completed", ComponentType<{ size?: number; className?: string }>> = {
+const ICON_BY_STATUS: Record<Deal["status"], ComponentType<{ size?: number; className?: string }>> = {
   draft: Clock,
   open: Clock,
   funded: CheckCircle2,
@@ -22,7 +22,6 @@ const ICON_BY_STATUS: Record<Deal["status"] | "completed", ComponentType<{ size?
   return_completed: RotateCcw,
   cancelled: XCircle,
   closed: CheckCircle2,
-  completed: CheckCircle2,
 };
 
 interface StatusBannerProps {
@@ -33,7 +32,7 @@ export function StatusBanner({ deal }: StatusBannerProps) {
   const { role } = useRole();
   const isSeller = role === "seller";
   
-  const status = (deal.status as string) === "completed" ? "completed" : deal.status;
+  const status = deal.status;
   const banner = getStatusBanner(deal.status);
   const Icon = ICON_BY_STATUS[status] || CheckCircle2;
 

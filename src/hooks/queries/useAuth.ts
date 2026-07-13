@@ -8,6 +8,7 @@ import {
   removeStorageItems,
 } from "@/lib/storage";
 import { userKeys } from "@/hooks/queries/useUsers";
+import { dashboardKeys } from "@/hooks/queries/useDashboardData";
 import { useRouter } from "next/navigation";
 import type {
   RegisterDto,
@@ -80,7 +81,8 @@ export function useRegisterMutation({
         ]);
       }
       // Invalidate so AuthProvider's useCurrentUser re-fetches immediately
-      queryClient.invalidateQueries({ queryKey: userKeys.me() });
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
       onSuccess?.(data, variables);
     },
     onError: (error: Error) => {
@@ -130,7 +132,8 @@ export function useLoginMutation({
         ]);
       }
       // Invalidate so AuthProvider's useCurrentUser re-fetches immediately
-      queryClient.invalidateQueries({ queryKey: userKeys.me() });
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
       onSuccess?.(data, variables);
     },
     onError: (error: Error) => {
@@ -162,7 +165,8 @@ export function useVerifyOtpMutation({
         removeStorageItem(AUTH_STORAGE_KEYS.REGISTRATION_TOKEN);
       }
       // Invalidate user profile so it reflects the new verified state
-      queryClient.invalidateQueries({ queryKey: userKeys.me() });
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
       onSuccess?.(data);
     },
     onError: (error: Error) => {

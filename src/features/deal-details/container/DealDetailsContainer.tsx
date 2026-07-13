@@ -10,7 +10,7 @@ import { useRole } from "@/providers/role-provider";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 import { toast } from "sonner";
 import { DealDetailsView, type DealDetailsAction } from "../components/DealDetailsView";
-import { Role } from "@/types/enums";
+import { Role, DealStatus, DealDetailsActionType } from "@/types/enums";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function DealDetailsContainer() {
@@ -87,20 +87,20 @@ export default function DealDetailsContainer() {
   const isSeller = role === Role.SELLER || Boolean(user && deal.sellerId === user.id);
 
   let action: DealDetailsAction = null;
-  if (isBuyer && (deal.status === "shipped" || deal.status === "delivered")) {
-    action = { type: "confirm-delivery", isPending: confirmDeliveryMutation.isPending };
-  } else if (isBuyer && (deal.status === "closed" || (deal.status as string) === "completed")) {
-    action = { type: "review" };
+  if (isBuyer && deal.status === DealStatus.SHIPPED) {
+    action = { type: DealDetailsActionType.CONFIRM_DELIVERY, isPending: confirmDeliveryMutation.isPending };
+  } else if (isBuyer && (deal.status === DealStatus.DELIVERED || deal.status === DealStatus.CLOSED)) {
+    action = { type: DealDetailsActionType.REVIEW };
   }
 
   const handlePrimaryAction = async () => {
-    if (action?.type === "confirm-delivery") {
+    if (action?.type === DealDetailsActionType.CONFIRM_DELIVERY) {
       try {
         await confirmDeliveryMutation.mutateAsync(deal.id);
       } catch (e) {
         console.error("Failed to confirm delivery", e);
       }
-    } else if (action?.type === "review") {
+    } else if (action?.type === DealDetailsActionType.REVIEW) {
       router.push(FRONTEND_ROUTES.REVIEW_SELLER(deal.dealNumber));
     }
   };
@@ -112,12 +112,14 @@ export default function DealDetailsContainer() {
       action={action}
       onPrimaryAction={handlePrimaryAction}
       onReportIssue={
-        action?.type === "confirm-delivery" ? () => router.push(FRONTEND_ROUTES.DISPUTE_FLOW(deal.dealNumber)) : undefined
+        action?.type === DealDetailsActionType.CONFIRM_DELIVERY ? () => router.push(FRONTEND_ROUTES.DISPUTE_FLOW(deal.dealNumber)) : undefined
       }
       onPublish={() => publishDealMutation.mutate(deal.id)}
       isPublishPending={publishDealMutation.isPending}
       onDelete={() => deleteDealMutation.mutate(deal.id)}
       isDeletePending={deleteDealMutation.isPending}
+      isSeller={isSeller}
+      isBuyer={isBuyer}
     />
   );
 }

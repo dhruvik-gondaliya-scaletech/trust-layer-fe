@@ -20,7 +20,7 @@ import dealsService from "@/services/deals.service";
 import s3Service from "@/services/s3.service";
 import { useUploadDealMedia, useDeleteDealMedia } from "@/hooks/queries/useDeals";
 import type { Deal, HandlingTime, FeePayer } from "@/types/api.types";
-import { ProofType, UploadPurpose } from "@/types/enums";
+import { ProofType, UploadPurpose, OrderType } from "@/types/enums";
 import { MediaSlot, MediaSlotIds } from "@/types/deal.types";
 import { dataURLtoBlob, mapProductTypeToCategory, mapStep1ToDto, SLOT_FILE_NAMES, SLOT_SORT_ORDER } from "@/utils/deal";
 
@@ -108,7 +108,7 @@ export const CreateDealContainer: React.FC = () => {
             price: Number(deal.price) || 0,
             category: mapProductTypeToCategory(deal.productType),
             condition: deal.condition || "",
-            orderType: deal.orderType === "in_person" ? "In-Person Transaction" : (deal.orderType === "online" ? "Online Transaction" : ""),
+            orderType: deal.orderType === OrderType.IN_PERSON ? "In-Person Transaction" : (deal.orderType === OrderType.ONLINE ? "Online Transaction" : ""),
             isGraded: deal.isGraded || false,
             gradedSerial: deal.serialNumber || "",
             description: deal.description || "",
@@ -531,7 +531,7 @@ export const CreateDealContainer: React.FC = () => {
           setPublishedDealId(deal.id); // Store the deal ID so we link to it
           setPublishedDealNumber(deal.dealNumber); // Store the deal number
           setIsSuccess(true);
-          toast.success(isUpdateMode ? "Deal updated and published!" : "Escrow deal successfully created!");
+          toast.success(isUpdateMode ? "Deal updated and published!" : "Deal successfully created!");
           window.history.replaceState(null, "", FRONTEND_ROUTES.DEAL_DETAILS(deal.id));
         }
       } else {
