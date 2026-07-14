@@ -23,6 +23,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { AnimatedModal } from "@/components/shared/animated-modal";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
 
 interface ProfileSheetProps {
@@ -61,22 +62,29 @@ export const ProfileSheet: React.FC<ProfileSheetProps> = ({ children }) => {
               </div>
 
               <div className="flex items-center gap-3.5 pt-4">
-                <div
-                  className={cn(
-                    "h-12 w-12 rounded-full flex items-center justify-center border-2 shadow-sm shrink-0 overflow-hidden",
-                    isBuyer
-                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"
-                      : "bg-primary/10 border-primary/20 text-primary"
+                <Avatar className="h-12 w-12 border-2 shadow-sm shrink-0">
+                  {user?.profilePhotoUrl && (
+                    <AvatarImage src={user.profilePhotoUrl} alt={user?.username || "user"} className="object-cover" />
                   )}
-                >
-                  <User className="w-6 h-6" />
-                </div>
+                  <AvatarFallback
+                    className={cn(
+                      "flex size-full items-center justify-center rounded-full text-sm",
+                      isBuyer
+                        ? "bg-emerald-500/10 text-emerald-500"
+                        : "bg-primary/10 text-primary"
+                    )}
+                  >
+                    <User className="w-6 h-6" />
+                  </AvatarFallback>
+                </Avatar>
                 <div className="flex flex-col min-w-0">
                   <span className="text-sm font-extrabold text-foreground truncate">
-                    {user?.username || "alex"}
+                    {user?.firstName && user?.lastName
+                      ? `${user.firstName} ${user.lastName}`
+                      : user?.firstName || user?.username || "Alex User"}
                   </span>
                   <span className="text-xs text-muted-foreground truncate max-w-[160px]">
-                    {user?.email || "alex@trustlayer.com"}
+                    @{user?.username || "alex"}
                   </span>
                   <div className="flex gap-1 items-center mt-1">
                     <Check className="w-3.5 h-3.5 text-emerald-500 stroke-[3]" />

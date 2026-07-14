@@ -316,3 +316,12 @@ export interface PaginatedNotifications {
   page: number;
   limit: number;
 }
+
+export interface PaginatedDeals {
+  items: Deal[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+

@@ -102,7 +102,8 @@ export function useDashboardData(
       }
 
       // 1. Fetch my deals
-      const deals = await dealsService.getMyDeals(role);
+      const response = await dealsService.getMyDeals(role);
+      const deals = response.items;
 
       // 3. Fetch wallet with lazy initialization (404) handling
       let wallet;

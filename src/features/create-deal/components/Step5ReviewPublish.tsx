@@ -189,152 +189,156 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
     <div className="flex flex-col h-full flex-1 overflow-hidden text-left select-none">
       <form id="step5-form" onSubmit={handlePublish} className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto pr-0.5 space-y-6 scrollbar-none pb-28">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-xl font-extrabold text-foreground tracking-tight">
-              {isUpdateMode ? "Review updates" : "Review deal"}
-            </h2>
-          </div>
-
-          {/* Premium Trust Score Card */}
-          <TrustScoreCard
-            score={trustScore}
-            breakdown={breakdown}
-            variant="review"
-          />
-
-          {/* Deal Detail Review Card */}
-          <div className="w-full bg-background border border-border/80 rounded-[32px] p-5 shadow-xs flex flex-col gap-4 relative">
-            {/* Edit Button */}
-            <button
-              type="button"
-              onClick={onEdit}
-              className="absolute top-4 right-4 bg-black/60 hover:bg-black/75 text-white border-none font-bold px-3.5 py-1.5 rounded-full text-[11px] flex items-center gap-1 active:scale-95 transition-all z-20 cursor-pointer shadow-md"
-            >
-              <PenSquare className="w-3.5 h-3.5" />
-              <span>Edit Deal</span>
-            </button>
-
-            {/* Carousel-based Media Display Preview */}
-            <div className="w-full aspect-square rounded-2xl overflow-hidden bg-muted/30 border border-border/40 flex items-center justify-center relative select-none">
-              {mediaItems.length > 0 ? (
-                <Carousel className="w-full h-full">
-                  <CarouselContent className="h-full">
-                    {mediaItems.map((item, idx) => (
-                      <CarouselItem key={idx} className="relative w-full h-full">
-                        {item.type === "video" ? (
-                          <video
-                            src={item.url}
-                            controls
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <Image
-                            src={item.url}
-                            alt={item.label || "Review View"}
-                            fill
-                            className="object-cover"
-                          />
-                        )}
-
-                        {/* Top-left float badge for graded items / trust score */}
-                        {formData.isGraded && (
-                          <div className="absolute top-4 left-4 flex flex-col gap-1.5 z-10 pointer-events-none">
-                            <span className="bg-black/75 text-white font-black text-[9px] tracking-widest uppercase px-2.5 py-1.5 rounded-lg w-fit shadow-md">
-                              {formData.gradedSerial || "PSA 10"}
-                            </span>
-                            <span className="bg-yellow-500 text-black font-black text-[9px] tracking-widest uppercase px-2.5 py-1.5 rounded-lg w-fit shadow-md">
-                              TRUST {trustScore}
-                            </span>
-                          </div>
-                        )}
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-
-                  {mediaItems.length > 1 && (
-                    <>
-                      <CarouselPrevious className="left-3 bg-black/45 text-white hover:bg-black/60 hover:text-white border-none w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-colors shadow-lg z-10" />
-                      <CarouselNext className="right-3 bg-black/45 text-white hover:bg-black/60 hover:text-white border-none w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-colors shadow-lg z-10" />
-                      <CarouselDots className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10" />
-                    </>
-                  )}
-                </Carousel>
-              ) : (
-                <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground/60 p-6">
-                  <ImageIcon className="w-8 h-8 stroke-[1.5]" />
-                  <span className="text-[11px] font-bold tracking-wider uppercase">No photo uploaded</span>
-                </div>
-              )}
+          <div className="lg:max-w-[520px] lg:mx-auto w-full space-y-6">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-xl font-extrabold text-foreground tracking-tight">
+                {isUpdateMode ? "Review updates" : "Review deal"}
+              </h2>
             </div>
 
-            {/* Media Count Status Info Bar */}
-            <div className="w-full bg-muted/40 border border-border/40 rounded-xl py-2 px-4 flex items-center justify-center text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground gap-3.5">
-              <span>{mediaItems.filter(i => i.type === "image" && i.label !== "Certificate").length} Photos</span>
-              <span className="text-border/80">|</span>
-              <span>{verificationVideo ? "1 Video" : "0 Video"}</span>
-              <span className="text-border/80">|</span>
-              <span>{certPhoto ? "1 Cert" : "0 Cert"}</span>
+            {/* Premium Trust Score Card */}
+            <div className="lg:hidden">
+              <TrustScoreCard
+                score={trustScore}
+                breakdown={breakdown}
+                variant="review"
+              />
             </div>
 
-            {/* Title & Price */}
-            <div className="flex flex-col gap-1 mt-1 text-left">
-              <h3 className="text-[17px] font-extrabold text-foreground leading-snug">{formData.title}</h3>
-              <span className="text-2xl font-black text-primary">
-                ${formData.price % 1 === 0 ? formData.price.toLocaleString() : formData.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-              </span>
-            </div>
+            {/* Deal Detail Review Card */}
+            <div className="w-full bg-background border border-border/80 rounded-[32px] p-5 shadow-xs flex flex-col gap-4 relative">
+              {/* Edit Button */}
+              <button
+                type="button"
+                onClick={onEdit}
+                className="absolute top-4 right-4 bg-black/60 hover:bg-black/75 text-white border-none font-bold px-3.5 py-1.5 rounded-full text-[11px] flex items-center gap-1 active:scale-95 transition-all z-20 cursor-pointer shadow-md"
+              >
+                <PenSquare className="w-3.5 h-3.5" />
+                <span>Edit Deal</span>
+              </button>
 
-            {/* Item Details spec list */}
-            <div className="flex flex-col gap-3.5 pt-4 border-t border-border/20">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Item Details</span>
+              {/* Carousel-based Media Display Preview */}
+              <div className="w-full aspect-square rounded-2xl overflow-hidden bg-muted/30 border border-border/40 flex items-center justify-center relative select-none">
+                {mediaItems.length > 0 ? (
+                  <Carousel className="w-full h-full">
+                    <CarouselContent className="h-full">
+                      {mediaItems.map((item, idx) => (
+                        <CarouselItem key={idx} className="relative w-full h-full">
+                          {item.type === "video" ? (
+                            <video
+                              src={item.url}
+                              controls
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <Image
+                              src={item.url}
+                              alt={item.label || "Review View"}
+                              fill
+                              className="object-cover"
+                            />
+                          )}
 
-              <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-xs text-muted-foreground font-semibold">Product Type</span>
-                  <span className="text-sm font-bold text-foreground">{formData.category}</span>
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-xs text-muted-foreground font-semibold">Condition</span>
-                  <span className="text-sm font-bold text-foreground">{formData.condition}</span>
-                </div>
+                          {/* Top-left float badge for graded items / trust score */}
+                          {formData.isGraded && (
+                            <div className="absolute top-4 left-4 flex flex-col gap-1.5 z-10 pointer-events-none">
+                              <span className="bg-black/75 text-white font-black text-[9px] tracking-widest uppercase px-2.5 py-1.5 rounded-lg w-fit shadow-md">
+                                {formData.gradedSerial || "PSA 10"}
+                              </span>
+                              <span className="bg-yellow-500 text-black font-black text-[9px] tracking-widest uppercase px-2.5 py-1.5 rounded-lg w-fit shadow-md">
+                                TRUST {trustScore}
+                              </span>
+                            </div>
+                          )}
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+
+                    {mediaItems.length > 1 && (
+                      <>
+                        <CarouselPrevious className="left-3 bg-black/45 text-white hover:bg-black/60 hover:text-white border-none w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-colors shadow-lg z-10" />
+                        <CarouselNext className="right-3 bg-black/45 text-white hover:bg-black/60 hover:text-white border-none w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-colors shadow-lg z-10" />
+                        <CarouselDots className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10" />
+                      </>
+                    )}
+                  </Carousel>
+                ) : (
+                  <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground/60 p-6">
+                    <ImageIcon className="w-8 h-8 stroke-[1.5]" />
+                    <span className="text-[11px] font-bold tracking-wider uppercase">No photo uploaded</span>
+                  </div>
+                )}
               </div>
 
-              {formData.description && (
-                <div className="flex flex-col gap-1 mt-1">
-                  <span className="text-xs text-muted-foreground font-semibold">Description</span>
-                  <p className="text-sm font-semibold text-foreground/90 leading-relaxed">
-                    {formData.description}
-                  </p>
-                </div>
-              )}
-            </div>
+              {/* Media Count Status Info Bar */}
+              <div className="w-full bg-muted/40 border border-border/40 rounded-xl py-2 px-4 flex items-center justify-center text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground gap-3.5">
+                <span>{mediaItems.filter(i => i.type === "image" && i.label !== "Certificate").length} Photos</span>
+                <span className="text-border/80">|</span>
+                <span>{verificationVideo ? "1 Video" : "0 Video"}</span>
+                <span className="text-border/80">|</span>
+                <span>{certPhoto ? "1 Cert" : "0 Cert"}</span>
+              </div>
 
-            {/* Transaction spec list */}
-            <div className="flex flex-col gap-3.5 pt-4 border-t border-border/20">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Transaction</span>
+              {/* Title & Price */}
+              <div className="flex flex-col gap-1 mt-1 text-left">
+                <h3 className="text-[17px] font-extrabold text-foreground leading-snug">{formData.title}</h3>
+                <span className="text-2xl font-black text-primary">
+                  ${formData.price % 1 === 0 ? formData.price.toLocaleString() : formData.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </span>
+              </div>
 
-              <div className="flex flex-col gap-3">
-                <div className="flex justify-between items-center py-0.5">
-                  <span className="text-xs text-muted-foreground font-semibold">Order Type</span>
-                  <span className="text-sm font-bold text-foreground">{formData.orderType}</span>
+              {/* Item Details spec list */}
+              <div className="flex flex-col gap-3.5 pt-4 border-t border-border/20">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Item Details</span>
+
+                <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-xs text-muted-foreground font-semibold">Product Type</span>
+                    <span className="text-sm font-bold text-foreground">{formData.category}</span>
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-xs text-muted-foreground font-semibold">Condition</span>
+                    <span className="text-sm font-bold text-foreground">{formData.condition}</span>
+                  </div>
                 </div>
-                {formData.orderType !== "In-Person Transaction" && (
-                  <>
-                    <div className="flex justify-between items-center py-0.5">
-                      <span className="text-xs text-muted-foreground font-semibold">Handling Time</span>
-                      <span className="text-sm font-bold text-foreground">{shippingData.handlingTime}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-0.5">
-                      <span className="text-xs text-muted-foreground font-semibold">Shipping Cost</span>
-                      <span className="text-sm font-extrabold text-emerald-500 uppercase">
-                        {(shippingData.shippingCost ?? 0) > 0 ? `$${(shippingData.shippingCost ?? 0).toFixed(2)}` : "FREE"}
-                      </span>
-                    </div>
-                  </>
+
+                {formData.description && (
+                  <div className="flex flex-col gap-1 mt-1">
+                    <span className="text-xs text-muted-foreground font-semibold">Description</span>
+                    <p className="text-sm font-semibold text-foreground/90 leading-relaxed">
+                      {formData.description}
+                    </p>
+                  </div>
                 )}
-                <div className="flex justify-between items-center py-0.5">
-                  <span className="text-xs text-muted-foreground font-semibold">Platform Fee</span>
-                  <span className="text-sm font-bold text-foreground">{feesData.feeStructure}</span>
+              </div>
+
+              {/* Transaction spec list */}
+              <div className="flex flex-col gap-3.5 pt-4 border-t border-border/20">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Transaction</span>
+
+                <div className="flex flex-col gap-3">
+                  <div className="flex justify-between items-center py-0.5">
+                    <span className="text-xs text-muted-foreground font-semibold">Order Type</span>
+                    <span className="text-sm font-bold text-foreground">{formData.orderType}</span>
+                  </div>
+                  {formData.orderType !== "In-Person Transaction" && (
+                    <>
+                      <div className="flex justify-between items-center py-0.5">
+                        <span className="text-xs text-muted-foreground font-semibold">Handling Time</span>
+                        <span className="text-sm font-bold text-foreground">{shippingData.handlingTime}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-0.5">
+                        <span className="text-xs text-muted-foreground font-semibold">Shipping Cost</span>
+                        <span className="text-sm font-extrabold text-emerald-500 uppercase">
+                          {(shippingData.shippingCost ?? 0) > 0 ? `$${(shippingData.shippingCost ?? 0).toFixed(2)}` : "FREE"}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                  <div className="flex justify-between items-center py-0.5">
+                    <span className="text-xs text-muted-foreground font-semibold">Platform Fee</span>
+                    <span className="text-sm font-bold text-foreground">{feesData.feeStructure}</span>
+                  </div>
                 </div>
               </div>
             </div>

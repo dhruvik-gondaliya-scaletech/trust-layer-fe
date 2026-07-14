@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import dealsService from "@/services/deals.service";
 import s3Service from "@/services/s3.service";
 import type { CreateDealDto, UpdateDealDto, Deal, DeclineDealDto, ShipDealDto, DealStatusResponse } from "@/types/api.types";
@@ -15,17 +15,19 @@ export const dealKeys = {
   statusByDealNumber: (dealNumber: string) => [...dealKeys.all, "status", dealNumber] as const,
 };
 
-// ─── useMyDeals ───────────────────────────────────────────────────────────────
-
 /**
- * Query: GET /deals/my
- * Fetches all deals belonging to the authenticated user.
+ * Query: GET /deals/my (Infinite Query)
+ * Fetches paginated deals belonging to the authenticated user.
  * Cached for 30 seconds.
  */
 export function useMyDeals(role?: "seller" | "buyer" | "all", options?: { enabled?: boolean }) {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: dealKeys.myDeals(role),
-    queryFn: () => dealsService.getMyDeals(role),
+    queryFn: ({ pageParam = 1 }) => dealsService.getMyDeals(role, pageParam, 10),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      return lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined;
+    },
     staleTime: 30_000,
     retry: 1,
     enabled: options?.enabled,

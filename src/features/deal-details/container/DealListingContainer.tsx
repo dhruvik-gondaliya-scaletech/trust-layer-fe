@@ -21,9 +21,23 @@ export default function DealListingContainer() {
 
   // ─── Query Hook ────────────────────────────────────────────────────────────
   // Pass the current active role to the API query so server-side filtering is utilized.
-  const { data: deals = [], isLoading, isError, error, refetch } = useMyDeals(role, {
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useMyDeals(role, {
     enabled: mounted && !!user,
   });
+
+  // Flatten all fetched pages of deals into a single array
+  const deals = useMemo(() => {
+    return data?.pages.flatMap((page) => page.items) ?? [];
+  }, [data?.pages]);
 
   // ─── In-Memory Search & Status Filtering ──                                                                                                                                                             ──────────────────────────────────
   const filteredDeals = useMemo(() => {
@@ -64,6 +78,9 @@ export default function DealListingContainer() {
       onStatusFilterChange={setStatusFilter}
       onDealClick={handleDealClick}
       onRetry={refetch}
+      hasNextPage={!!hasNextPage}
+      fetchNextPage={fetchNextPage}
+      isFetchingNextPage={isFetchingNextPage}
     />
   );
 }

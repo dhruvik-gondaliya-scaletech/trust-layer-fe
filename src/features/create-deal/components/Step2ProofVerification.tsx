@@ -22,6 +22,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { TrustScoreCard, TrustScoreBreakdown } from "./TrustScoreCard";
 import { cn } from "@/lib/utils";
+import { AnimatedModal } from "@/components/shared/animated-modal";
 
 // Direct Camera Imports
 import { useCamera, usePhotoCapture, useVideoRecording } from '@/utils/camera';
@@ -374,6 +375,16 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraType, setCameraType] = useState<MediaSlot | null>(null);
 
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1024px)");
+    setIsDesktop(media.matches);
+    const listener = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }, []);
+
   const capturedPhotosCount = Object.values(productPhotos).filter(Boolean).length;
   const isProductPhotosComplete = capturedPhotosCount === 4;
 
@@ -429,7 +440,9 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
       <div className="flex-1 overflow-y-auto pr-0.5 space-y-6 scrollbar-none pb-28">
 
         {typeof trustScore === "number" && (
-          <TrustScoreCard score={trustScore} nextStepName={nextStepName} breakdown={breakdown} />
+          <div className="lg:hidden">
+            <TrustScoreCard score={trustScore} nextStepName={nextStepName} breakdown={breakdown} />
+          </div>
         )}
 
         <div className="flex flex-col gap-2">
@@ -552,7 +565,7 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
               <p className="text-[11px] text-muted-foreground leading-relaxed">
                 Capture multiple angles to build maximum buyer confidence and prevent disputes.
               </p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {PHOTO_SLOTS.map((slot) => {
                   const image = productPhotos[slot.id];
                   const isUploading = uploadingSlots[slot.id];
@@ -782,11 +795,13 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
         </Accordion>
       </div>
 
-      {/* Guidelines Bottom Sheet */}
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="bottom" className="p-6 bg-card border-t border-border/40">
-          <SheetHeader className="pb-4 border-b border-border/20">
-            <SheetTitle className="text-center font-extrabold text-foreground flex items-center justify-center gap-2">
+      {/* Guidelines Bottom Sheet for mobile / Modal for desktop */}
+      {isDesktop ? (
+        <AnimatedModal
+          isOpen={sheetOpen}
+          onClose={() => setSheetOpen(false)}
+          title={
+            <div className="flex items-center gap-2 text-foreground">
               {sheetType === "video" ? (
                 <>
                   <Video className="w-5 h-5 text-primary fill-primary/10" />
@@ -807,8 +822,12 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                   </span>
                 </>
               )}
-            </SheetTitle>
-            <SheetDescription className="text-center text-[11px] text-muted-foreground max-w-[340px] mx-auto leading-relaxed">
+            </div>
+          }
+          className="max-w-md p-6 bg-card border border-border/40"
+        >
+          <div className="flex flex-col gap-4 text-left">
+            <p className="text-xs text-muted-foreground leading-relaxed -mt-2">
               {sheetType === "video"
                 ? "Prove physical ownership by recording a short live video scan of your product."
                 : sheetType === "cert"
@@ -816,122 +835,272 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                   : sheetType === "main"
                     ? "This is the primary photo buyers will see. Make sure it's clear, well-lit, and showcases the whole item."
                     : "Provide a detailed angle to showcase authenticity, corners, and overall condition."}
-            </SheetDescription>
-          </SheetHeader>
+            </p>
 
-          <div className="py-6 flex flex-col gap-3.5 max-w-[340px] mx-auto text-left">
-            {sheetType === "video" ? (
-              <>
-                {[
-                  "Record a full 360° view of the product",
-                  "Slowly rotate around the item or pan it",
-                  "Highlight edges, serial numbers, and labels",
-                  "Ensure adequate lighting with no flare",
-                ].map((tip) => (
-                  <div key={tip} className="flex items-start gap-2.5">
-                    <div className="w-4.5 h-4.5 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5 text-primary">
-                      <Check className="w-3 h-3 stroke-[2.5]" />
+            <div className="py-2 flex flex-col gap-3.5 text-left">
+              {sheetType === "video" ? (
+                <>
+                  {[
+                    "Record a full 360° view of the product",
+                    "Slowly rotate around the item or pan it",
+                    "Highlight edges, serial numbers, and labels",
+                    "Ensure adequate lighting with no flare",
+                  ].map((tip) => (
+                    <div key={tip} className="flex items-start gap-2.5">
+                      <div className="w-4.5 h-4.5 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5 text-primary">
+                        <Check className="w-3 h-3 stroke-[2.5]" />
+                      </div>
+                      <span className="text-[11px] font-semibold text-foreground/80 leading-normal">{tip}</span>
                     </div>
-                    <span className="text-[11px] font-semibold text-foreground/80 leading-normal">{tip}</span>
-                  </div>
-                ))}
-                <div className="pt-2 border-t border-border/20 flex flex-col gap-1">
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                    <AlertCircle className="w-3.5 h-3.5 text-muted-foreground" />
-                    <span>Requirements</span>
-                  </div>
-                  <span className="text-[10px] text-muted-foreground pl-5">• Maximum recording length: 60 seconds</span>
-                  <span className="text-[10px] text-muted-foreground pl-5">• Recommended duration: 5-10 seconds</span>
-                </div>
-              </>
-            ) : sheetType === "cert" ? (
-              <>
-                {[
-                  "Place the certificate flat on a clean surface",
-                  "Ensure all text and grading numbers are legible",
-                  "Avoid glare — use soft, indirect lighting",
-                  "Capture the full certificate within the frame",
-                ].map((tip) => (
-                  <div key={tip} className="flex items-start gap-2.5">
-                    <div className="w-4.5 h-4.5 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5 text-primary">
-                      <Check className="w-3 h-3 stroke-[2.5]" />
+                  ))}
+                  <div className="pt-2 border-t border-border/20 flex flex-col gap-1">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                      <AlertCircle className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span>Requirements</span>
                     </div>
-                    <span className="text-[11px] font-semibold text-foreground/80 leading-normal">{tip}</span>
+                    <span className="text-[10px] text-muted-foreground pl-5">• Maximum recording length: 60 seconds</span>
+                    <span className="text-[10px] text-muted-foreground pl-5">• Recommended duration: 5-10 seconds</span>
                   </div>
-                ))}
-              </>
-            ) : (
-              <>
-                {[
-                  "Use bright, natural lighting if possible",
-                  "Avoid shadows casting on the product",
-                  "Place on a clean, neutral, solid background",
-                  "Keep details sharp and in focus (no blur)",
-                ].map((tip) => (
-                  <div key={tip} className="flex items-start gap-2.5">
-                    <div className="w-4.5 h-4.5 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5 text-primary">
-                      <Check className="w-3 h-3 stroke-[2.5]" />
+                </>
+              ) : sheetType === "cert" ? (
+                <>
+                  {[
+                    "Place the certificate flat on a clean surface",
+                    "Ensure all text and grading numbers are legible",
+                    "Avoid glare — use soft, indirect lighting",
+                    "Capture the full certificate within the frame",
+                  ].map((tip) => (
+                    <div key={tip} className="flex items-start gap-2.5">
+                      <div className="w-4.5 h-4.5 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5 text-primary">
+                        <Check className="w-3 h-3 stroke-[2.5]" />
+                      </div>
+                      <span className="text-[11px] font-semibold text-foreground/80 leading-normal">{tip}</span>
                     </div>
-                    <span className="text-[11px] font-semibold text-foreground/80 leading-normal">{tip}</span>
-                  </div>
-                ))}
-              </>
-            )}
-          </div>
+                  ))}
+                </>
+              ) : (
+                <>
+                  {[
+                    "Use bright, natural lighting if possible",
+                    "Avoid shadows casting on the product",
+                    "Place on a clean, neutral, solid background",
+                    "Keep details sharp and in focus (no blur)",
+                  ].map((tip) => (
+                    <div key={tip} className="flex items-start gap-2.5">
+                      <div className="w-4.5 h-4.5 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5 text-primary">
+                        <Check className="w-3 h-3 stroke-[2.5]" />
+                      </div>
+                      <span className="text-[11px] font-semibold text-foreground/80 leading-normal">{tip}</span>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
 
-          <div className="flex gap-3 max-w-[340px] mx-auto pt-2 pb-6 w-full">
-            {sheetType === "video" ? (
-              <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setSheetOpen(false)}
-                  className="flex-1 border-border/80 rounded-xl h-11 text-xs font-bold active:scale-[0.98] transition-all uppercase tracking-wider"
-                >
-                  Cancel
-                </Button>
+            <div className="flex gap-3 pt-4 w-full">
+              {sheetType === "video" ? (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setSheetOpen(false)}
+                    className="flex-1 border-border/80 rounded-xl h-11 text-xs font-bold transition-all uppercase tracking-wider"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={handleContinueToCamera}
+                    className="flex-1 bg-primary text-primary-foreground hover:bg-primary/95 shadow-md rounded-xl h-11 text-xs font-bold transition-all uppercase tracking-wider"
+                  >
+                    Start Recording
+                  </Button>
+                </>
+              ) : sheetType === "cert" ? (
+                <>
+                  <Button
+                    type="button"
+                    onClick={handleContinueToCamera}
+                    className="flex-1 bg-primary text-primary-foreground hover:bg-primary/95 shadow-md rounded-xl h-11 text-xs font-bold transition-all uppercase tracking-wider flex items-center justify-center gap-1.5"
+                  >
+                    <Camera className="w-3.5 h-3.5" /> Camera
+                  </Button>
+                  <label className="flex-1 flex items-center justify-center gap-1.5 bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border/50 shadow-sm rounded-xl h-11 text-xs font-bold cursor-pointer transition-all uppercase tracking-wider">
+                    <ImageIcon className="w-3.5 h-3.5" /> Gallery
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        setSheetOpen(false);
+                        handleGalleryUpload(e);
+                      }}
+                    />
+                  </label>
+                </>
+              ) : (
                 <Button
                   type="button"
                   onClick={handleContinueToCamera}
-                  className="flex-1 bg-primary text-primary-foreground hover:bg-primary/95 shadow-md rounded-xl h-11 text-xs font-bold active:scale-[0.98] transition-all uppercase tracking-wider"
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/95 shadow-md rounded-xl h-11 text-xs font-bold transition-all uppercase tracking-wider"
                 >
-                  Start Recording
+                  Continue to Camera
                 </Button>
-              </>
-            ) : sheetType === "cert" ? (
-              <>
+              )}
+            </div>
+          </div>
+        </AnimatedModal>
+      ) : (
+        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+          <SheetContent side="bottom" className="p-6 bg-card border-t border-border/40">
+            <SheetHeader className="pb-4 border-b border-border/20">
+              <SheetTitle className="text-center font-extrabold text-foreground flex items-center justify-center gap-2">
+                {sheetType === "video" ? (
+                  <>
+                    <Video className="w-5 h-5 text-primary fill-primary/10" />
+                    <span>Product Video Instructions</span>
+                  </>
+                ) : sheetType === "cert" ? (
+                  <>
+                    <Award className="w-5 h-5 text-primary" />
+                    <span>Certificate Photo Guidelines</span>
+                  </>
+                ) : (
+                  <>
+                    <Camera className="w-5 h-5 text-primary fill-primary/10" />
+                    <span>
+                      {sheetType === "main"
+                        ? "Main Photo Guidelines"
+                        : `${PHOTO_SLOTS.find((s) => s.id === sheetType)?.label || "Angle"} Guidelines`}
+                    </span>
+                  </>
+                )}
+              </SheetTitle>
+              <SheetDescription className="text-center text-[11px] text-muted-foreground max-w-[340px] mx-auto leading-relaxed">
+                {sheetType === "video"
+                  ? "Prove physical ownership by recording a short live video scan of your product."
+                  : sheetType === "cert"
+                    ? "Photograph your grading certificate, PSA slab label, or authenticity document clearly."
+                    : sheetType === "main"
+                      ? "This is the primary photo buyers will see. Make sure it's clear, well-lit, and showcases the whole item."
+                      : "Provide a detailed angle to showcase authenticity, corners, and overall condition."}
+              </SheetDescription>
+            </SheetHeader>
+
+            <div className="py-6 flex flex-col gap-3.5 max-w-[340px] mx-auto text-left">
+              {sheetType === "video" ? (
+                <>
+                  {[
+                    "Record a full 360° view of the product",
+                    "Slowly rotate around the item or pan it",
+                    "Highlight edges, serial numbers, and labels",
+                    "Ensure adequate lighting with no flare",
+                  ].map((tip) => (
+                    <div key={tip} className="flex items-start gap-2.5">
+                      <div className="w-4.5 h-4.5 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5 text-primary">
+                        <Check className="w-3 h-3 stroke-[2.5]" />
+                      </div>
+                      <span className="text-[11px] font-semibold text-foreground/80 leading-normal">{tip}</span>
+                    </div>
+                  ))}
+                  <div className="pt-2 border-t border-border/20 flex flex-col gap-1">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                      <AlertCircle className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span>Requirements</span>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground pl-5">• Maximum recording length: 60 seconds</span>
+                    <span className="text-[10px] text-muted-foreground pl-5">• Recommended duration: 5-10 seconds</span>
+                  </div>
+                </>
+              ) : sheetType === "cert" ? (
+                <>
+                  {[
+                    "Place the certificate flat on a clean surface",
+                    "Ensure all text and grading numbers are legible",
+                    "Avoid glare — use soft, indirect lighting",
+                    "Capture the full certificate within the frame",
+                  ].map((tip) => (
+                    <div key={tip} className="flex items-start gap-2.5">
+                      <div className="w-4.5 h-4.5 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5 text-primary">
+                        <Check className="w-3 h-3 stroke-[2.5]" />
+                      </div>
+                      <span className="text-[11px] font-semibold text-foreground/80 leading-normal">{tip}</span>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <>
+                  {[
+                    "Use bright, natural lighting if possible",
+                    "Avoid shadows casting on the product",
+                    "Place on a clean, neutral, solid background",
+                    "Keep details sharp and in focus (no blur)",
+                  ].map((tip) => (
+                    <div key={tip} className="flex items-start gap-2.5">
+                      <div className="w-4.5 h-4.5 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5 text-primary">
+                        <Check className="w-3 h-3 stroke-[2.5]" />
+                      </div>
+                      <span className="text-[11px] font-semibold text-foreground/80 leading-normal">{tip}</span>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+
+            <div className="flex gap-3 max-w-[340px] mx-auto pt-2 pb-6 w-full">
+              {sheetType === "video" ? (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setSheetOpen(false)}
+                    className="flex-1 border-border/80 rounded-xl h-11 text-xs font-bold active:scale-[0.98] transition-all uppercase tracking-wider"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={handleContinueToCamera}
+                    className="flex-1 bg-primary text-primary-foreground hover:bg-primary/95 shadow-md rounded-xl h-11 text-xs font-bold active:scale-[0.98] transition-all uppercase tracking-wider"
+                  >
+                    Start Recording
+                  </Button>
+                </>
+              ) : sheetType === "cert" ? (
+                <>
+                  <Button
+                    type="button"
+                    onClick={handleContinueToCamera}
+                    className="flex-1 bg-primary text-primary-foreground hover:bg-primary/95 shadow-md rounded-xl h-11 text-xs font-bold active:scale-[0.98] transition-all uppercase tracking-wider flex items-center justify-center gap-1.5"
+                  >
+                    <Camera className="w-3.5 h-3.5" /> Camera
+                  </Button>
+                  <label className="flex-1 flex items-center justify-center gap-1.5 bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border/50 shadow-sm rounded-xl h-11 text-xs font-bold cursor-pointer active:scale-[0.98] transition-all uppercase tracking-wider">
+                    <ImageIcon className="w-3.5 h-3.5" /> Gallery
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        setSheetOpen(false);
+                        handleGalleryUpload(e);
+                      }}
+                    />
+                  </label>
+                </>
+              ) : (
                 <Button
                   type="button"
                   onClick={handleContinueToCamera}
-                  className="flex-1 bg-primary text-primary-foreground hover:bg-primary/95 shadow-md rounded-xl h-11 text-xs font-bold active:scale-[0.98] transition-all uppercase tracking-wider flex items-center justify-center gap-1.5"
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/95 shadow-md rounded-xl h-11 text-xs font-bold active:scale-[0.98] transition-all uppercase tracking-wider"
                 >
-                  <Camera className="w-3.5 h-3.5" /> Camera
+                  Continue to Camera
                 </Button>
-                <label className="flex-1 flex items-center justify-center gap-1.5 bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border/50 shadow-sm rounded-xl h-11 text-xs font-bold cursor-pointer active:scale-[0.98] transition-all uppercase tracking-wider">
-                  <ImageIcon className="w-3.5 h-3.5" /> Gallery
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      setSheetOpen(false);
-                      handleGalleryUpload(e);
-                    }}
-                  />
-                </label>
-              </>
-            ) : (
-              <Button
-                type="button"
-                onClick={handleContinueToCamera}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/95 shadow-md rounded-xl h-11 text-xs font-bold active:scale-[0.98] transition-all uppercase tracking-wider"
-              >
-                Continue to Camera
-              </Button>
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
 
       {/* Direct Camera Overlay */}
       {cameraOpen && cameraType && (() => {
