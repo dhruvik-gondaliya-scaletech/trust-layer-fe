@@ -775,7 +775,7 @@ export const CreateDealContainer: React.FC = () => {
                   )}
                   {step === 4 && (
                     <Step4Fees
-                      price={formData.price}
+                      price={formData.price === "" ? 0 : formData.price}
                       shippingCost={shippingData.shippingCost ?? 0}
                       initialData={feesData}
                       onContinue={handleStep4Submit}
@@ -783,7 +783,10 @@ export const CreateDealContainer: React.FC = () => {
                   )}
                   {step === 5 && (
                     <Step5ReviewPublish
-                      formData={formData}
+                      formData={{
+                        ...formData,
+                        price: formData.price === "" ? 0 : formData.price,
+                      }}
                       shippingData={shippingData}
                       feesData={feesData}
                       mainPhoto={mainPhoto}

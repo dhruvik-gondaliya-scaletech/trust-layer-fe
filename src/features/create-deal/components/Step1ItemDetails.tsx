@@ -12,7 +12,7 @@ import { Form, FormField, FormControl, Field, FieldLabel, FieldError } from "@/c
 
 export interface Step1FormData {
   title: string;
-  price: number;
+  price: number | "";
   category: string;
   condition: string;
   orderType: string;
@@ -42,7 +42,7 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
   const form = useForm<Step1FormData>({
     defaultValues: {
       title: initialData?.title || "",
-      price: initialData?.price || undefined,
+      price: initialData?.price || "",
       category: initialData?.category || "",
       condition: initialData?.condition || "",
       orderType: initialData?.orderType || "",
@@ -111,7 +111,7 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
                     className="rounded-2xl h-12 px-4 border text-base font-semibold bg-background placeholder:text-muted-foreground/50"
                     {...field}
                     value={field.value ?? ""}
-                    onChange={(e) => field.onChange(Number.isNaN(e.target.valueAsNumber) ? undefined : e.target.valueAsNumber)}
+                    onChange={(e) => field.onChange(Number.isNaN(e.target.valueAsNumber) ? "" : e.target.valueAsNumber)}
                   />
                 </FormControl>
               </div>
