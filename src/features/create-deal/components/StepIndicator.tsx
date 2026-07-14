@@ -12,6 +12,11 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
 }) => {
   return (
     <div className="w-full flex flex-col gap-2 select-none">
+      {/* Label */}
+      <span className="text-xs font-bold text-primary uppercase tracking-wider">
+        STEP {currentStep} OF {totalSteps}
+      </span>
+
       {/* Horizontal Segments */}
       <div className="flex gap-1.5 w-full">
         {Array.from({ length: totalSteps }).map((_, idx) => {
@@ -28,11 +33,6 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
           );
         })}
       </div>
-
-      {/* Label */}
-      <span className="text-xs font-bold text-primary uppercase tracking-wider">
-        STEP {currentStep} OF {totalSteps}
-      </span>
     </div>
   );
 };

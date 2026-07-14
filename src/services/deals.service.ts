@@ -9,6 +9,7 @@ import type {
   DeclineDealDto,
   ShipDealDto,
   DealStatusResponse,
+  PaginatedDeals,
 } from "@/types/api.types";
 
 /**
@@ -32,9 +33,17 @@ const dealsService = {
    * GET /deals/my 🔒 Auth Required
    * Fetch all deals belonging to the authenticated user.
    */
-  getMyDeals: async (role?: "seller" | "buyer" | "all"): Promise<Deal[]> => {
-    const res = await httpService.get<Deal[]>(API_CONFIG.DEALS.MY_DEALS, {
-      params: role ? { role } : undefined,
+  getMyDeals: async (
+    role?: "seller" | "buyer" | "all",
+    page?: number,
+    limit?: number
+  ): Promise<PaginatedDeals> => {
+    const res = await httpService.get<PaginatedDeals>(API_CONFIG.DEALS.MY_DEALS, {
+      params: {
+        ...(role ? { role } : {}),
+        ...(page ? { page } : {}),
+        ...(limit ? { limit } : {}),
+      },
     });
     return res.data;
   },

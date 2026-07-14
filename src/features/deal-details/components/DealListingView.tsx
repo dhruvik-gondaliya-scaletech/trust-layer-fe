@@ -9,6 +9,7 @@ import type { Deal } from "@/types/api.types";
 import { DealListingCard } from "./DealListingCard";
 import { cn } from "@/lib/utils";
 import { BackButton } from "@/components/shared/BackButton";
+import { InfiniteScroll } from "@/components/shared/InfiniteScroll";
 
 interface DealListingViewProps {
   deals: Deal[];
@@ -22,6 +23,9 @@ interface DealListingViewProps {
   onStatusFilterChange: (value: string) => void;
   onDealClick: (deal: Deal) => void;
   onRetry: () => void;
+  hasNextPage: boolean;
+  fetchNextPage: () => void;
+  isFetchingNextPage: boolean;
 }
 
 const STATUS_OPTIONS = [
@@ -60,10 +64,13 @@ export const DealListingView: React.FC<DealListingViewProps> = ({
   onStatusFilterChange,
   onDealClick,
   onRetry,
+  hasNextPage,
+  fetchNextPage,
+  isFetchingNextPage,
 }) => {
   return (
-    <div className="w-full bg-background min-h-screen py-6 md:py-10">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+    <div className="w-full bg-background min-h-[calc(100vh-4rem)]">
+      <div className="max-w-7xl mx-auto px-6 py-8">
 
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
@@ -121,26 +128,61 @@ export const DealListingView: React.FC<DealListingViewProps> = ({
         {/* Content Section */}
         {isLoading ? (
           /* Skeleton Loader */
-          <div className="flex flex-col gap-3 animate-pulse">
-            {[1, 2, 3, 4].map((idx) => (
-              <div
-                key={idx}
-                className="flex items-center justify-between p-4 bg-card border border-border/40 rounded-2xl"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-muted/65" />
-                  <div className="flex flex-col gap-2">
-                    <div className="h-4 w-40 bg-muted/70 rounded-md" />
-                    <div className="h-3 w-28 bg-muted/50 rounded-md" />
+          <>
+            {/* Desktop Skeletons */}
+            <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 xl:gap-6 animate-pulse">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((idx) => (
+                <div
+                  key={idx}
+                  className="bg-card border border-border/40 rounded-2xl h-[290px] flex flex-col overflow-hidden shadow-xs"
+                >
+                  {/* Image area skeleton */}
+                  <div className="w-full h-[150px] bg-muted/40 animate-pulse" />
+                  {/* Content area skeleton */}
+                  <div className="flex-1 p-4 flex flex-col justify-between">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <div className="h-3 w-16 bg-muted/50 rounded" />
+                        <div className="h-2 w-2 bg-muted/50 rounded-full" />
+                      </div>
+                      <div className="h-4 w-3/4 bg-muted/70 rounded" />
+                    </div>
+                    <div className="flex items-center justify-between pt-3 border-t border-border/30">
+                      <div className="space-y-1">
+                        <div className="h-2.5 w-10 bg-muted/40 rounded" />
+                        <div className="h-4.5 w-20 bg-muted/70 rounded" />
+                      </div>
+                      <div className="w-8 h-8 rounded-full bg-muted/40" />
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="h-6 w-20 bg-muted/60 rounded-full" />
-                  <div className="h-4 w-16 bg-muted/70 rounded-md" />
+              ))}
+            </div>
+            {/* Mobile Skeletons */}
+            <div className="flex sm:hidden flex-col gap-3 animate-pulse">
+              {[1, 2, 3, 4, 5].map((idx) => (
+                <div
+                  key={idx}
+                  className="bg-card border border-border/40 rounded-2xl h-[76px] px-4 flex items-center justify-between shadow-xs"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-12 h-12 bg-muted/40 rounded-full shrink-0 animate-pulse" />
+                    <div className="flex flex-col gap-2">
+                      <div className="h-4 w-32 bg-muted/50 rounded animate-pulse" />
+                      <div className="flex items-center gap-2">
+                        <div className="h-3.5 w-12 bg-muted/45 rounded animate-pulse" />
+                        <div className="h-3.5 w-16 bg-muted/45 rounded-full animate-pulse" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="h-5 w-16 bg-muted/50 rounded animate-pulse" />
+                    <div className="w-4 h-4 bg-muted/40 rounded animate-pulse" />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </>
         ) : isError ? (
           /* Error State */
           <div className="flex flex-col items-center justify-center p-8 text-center bg-card border border-border/60 rounded-2xl shadow-sm">
@@ -169,8 +211,13 @@ export const DealListingView: React.FC<DealListingViewProps> = ({
             </p>
           </div>
         ) : (
-          /* Deals List */
-          <div className="flex flex-col gap-3">
+          /* Deals List with InfiniteScroll */
+          <InfiniteScroll
+            dataLength={deals.length}
+            next={fetchNextPage}
+            hasMore={hasNextPage}
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 xl:gap-6"
+          >
             {deals.map((deal) => (
               <DealListingCard
                 key={deal.id}
@@ -179,7 +226,7 @@ export const DealListingView: React.FC<DealListingViewProps> = ({
                 onClick={onDealClick}
               />
             ))}
-          </div>
+          </InfiniteScroll>
         )}
 
       </div>

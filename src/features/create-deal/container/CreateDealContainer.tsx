@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useConfetti } from "@/providers/confetti-provider";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 import { StepIndicator } from "../components/StepIndicator";
+import { TrustScoreCard } from "../components/TrustScoreCard";
 import { Step1ItemDetails, Step1FormData } from "../components/Step1ItemDetails";
 import { Step2ProofVerification } from "../components/Step2ProofVerification";
 import { Step3Shipping, Step3ShippingData } from "../components/Step3Shipping";
@@ -90,8 +91,8 @@ export const CreateDealContainer: React.FC = () => {
           try {
             deal = await dealsService.getDealById(urlDealId);
           } catch (e) {
-            const sellerDeals = await dealsService.getMyDeals("seller");
-            deal = sellerDeals.find((d) => d.id === urlDealId);
+            const response = await dealsService.getMyDeals("seller");
+            deal = response.items.find((d) => d.id === urlDealId);
           }
         }
 
@@ -578,6 +579,105 @@ export const CreateDealContainer: React.FC = () => {
     }
   };
 
+  const renderButtons = (isDesktop: boolean) => {
+    if (isSuccess) return null;
+
+    const backButton = step > 1 && (
+      <Button
+        type="button"
+        onClick={handleBack}
+        variant="outline"
+        disabled={step === 5 && (isSubmitting || isSavingDraft)}
+        className="flex-1 border-border/80 rounded-2xl h-14 text-base font-bold active:scale-[0.98] transition-all"
+      >
+        Back
+      </Button>
+    );
+
+    const saveDraftButton = step === 5 && (!isUpdateMode || dealStatus === "draft") && (
+      <Button
+        type="button"
+        onClick={handleSaveDraft}
+        variant="outline"
+        disabled={isSubmitting || isSavingDraft}
+        className="flex-1 border-primary/40 text-primary hover:text-primary hover:bg-primary/5 rounded-2xl h-14 text-base font-bold active:scale-[0.98] transition-all"
+      >
+        {isSavingDraft ? "Saving..." : (isUpdateMode ? "Save as Draft" : "Save Draft")}
+      </Button>
+    );
+
+    const primaryButton = (
+      <Button
+        type={
+          step === 1 ? "submit" :
+            step === 3 ? "submit" :
+              step === 4 ? "submit" :
+                step === 5 && !isSuccess ? "submit" : "button"
+        }
+        form={
+          step === 1 ? "step1-form" :
+            step === 3 ? "step3-form" :
+              step === 4 ? "step4-form" :
+                step === 5 && !isSuccess ? "step5-form" : undefined
+        }
+        onClick={
+          step === 2
+            ? () => {
+              if (!mainPhoto) {
+                toast.error("Please take the main photo to continue");
+                return;
+              }
+              setStep(isInPerson ? 4 : 3);
+            }
+            : isSuccess ? () => router.push(FRONTEND_ROUTES.DASHBOARD) : undefined
+        }
+        disabled={(step === 5 && (isSubmitting || isSavingDraft)) || (step === 2 && isUploadingMedia)}
+        className={`${step === 5 && saveDraftButton && isDesktop ? "w-full" : "flex-1"} bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/10 rounded-2xl h-14 text-base font-bold active:scale-[0.98] transition-all`}
+      >
+        {step === 5 && !isSuccess
+          ? (isSubmitting
+            ? (isUpdateMode ? "Saving..." : "Publishing...")
+            : (isUpdateMode
+              ? (dealStatus === "draft" ? "Publish" : "Save Changes")
+              : "Publish"))
+          : isSuccess
+            ? "Go to Dashboard"
+            : step === 2 && isUploadingMedia
+              ? "Uploading..."
+              : "Continue"}
+      </Button>
+    );
+
+    if (isDesktop) {
+      if (step === 5 && saveDraftButton) {
+        return (
+          <div className="flex flex-col gap-3 w-full mt-4">
+            {primaryButton}
+            <div className="flex gap-3 w-full">
+              {backButton}
+              {saveDraftButton}
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="flex gap-3 w-full mt-4">
+          {backButton}
+          {primaryButton}
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex gap-3">
+        {backButton}
+        {saveDraftButton}
+        {primaryButton}
+      </div>
+    );
+  };
+
   if (!isInitialized) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center p-6 min-h-[400px]">
@@ -588,254 +688,143 @@ export const CreateDealContainer: React.FC = () => {
   }
 
   return (
-    <div className="w-full flex-1 flex flex-col lg:flex-row gap-8 max-w-6xl mx-auto px-0 lg:px-4 py-0 lg:py-8 min-h-0 select-none">
-      {/* ─── LEFT PANE - Stepper progress (Desktop only) ─────────────────── */}
-      <div className="hidden lg:flex flex-col w-80 shrink-0 gap-6">
-        {/* Title */}
-        <div className="flex items-center gap-3">
+    <div className="w-full flex-1 flex flex-col gap-6 max-w-6xl mx-auto py-4 lg:py-8 select-none">
+      <div className="w-full flex-1 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 min-h-0">
+
+        {/* Left Column - Form Card and Desktop Header */}
+        <div className="w-full flex flex-col gap-6">
+          {/* Desktop Header & Progress Bar (Desktop only) */}
           {!isSuccess && (
-            <BackButton />
-          )}
-          <span className="font-extrabold text-xl text-foreground">{isUpdateMode ? "Update Deal" : "New Deal"}</span>
-        </div>
-
-        {/* Steps List */}
-        {!isSuccess && (
-          <div className="bg-card border border-border/40 rounded-3xl p-6 shadow-sm flex flex-col gap-6">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-              {isUpdateMode ? "Deal Update Steps" : "Deal Creation Steps"}
-            </span>
-            <div className="flex flex-col gap-4">
-              {stepsList.map((name, index) => {
-                const currentStepIndex = index + 1;
-                const visualStep = getVisualStep(step);
-                const isPast = visualStep > currentStepIndex;
-                const isCurrent = visualStep === currentStepIndex;
-                return (
-                  <div
-                    key={name}
-                    className={cn(
-                      "flex items-center gap-3 text-sm font-bold transition-all",
-                      isCurrent
-                        ? "text-primary"
-                        : isPast
-                          ? "text-muted-foreground/60"
-                          : "text-muted-foreground/45"
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        "w-6 h-6 rounded-full flex items-center justify-center text-xs border",
-                        isCurrent
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : isPast
-                            ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/25"
-                            : "bg-muted text-muted-foreground/40 border-border/40"
-                      )}
-                    >
-                      {isPast ? "✓" : currentStepIndex}
-                    </div>
-                    <span>{name}</span>
-                  </div>
-                );
-              })}
+            <div className="hidden lg:flex flex-col gap-3 w-full">
+              <div className="flex items-center gap-3">
+                <BackButton />
+                <span className="font-extrabold text-2xl text-foreground">
+                  {isUpdateMode ? "Update Deal" : "New Deal"}
+                </span>
+              </div>
+              <StepIndicator currentStep={getVisualStep(step)} totalSteps={isInPerson ? 4 : 5} />
             </div>
-          </div>
-        )}
-
-        {/* Trust Score Summary */}
-        {!isSuccess && (
-          <div className="bg-card border border-border/40 rounded-3xl p-6 shadow-sm flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                Live Trust Score
-              </span>
-              <span className="text-base font-black text-primary">{trustScore}%</span>
-            </div>
-            {/* Progress bar */}
-            <div className="w-full bg-muted h-3 rounded-full overflow-hidden">
-              <div
-                className="bg-primary h-full transition-all duration-500"
-                style={{ width: `${trustScore}%` }}
-              />
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed font-medium">
-              A high trust score shows buyers your deal is authentic and increases the likelihood of a fast transaction.
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* ─── RIGHT PANE - Form card layout (Responsive wrapper) ──────────── */}
-      <div className="flex-1 flex flex-col bg-card lg:border lg:border-border/40 lg:rounded-[2.5rem] lg:shadow-xl relative overflow-hidden min-h-[600px] lg:max-h-[820px] lg:h-[820px]">
-        {/* Mobile Header (Hidden on Desktop) */}
-        <div className="lg:hidden flex items-center justify-between w-full p-6 pb-2 shrink-0 select-none">
-          {!isSuccess && (
-            <BackButton />
           )}
 
-          <div className="font-extrabold text-foreground text-base select-none mx-auto">
-            {isUpdateMode ? "Update deal" : "New deal"}
-          </div>
+          {/* Form Card Layout */}
+          <div className="w-full flex flex-col bg-card lg:bg-transparent lg:border-0 lg:shadow-none lg:rounded-none relative overflow-hidden lg:overflow-visible min-h-[600px] lg:min-h-0 lg:max-h-none lg:h-auto">
+            {/* Mobile Header (Hidden on Desktop) */}
+            <div className="lg:hidden flex items-center justify-between w-full p-6 pb-2 shrink-0 select-none">
+              {!isSuccess && (
+                <BackButton />
+              )}
 
-          {!isSuccess && <div className="w-10" />}
+              <div className="font-extrabold text-foreground text-base select-none mx-auto">
+                {isUpdateMode ? "Update deal" : "New deal"}
+              </div>
+
+              {!isSuccess && <div className="w-10" />}
+            </div>
+
+            {/* Mobile Step Indicator (Hidden on Desktop) */}
+            {!isSuccess && (
+              <div className="lg:hidden px-6 py-2 shrink-0">
+                <StepIndicator currentStep={getVisualStep(step)} totalSteps={isInPerson ? 4 : 5} />
+              </div>
+            )}
+
+            {/* Render Steps with scroll and slide animation */}
+            <div className="flex-1 flex flex-col overflow-y-auto lg:overflow-y-visible scrollbar-none px-6 lg:px-0 pt-4 pb-36 lg:pb-8 min-h-0 lg:min-h-0">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={step}
+                  initial={{ opacity: 0, x: 15 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -15 }}
+                  transition={{ duration: 0.22, ease: "easeInOut" }}
+                  className="flex-1 flex flex-col min-h-0"
+                >
+                  {step === 1 && (
+                    <Step1ItemDetails
+                      initialData={formData}
+                      onContinue={handleStep1Submit}
+                      trustScore={trustScore}
+                      nextStepName={nextStepName}
+                      breakdown={breakdown}
+                    />
+                  )}
+                  {step === 2 && (
+                    <Step2ProofVerification
+                      mainPhoto={mainPhoto}
+                      productPhotos={productPhotos}
+                      verificationVideo={verificationVideo}
+                      certPhoto={certPhoto}
+                      isGraded={formData.isGraded}
+                      onCaptureMainPhoto={handleCaptureMainPhoto}
+                      onCaptureProductPhotoSlot={handleCaptureProductPhotosSlot}
+                      onCaptureVideo={handleCaptureVideo}
+                      onCaptureCertPhoto={handleCaptureCertPhoto}
+                      uploadingSlots={uploadingSlots}
+                      onContinue={() => setStep(isInPerson ? 4 : 3)}
+                      onBack={handleBack}
+                      trustScore={trustScore}
+                      nextStepName={nextStepName}
+                      breakdown={breakdown}
+                    />
+                  )}
+                  {step === 3 && (
+                    <Step3Shipping
+                      initialData={shippingData}
+                      onContinue={handleStep3Submit}
+                    />
+                  )}
+                  {step === 4 && (
+                    <Step4Fees
+                      price={formData.price}
+                      shippingCost={shippingData.shippingCost ?? 0}
+                      initialData={feesData}
+                      onContinue={handleStep4Submit}
+                    />
+                  )}
+                  {step === 5 && (
+                    <Step5ReviewPublish
+                      formData={formData}
+                      shippingData={shippingData}
+                      feesData={feesData}
+                      mainPhoto={mainPhoto}
+                      productPhotos={productPhotos}
+                      verificationVideo={verificationVideo}
+                      certPhoto={certPhoto}
+                      trustScore={trustScore}
+                      onBack={handleBack}
+                      onEdit={() => setStep(1)}
+                      isSubmitting={isSubmitting}
+                      isSuccess={isSuccess}
+                      dealId={publishedDealId}
+                      dealNumber={publishedDealNumber}
+                      handlePublish={handlePublish}
+                      isUpdateMode={isUpdateMode}
+                      dealStatus={dealStatus}
+                    />
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* Central Persistent Sticky Footer inside Form Card */}
+            {!isSuccess && (
+              <div className={`fixed bottom-0 left-0 right-0 lg:hidden py-4 px-6 bg-card border-t border-border/40 flex flex-col gap-3 z-30 shadow-lg ${step === 5 ? "max-w-[520px] mx-auto w-full" : ""}`}>
+                {renderButtons(false)}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Mobile Step Indicator (Hidden on Desktop) */}
-        {!isSuccess && (
-          <div className="lg:hidden px-6 py-2 shrink-0">
-            <StepIndicator currentStep={getVisualStep(step)} totalSteps={isInPerson ? 4 : 5} />
-          </div>
-        )}
-
-        {/* Render Steps with scroll and slide animation */}
-        <div className="flex-1 flex flex-col overflow-y-auto scrollbar-none px-6 pt-4 pb-36 lg:pb-28 min-h-0">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={step}
-              initial={{ opacity: 0, x: 15 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -15 }}
-              transition={{ duration: 0.22, ease: "easeInOut" }}
-              className="flex-1 flex flex-col min-h-0"
-            >
-              {step === 1 && (
-                <Step1ItemDetails
-                  initialData={formData}
-                  onContinue={handleStep1Submit}
-                  trustScore={trustScore}
-                  nextStepName={nextStepName}
-                  breakdown={breakdown}
-                />
-              )}
-              {step === 2 && (
-                <Step2ProofVerification
-                  mainPhoto={mainPhoto}
-                  productPhotos={productPhotos}
-                  verificationVideo={verificationVideo}
-                  certPhoto={certPhoto}
-                  isGraded={formData.isGraded}
-                  onCaptureMainPhoto={handleCaptureMainPhoto}
-                  onCaptureProductPhotoSlot={handleCaptureProductPhotosSlot}
-                  onCaptureVideo={handleCaptureVideo}
-                  onCaptureCertPhoto={handleCaptureCertPhoto}
-                  uploadingSlots={uploadingSlots}
-                  onContinue={() => setStep(isInPerson ? 4 : 3)}
-                  onBack={handleBack}
-                  trustScore={trustScore}
-                  nextStepName={nextStepName}
-                  breakdown={breakdown}
-                />
-              )}
-              {step === 3 && (
-                <Step3Shipping
-                  initialData={shippingData}
-                  onContinue={handleStep3Submit}
-                />
-              )}
-              {step === 4 && (
-                <Step4Fees
-                  price={formData.price}
-                  shippingCost={shippingData.shippingCost ?? 0}
-                  initialData={feesData}
-                  onContinue={handleStep4Submit}
-                />
-              )}
-              {step === 5 && (
-                <Step5ReviewPublish
-                  formData={formData}
-                  shippingData={shippingData}
-                  feesData={feesData}
-                  mainPhoto={mainPhoto}
-                  productPhotos={productPhotos}
-                  verificationVideo={verificationVideo}
-                  certPhoto={certPhoto}
-                  trustScore={trustScore}
-                  onBack={handleBack}
-                  onEdit={() => setStep(1)}
-                  isSubmitting={isSubmitting}
-                  isSuccess={isSuccess}
-                  dealId={publishedDealId}
-                  dealNumber={publishedDealNumber}
-                  handlePublish={handlePublish}
-                  isUpdateMode={isUpdateMode}
-                  dealStatus={dealStatus}
-                />
-              )}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        {/* Central Persistent Sticky Footer inside Form Card */}
-        {!isSuccess && (
-          <div className="fixed bottom-0 left-0 right-0 lg:absolute lg:bottom-0 lg:left-0 lg:right-0 py-4 px-6 bg-card border-t border-border/40 flex flex-col gap-3 z-30 shadow-lg">
-            <div className="flex gap-3">
-              {step > 1 && !isSuccess && (
-                <Button
-                  type="button"
-                  onClick={handleBack}
-                  variant="outline"
-                  disabled={step === 5 && (isSubmitting || isSavingDraft)}
-                  className="flex-1 border-border/80 rounded-2xl h-14 text-base font-bold active:scale-[0.98] transition-all"
-                >
-                  Back
-                </Button>
-              )}
-              {step === 5 && !isSuccess && (!isUpdateMode || dealStatus === "draft") && (
-                <Button
-                  type="button"
-                  onClick={handleSaveDraft}
-                  variant="outline"
-                  disabled={isSubmitting || isSavingDraft}
-                  className="flex-1 border-primary/40 text-primary hover:text-primary hover:bg-primary/5 rounded-2xl h-14 text-base font-bold active:scale-[0.98] transition-all"
-                >
-                  {isSavingDraft ? "Saving..." : (isUpdateMode ? "Save as Draft" : "Save Draft")}
-                </Button>
-              )}
-              <Button
-                type={
-                  step === 1 ? "submit" :
-                    step === 3 ? "submit" :
-                      step === 4 ? "submit" :
-                        step === 5 && !isSuccess ? "submit" : "button"
-                }
-                form={
-                  step === 1 ? "step1-form" :
-                    step === 3 ? "step3-form" :
-                      step === 4 ? "step4-form" :
-                        step === 5 && !isSuccess ? "step5-form" : undefined
-                }
-                onClick={
-                  step === 2
-                    ? () => {
-                      // Main photo is mandatory — it's also required by the
-                      // backend to publish the deal.
-                      if (!mainPhoto) {
-                        toast.error("Please take the main photo to continue");
-                        return;
-                      }
-                      setStep(isInPerson ? 4 : 3);
-                    }
-                    : isSuccess ? () => router.push(FRONTEND_ROUTES.DASHBOARD) : undefined
-                }
-                disabled={(step === 5 && (isSubmitting || isSavingDraft)) || (step === 2 && isUploadingMedia)}
-                className="flex-1 bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/10 rounded-2xl h-14 text-base font-bold active:scale-[0.98] transition-all"
-              >
-                {step === 5 && !isSuccess
-                  ? (isSubmitting
-                    ? (isUpdateMode ? "Saving..." : "Publishing...")
-                    : (isUpdateMode
-                      ? (dealStatus === "draft" ? "Publish" : "Save Changes")
-                      : "Publish"))
-                  : isSuccess
-                    ? "Go to Dashboard"
-                    : step === 2 && isUploadingMedia
-                      ? "Uploading..."
-                      : "Continue"}
-              </Button>
+        {/* Right Column - Floating Trust Score Card (Desktop only) */}
+        {!isSuccess && typeof trustScore === "number" && (
+          <div className="hidden lg:block lg:w-80 shrink-0 h-full">
+            <div className="sticky top-20 flex flex-col gap-4">
+              <TrustScoreCard score={trustScore} nextStepName={nextStepName} breakdown={breakdown} />
+              {renderButtons(true)}
             </div>
           </div>
         )}
+
       </div>
     </div>
   );

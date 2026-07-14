@@ -67,7 +67,9 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
 
           {/* Trust Score card — scrolls with content */}
           {typeof trustScore === "number" && (
-            <TrustScoreCard score={trustScore} nextStepName={nextStepName} breakdown={breakdown} />
+            <div className="lg:hidden">
+              <TrustScoreCard score={trustScore} nextStepName={nextStepName} breakdown={breakdown} />
+            </div>
           )}
 
           {/* Step heading */}
@@ -118,51 +120,53 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
           )} />
 
           {/* Product Type & Condition Dropdowns */}
-          <FormField control={form.control} name="category" rules={{ required: "Product type is required" }} render={({ field }) => (
-            <Field className="flex flex-col gap-1.5 border-none p-0">
-              <FieldLabel className="text-sm font-semibold text-foreground/80">
-                Product Type
-              </FieldLabel>
-              <FormControl>
-                <Select value={field.value || ""} onValueChange={field.onChange}>
-                  <SelectTrigger className="rounded-2xl border border-border/80 h-12 text-sm font-semibold">
-                    <SelectValue placeholder="Select Product Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CATEGORIES.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FieldError className="text-xs font-medium mt-0.5" />
-            </Field>
-          )} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField control={form.control} name="category" rules={{ required: "Product type is required" }} render={({ field }) => (
+              <Field className="flex flex-col gap-1.5 border-none p-0">
+                <FieldLabel className="text-sm font-semibold text-foreground/80">
+                  Product Type
+                </FieldLabel>
+                <FormControl>
+                  <Select value={field.value || ""} onValueChange={field.onChange}>
+                    <SelectTrigger className="rounded-2xl border border-border/80 h-12 text-sm font-semibold">
+                      <SelectValue placeholder="Select Product Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CATEGORIES.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FieldError className="text-xs font-medium mt-0.5" />
+              </Field>
+            )} />
 
-          <FormField control={form.control} name="condition" rules={{ required: "Condition is required" }} render={({ field }) => (
-            <Field className="flex flex-col gap-1.5 border-none p-0">
-              <FieldLabel className="text-sm font-semibold text-foreground/80">
-                Condition
-              </FieldLabel>
-              <FormControl>
-                <Select value={field.value || ""} onValueChange={field.onChange}>
-                  <SelectTrigger className="rounded-2xl border border-border/80 h-12 text-sm font-semibold">
-                    <SelectValue placeholder="Select Condition" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CONDITIONS.map((cond) => (
-                      <SelectItem key={cond} value={cond}>
-                        {cond}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FieldError className="text-xs font-medium mt-0.5" />
-            </Field>
-          )} />
+            <FormField control={form.control} name="condition" rules={{ required: "Condition is required" }} render={({ field }) => (
+              <Field className="flex flex-col gap-1.5 border-none p-0">
+                <FieldLabel className="text-sm font-semibold text-foreground/80">
+                  Condition
+                </FieldLabel>
+                <FormControl>
+                  <Select value={field.value || ""} onValueChange={field.onChange}>
+                    <SelectTrigger className="rounded-2xl border border-border/80 h-12 text-sm font-semibold">
+                      <SelectValue placeholder="Select Condition" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CONDITIONS.map((cond) => (
+                        <SelectItem key={cond} value={cond}>
+                          {cond}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FieldError className="text-xs font-medium mt-0.5" />
+              </Field>
+            )} />
+          </div>
 
           {/* Order Type Dropdown */}
           <FormField control={form.control} name="orderType" rules={{ required: "Order type is required" }} render={({ field }) => (

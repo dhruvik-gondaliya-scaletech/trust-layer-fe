@@ -63,8 +63,8 @@ export const AnimatedModal: React.FC<AnimatedModalProps> = ({
         >
           {showCloseButton && (
             <motion.button
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.92 }}
+              whileHover={{}}
+              whileTap={{}}
               onClick={onClose}
               className="absolute top-4 right-4 rounded-full p-2 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors cursor-pointer"
             >
@@ -84,7 +84,7 @@ export const AnimatedModal: React.FC<AnimatedModalProps> = ({
           )}
 
           {/* Content Body */}
-          <div className="max-h-[75vh] overflow-y-auto">
+          <div className="max-h-[75vh] overflow-y-auto overflow-x-hidden">
             {children}
           </div>
         </motion.div>

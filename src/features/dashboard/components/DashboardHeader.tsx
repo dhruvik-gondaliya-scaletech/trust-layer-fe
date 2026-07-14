@@ -5,10 +5,13 @@ import { Bell, Plus, Store, ShoppingCart, User } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useRole } from "@/providers/role-provider";
+import { useAuth } from "@/providers/auth-provider";
+import { ProfileSheet } from "@/components/shared/ProfileSheet";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Role } from "@/types/enums";
 
-import { ProfileSheet } from "@/components/shared/ProfileSheet";
+
 
 interface DashboardHeaderProps {
   name: string;
@@ -34,6 +37,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   onCreateNewDeal,
 }) => {
   const { role, setRole } = useRole();
+  const { user } = useAuth();
   const greeting = getGreeting();
 
   return (
@@ -41,20 +45,21 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       {/* Row 1: Avatar + Greeting + Bell (Bell hidden on desktop — it's in the top navbar) */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3.5">
-          {/* Avatar */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, type: "spring" }}
-          >
+          {/* Avatar (mobile only) */}
+          <div className="md:hidden">
             <ProfileSheet>
-              <button
-                className="h-[52px] w-[52px] bg-primary/10 rounded-full flex items-center justify-center border-2 border-primary/20 shadow-sm shrink-0 overflow-hidden text-primary cursor-pointer hover:scale-105 active:scale-95 transition-all outline-none"
-              >
-                <User className="w-6 h-6" />
+              <button className="h-10 w-10 rounded-full border border-border/40 overflow-hidden relative active:scale-95 transition-all focus:outline-none shrink-0">
+                <Avatar className="h-full w-full">
+                  {user?.profilePhotoUrl && (
+                    <AvatarImage src={user.profilePhotoUrl} alt={user?.username || "user"} className="object-cover" />
+                  )}
+                  <AvatarFallback className="flex size-full items-center justify-center bg-primary/10 text-primary">
+                    <User className="w-5 h-5" />
+                  </AvatarFallback>
+                </Avatar>
               </button>
             </ProfileSheet>
-          </motion.div>
+          </div>
 
           {/* Greeting */}
           <motion.div
