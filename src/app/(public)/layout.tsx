@@ -129,10 +129,6 @@ function PublicLayoutContent({
         {/* Footer info */}
         <div className="flex items-center justify-between text-xs text-slate-500 relative z-10 pt-4 border-t border-slate-900/40">
           <span>&copy; {new Date().getFullYear()} TrustLayer Inc.</span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-            All Systems Operational
-          </span>
         </div>
       </div>
 

@@ -67,41 +67,86 @@ export function DealDetailsView({
       <DealDetailsHero deal={deal} />
 
       <div className={cn(
-        "max-w-2xl mx-auto w-full px-4 sm:px-6 flex flex-col gap-4 -mt-4 relative z-20",
-        hasBottomBar ? "pb-[150px]" : "pb-10"
+        "max-w-2xl mx-auto w-full px-4 sm:px-6 -mt-4 relative z-20",
+        hasBottomBar ? "lg:max-w-5xl pb-[150px] lg:pb-10" : "pb-10"
       )}>
-        <StatusBanner deal={deal} />
-        {isSellerView && deal.status !== DealStatus.DRAFT && (
-          <ShareableDealLink dealNumber={deal.dealNumber} />
-        )}
-        <ProgressStepper status={deal.status} />
-        <MediaDetailsCard deal={deal} />
-        <PaymentSummaryCard deal={deal} />
-        <PartyCard label={partyLabel} user={partyUser} trustScore={deal.trustScore} />
-        <TrackingCard deal={deal} />
+        <div className={cn(
+          "flex flex-col gap-4",
+          hasBottomBar && "lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start"
+        )}>
+          {/* Main details column */}
+          <div className={cn("flex flex-col gap-4", hasBottomBar && "lg:col-span-2")}>
+            <StatusBanner deal={deal} />
+            {isSellerView && deal.status !== DealStatus.DRAFT && (
+              <ShareableDealLink dealNumber={deal.dealNumber} />
+            )}
+            <ProgressStepper status={deal.status} />
+            <MediaDetailsCard deal={deal} />
+            <PaymentSummaryCard deal={deal} />
+            <PartyCard label={partyLabel} user={partyUser} trustScore={deal.trustScore} />
+            <TrackingCard deal={deal} />
+          </div>
+
+          {/* Sticky sidebar on desktop */}
+          {hasBottomBar && (
+            <div className="hidden lg:block lg:col-span-1 lg:sticky lg:top-24">
+              <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-4">
+                <div className="flex flex-col gap-1">
+                  <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                    Deal Actions
+                  </h3>
+                  <p className="text-[12px] text-slate-400 font-medium leading-tight">
+                    Manage and update the status of this deal.
+                  </p>
+                </div>
+                <div className="h-px bg-slate-100 w-full my-1" />
+                {isSeller && (
+                  <SellerActions
+                    deal={deal}
+                    onPublish={onPublish}
+                    isPublishPending={isPublishPending}
+                    onDeleteClick={() => setIsDeleteModalOpen(true)}
+                    isDeletePending={isDeletePending}
+                  />
+                )}
+
+                {isBuyer && (
+                  <BuyerActions
+                    deal={deal}
+                    action={action}
+                    onPrimaryAction={onPrimaryAction}
+                    onReportIssue={onReportIssue}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {hasBottomBar && (
-        <BottomActionBar>
-          {isSeller && (
-            <SellerActions
-              deal={deal}
-              onPublish={onPublish}
-              isPublishPending={isPublishPending}
-              onDeleteClick={() => setIsDeleteModalOpen(true)}
-              isDeletePending={isDeletePending}
-            />
-          )}
+        <div className="lg:hidden">
+          <BottomActionBar>
+            {isSeller && (
+              <SellerActions
+                deal={deal}
+                onPublish={onPublish}
+                isPublishPending={isPublishPending}
+                onDeleteClick={() => setIsDeleteModalOpen(true)}
+                isDeletePending={isDeletePending}
+              />
+            )}
 
-          {isBuyer && (
-            <BuyerActions
-              deal={deal}
-              action={action}
-              onPrimaryAction={onPrimaryAction}
-              onReportIssue={onReportIssue}
-            />
-          )}
-        </BottomActionBar>
+            {isBuyer && (
+              <BuyerActions
+                deal={deal}
+                action={action}
+                onPrimaryAction={onPrimaryAction}
+                onReportIssue={onReportIssue}
+              />
+            )}
+          </BottomActionBar>
+        </div>
       )}
 
       <AnimatedModal

@@ -43,7 +43,7 @@ export const mapOrderType = (ot: string): OrderType => {
 
 export const mapStep1ToDto = (data: Step1FormData) => ({
     title: data.title,
-    price: data.price,
+    price: data.price === "" ? 0 : data.price,
     productType: mapCategoryToProductType(data.category),
     orderType: mapOrderType(data.orderType),
     isGraded: data.isGraded,

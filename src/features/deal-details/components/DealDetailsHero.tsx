@@ -34,7 +34,7 @@ export function DealDetailsHero({ deal }: DealDetailsHeroProps) {
     <div className="relative h-[280px] md:h-[320px] w-full bg-gray-900">
       <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent" />
 
-      <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10 max-w-2xl mx-auto">
+      <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10 max-w-2xl lg:max-w-5xl mx-auto">
         <BackButton />
 
         <div className={cn(
@@ -45,7 +45,7 @@ export function DealDetailsHero({ deal }: DealDetailsHeroProps) {
         </div>
       </div>
 
-      <div className="absolute bottom-6 left-5 right-5 z-10 max-w-2xl mx-auto">
+      <div className="absolute bottom-6 left-5 right-5 z-10 max-w-2xl lg:max-w-5xl mx-auto">
         <div className="w-full">
           <p className="text-gray-300 font-bold text-[13px] mb-1 uppercase tracking-wider">{deal.dealNumber}</p>
           <h1 className="text-white text-[24px] md:text-[28px] font-extrabold leading-tight mb-2 tracking-tight truncate">{deal.title}</h1>
