@@ -10,8 +10,8 @@ export function BottomActionBar({ children, className }: BottomActionBarProps) {
   return (
     <div
       className={cn(
-        "fixed bottom-0 inset-x-0 z-40 bg-background/80 backdrop-blur-md border-t p-4 pb-8",
-        "mx-auto max-w-2xl w-full",
+        "fixed bottom-0 left-0 md:left-64 right-0 z-40 bg-background/80 backdrop-blur-md border-t p-4 pb-8",
+        "mx-auto max-w-2xl",
         "lg:static lg:bg-transparent lg:border-t-0 lg:p-0 lg:mt-6 lg:z-auto",
         className
       )}

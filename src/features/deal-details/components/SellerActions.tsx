@@ -49,11 +49,11 @@ export function SellerActions({
               </>
             )}
           </Button>
-          <div className="flex gap-3 w-full">
+          <div className="flex flex-row gap-3 w-full lg:flex-col lg:gap-2">
             <Button
               variant="outline"
               onClick={() => router.push(FRONTEND_ROUTES.DEAL_UPDATE(deal.id))}
-              className="flex-1 h-12 text-[14px] font-bold rounded-2xl border-slate-200 text-slate-700 hover:bg-slate-50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              className="flex-1 w-full h-12 text-[14px] font-bold rounded-2xl border-slate-200 text-slate-700 hover:bg-slate-50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
             >
               <Edit className="w-4 h-4 text-slate-500" />
               <span>Edit Deal</span>
@@ -62,7 +62,7 @@ export function SellerActions({
               variant="outline"
               onClick={onDeleteClick}
               disabled={isDeletePending}
-              className="flex-1 h-12 text-[14px] font-bold rounded-2xl border-red-200 text-red-600 hover:bg-red-50/50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              className="flex-1 w-full h-12 text-[14px] font-bold rounded-2xl border-red-200 text-red-600 hover:bg-red-50/50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
             >
               <Trash2 className="w-4 h-4 text-red-500" />
               <span>Delete Deal</span>
@@ -78,11 +78,11 @@ export function SellerActions({
             <Spinner className="w-3 h-3 text-slate-400" />
             <span>Waiting for buyer to add shipping details & secure payment</span>
           </div>
-          <div className="flex gap-3 w-full">
+          <div className="flex flex-row gap-3 w-full lg:flex-col lg:gap-2">
             <Button
               variant="outline"
               onClick={() => router.push(FRONTEND_ROUTES.DEAL_UPDATE(deal.id))}
-              className="flex-1 h-12 text-[14px] font-bold rounded-2xl border-slate-200 text-slate-700 hover:bg-slate-50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              className="flex-1 w-full h-12 text-[14px] font-bold rounded-2xl border-slate-200 text-slate-700 hover:bg-slate-50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
             >
               <Edit className="w-4 h-4 text-slate-500" />
               <span>Edit Deal</span>
@@ -91,7 +91,7 @@ export function SellerActions({
               variant="outline"
               onClick={onDeleteClick}
               disabled={isDeletePending}
-              className="flex-1 h-12 text-[14px] font-bold rounded-2xl border-red-200 text-red-600 hover:bg-red-50/50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              className="flex-1 w-full h-12 text-[14px] font-bold rounded-2xl border-red-200 text-red-600 hover:bg-red-50/50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
             >
               <Trash2 className="w-4 h-4 text-red-500" />
               <span>Delete Deal</span>

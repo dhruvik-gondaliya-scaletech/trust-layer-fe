@@ -127,7 +127,7 @@ export const DashboardContainer: React.FC = () => {
                   availableBalance={data.wallet.availableBalance}
                   inEscrow={data.wallet.inEscrow}
                   readyToWithdraw={data.wallet.readyToWithdraw}
-                // onWalletClick={handleWalletClick}
+                  onWalletClick={handleWalletClick}
                 />
               </motion.div>
 
@@ -210,16 +210,27 @@ export const DashboardContainer: React.FC = () => {
               />
             </motion.div>
 
-            {/* ── Quick Actions column ────────────────────────────────────── */}
-            {data.quickActions.length > 0 && (
-              <motion.div variants={slideUp} className="max-h-[420px] overflow-y-auto pr-1 scrollbar-none">
-                <QuickActions
-                  actions={data.quickActions}
-                  role={role}
-                  onActionClick={handleQuickActionClick}
+            {/* ── Right Column: Wallet + Quick Actions ─────────────────────── */}
+            <div className="flex flex-col gap-6 w-full">
+              <motion.div variants={slideUp}>
+                <WalletCard
+                  availableBalance={data.wallet.availableBalance}
+                  inEscrow={data.wallet.inEscrow}
+                  readyToWithdraw={data.wallet.readyToWithdraw}
+                // onWalletClick={handleWalletClick}
                 />
               </motion.div>
-            )}
+
+              {data.quickActions.length > 0 && (
+                <motion.div variants={slideUp} className="max-h-[420px] overflow-y-auto pr-1 scrollbar-none">
+                  <QuickActions
+                    actions={data.quickActions}
+                    role={role}
+                    onActionClick={handleQuickActionClick}
+                  />
+                </motion.div>
+              )}
+            </div>
           </div>
         </motion.div>
       </div>
