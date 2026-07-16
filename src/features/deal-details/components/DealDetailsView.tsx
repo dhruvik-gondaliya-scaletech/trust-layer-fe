@@ -64,10 +64,10 @@ export function DealDetailsView({
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <DealDetailsHero deal={deal} />
+      <DealDetailsHero deal={deal} hasBottomBar={hasBottomBar} />
 
       <div className={cn(
-        "max-w-2xl mx-auto w-full px-4 sm:px-6 -mt-4 relative z-20",
+        "max-w-2xl mx-auto w-full px-4 sm:px-6 pt-6 md:pt-8 relative z-20",
         hasBottomBar ? "xl:max-w-5xl pb-[150px] xl:pb-10" : "pb-10"
       )}>
         <div className={cn(

@@ -1,12 +1,13 @@
 "use client";
 
-import React from "react";
-import { Bell, Store, ShoppingCart } from "lucide-react";
+import React, { useState } from "react";
+import { Bell, Store, ShoppingCart, Info } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Role } from "@/types/enums";
 import { FRONTEND_ROUTES } from "@/lib/contants";
+import { AnimatedModal } from "@/components/shared/animated-modal";
 
 interface DesktopHeaderProps {
   pathname: string;
@@ -23,6 +24,7 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
   unreadNotificationsCount,
   isSidebarCollapsed,
 }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const isDashboardActive = pathname === FRONTEND_ROUTES.DASHBOARD;
   const isCreateDealActive = pathname === FRONTEND_ROUTES.CREATE_DEAL;
   const isTimelineActive = pathname.startsWith(FRONTEND_ROUTES.TIMELINE);
@@ -73,7 +75,17 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
           </button>
 
           <button
-            onClick={() => setRole(Role.BUYER)}
+            onClick={() => {
+              if (
+                (pathname.startsWith("/deal/details") ||
+                  pathname === FRONTEND_ROUTES.CREATE_DEAL) &&
+                role === Role.SELLER
+              ) {
+                setIsModalOpen(true);
+              } else {
+                setRole(Role.BUYER);
+              }
+            }}
             className={cn(
               "flex-1 py-1.5 text-[12px] font-bold rounded-lg transition-colors relative z-10 flex items-center justify-center gap-1.5 cursor-pointer",
               role === Role.BUYER ? "text-white" : "text-muted-foreground hover:text-foreground"
@@ -102,6 +114,31 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
           </Button>
         </div>
       </div>
+
+      <AnimatedModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={
+          <div className="flex items-center gap-2 text-amber-500">
+            <Info className="w-5 h-5" />
+            <span>Switch Role</span>
+          </div>
+        }
+      >
+        <div className="flex flex-col gap-4 py-2">
+          <p className="text-sm text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+            You cannot switch to buyer when creating deal or reviewing a specific deal.
+          </p>
+          <div className="flex justify-end mt-2">
+            <Button
+              onClick={() => setIsModalOpen(false)}
+              className="bg-primary hover:bg-primary/90 text-white rounded-xl px-4 py-2 font-bold text-xs cursor-pointer"
+            >
+              Got it
+            </Button>
+          </div>
+        </div>
+      </AnimatedModal>
     </header>
   );
 };

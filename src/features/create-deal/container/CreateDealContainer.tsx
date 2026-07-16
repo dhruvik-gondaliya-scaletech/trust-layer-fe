@@ -299,7 +299,8 @@ export const CreateDealContainer: React.FC = () => {
     try {
       if (dealId) {
         // Deal already exists — user came back and edited Step 1
-        await dealsService.updateDeal(dealId, mapStep1ToDto(data));
+        const deal = await dealsService.updateDeal(dealId, mapStep1ToDto(data));
+        setDealStatus(deal.status);
       } else {
         // First time through — create the backend draft
         const deal = await dealsService.createDeal({
@@ -307,6 +308,7 @@ export const CreateDealContainer: React.FC = () => {
           publish: false,
         });
         setDealId(deal.id);
+        setDealStatus(deal.status);
 
         // Update URL to include both dealId and dealNumber
         const newUrl = `${window.location.pathname}?dealId=${deal.id}&dealNumber=${deal.dealNumber}`;
@@ -474,7 +476,7 @@ export const CreateDealContainer: React.FC = () => {
 
         deal = await dealsService.updateDeal(dealId, {
           ...dealFields,
-          ...(publish ? { publish: true } : {}),
+          ...(publish && dealStatus === "draft" ? { publish: true } : {}),
         });
       } else {
         // 3b. No backend draft (draft saved before Step 1 created deals) —

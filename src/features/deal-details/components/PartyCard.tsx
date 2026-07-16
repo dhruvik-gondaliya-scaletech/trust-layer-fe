@@ -24,7 +24,8 @@ export function PartyCard({ label, user, trustScore, onClick }: PartyCardProps) 
     bgSoft: isSeller ? "bg-blue-100" : "bg-[#10B981]/20",
   };
 
-  const displayName = user?.username || [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "Unknown";
+  const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(" ");
+  const displayName = fullName || user?.username || "Unknown";
   const isVerified = Boolean(user?.phoneVerifiedAt && user?.emailVerifiedAt);
 
   const profilePhotoUrl = user?.profilePhotoUrl;
@@ -51,6 +52,9 @@ export function PartyCard({ label, user, trustScore, onClick }: PartyCardProps) 
             <span className="font-bold text-[15px] text-gray-900">{displayName}</span>
             {isVerified && <ShieldCheck className={cn("w-3.5 h-3.5", theme.text)} />}
           </div>
+          {fullName && user?.username && (
+            <span className="text-[12px] text-gray-500 -mt-0.5 mb-0.5">@{user.username}</span>
+          )}
           <div className="flex items-center gap-2 text-[12px] font-semibold text-gray-500">
             {typeof trustScore === "number" && (
               <>
