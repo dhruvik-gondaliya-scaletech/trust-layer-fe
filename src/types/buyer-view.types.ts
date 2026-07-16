@@ -5,6 +5,7 @@ export interface MediaItem {
     url: string;
     mimeType: string;
     sortOrder: number;
+    type?: string;
 }
 
 export interface Deal {
@@ -27,6 +28,7 @@ export interface Deal {
     serialNumber?: string;
     gradedCompany?: string;
     gradedScore?: string;
+    isGraded?: boolean;
     media: MediaItem[];
     seller?: User;
 }

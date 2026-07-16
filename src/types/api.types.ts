@@ -325,3 +325,22 @@ export interface PaginatedDeals {
   totalPages: number;
 }
 
+export interface ForgotPasswordDto {
+  email: string;
+}
+
+export interface VerifyResetOtpDto {
+  email: string;
+  code: string;
+}
+
+export interface VerifyResetOtpResponse {
+  message: string;
+  resetToken: string;
+}
+
+export interface ResetPasswordDto {
+  newPassword: string;
+}
+
+

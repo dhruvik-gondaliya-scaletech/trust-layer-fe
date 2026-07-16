@@ -3,34 +3,33 @@
 import { Spinner } from "@/components/ui/spinner";
 import React, { useState, useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { PhoneVerifyInput } from "@/lib/validations/verify";
+import { ForgotOtpInput } from "@/lib/validations/forgot-password";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { Smartphone, Check, ChevronLeft } from "lucide-react";
+import { KeyRound, Shield, ChevronLeft } from "lucide-react";
 import { BottomActionBar } from "@/components/ui/bottom-action-bar";
-import { toast } from "sonner";
 import { CODE_RESEND_TIME_OUT } from "@/lib/contants";
 import { cn } from "@/lib/utils";
 import { Form, FormField, FormControl, Field, FieldLabel, FieldError } from "@/components/ui/field";
 
-interface PhoneVerifyStepProps {
-  form: UseFormReturn<PhoneVerifyInput>;
+interface ForgotOtpStepProps {
+  form: UseFormReturn<ForgotOtpInput>;
   isPending: boolean;
-  onSubmit: (data: PhoneVerifyInput) => void;
+  onSubmit: (data: ForgotOtpInput) => void;
+  email: string;
   onBack: () => void;
-  onResend?: (onSuccess: () => void) => void;
+  onResend: (onSuccess: () => void) => void;
   isResending?: boolean;
-  renderTracker?: () => React.ReactNode;
 }
 
-export const PhoneVerifyStep: React.FC<PhoneVerifyStepProps> = ({
+export const ForgotOtpStep: React.FC<ForgotOtpStepProps> = ({
   form,
   isPending,
   onSubmit,
+  email,
   onBack,
   onResend,
   isResending = false,
-  renderTracker,
 }) => {
   const [resendCountdown, setResendCountdown] = useState(CODE_RESEND_TIME_OUT);
 
@@ -42,13 +41,12 @@ export const PhoneVerifyStep: React.FC<PhoneVerifyStepProps> = ({
   }, [resendCountdown]);
 
   const handleResend = () => {
-    if (resendCountdown === 0 && onResend) {
+    if (resendCountdown === 0) {
       onResend(() => {
         setResendCountdown(CODE_RESEND_TIME_OUT);
       });
     }
   };
-
 
   return (
     <div className="flex flex-col min-h-full pb-[140px] lg:pb-0 justify-center">
@@ -61,33 +59,30 @@ export const PhoneVerifyStep: React.FC<PhoneVerifyStepProps> = ({
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-sm font-bold text-slate-400 tracking-wide uppercase">Step 2 of 3</h1>
+        <h1 className="text-sm font-bold text-slate-400 tracking-wide uppercase">Forgot Password</h1>
       </div>
 
       <div className="flex-1 px-5 pt-4 max-w-sm mx-auto w-full flex flex-col justify-center">
-        {/* Progress Tracker */}
-        {renderTracker?.()}
-
         {/* Hero Section */}
         <div className="flex justify-center mb-4">
-          <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 shadow-sm relative">
-            <Smartphone className="w-6 h-6 text-blue-600" />
+          <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 shadow-sm relative animate-fade-in">
+            <KeyRound className="w-6 h-6 text-blue-600" />
           </div>
         </div>
 
         <div className="text-center mb-6">
           <h1 className="text-2xl font-black mb-1.5 text-foreground leading-tight tracking-tight">
-            Enter Phone Code
+            Verify OTP
           </h1>
           <p className="text-sm text-muted-foreground font-medium">
-            We sent a secure code via SMS
+            We sent a secure code to <span className="font-semibold text-foreground">{email}</span>
           </p>
         </div>
 
         {/* Premium Card Container */}
         <div>
           <Form {...form}>
-            <form id="verify-phone-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" noValidate>
+            <form id="forgot-otp-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" noValidate>
               <FormField control={form.control} name="code" render={({ field }) => (
                 <Field className="space-y-3 border-none">
                   <FieldLabel className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">6-Digit Code</FieldLabel>
@@ -116,16 +111,17 @@ export const PhoneVerifyStep: React.FC<PhoneVerifyStepProps> = ({
             </form>
           </Form>
         </div>
+
         <BottomActionBar>
           <div className="flex flex-col lg:flex-row gap-3 w-full">
-            <Button form="verify-phone-form" type="submit" disabled={isPending} className="w-full lg:flex-1 h-14 text-[15px] font-bold rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/10 transition-all duration-200 active:scale-[0.98]">
+            <Button form="forgot-otp-form" type="submit" disabled={isPending} className="w-full lg:flex-1 h-14 text-[15px] font-bold rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/10 transition-all duration-200 active:scale-[0.98]">
               {isPending ? (
                 <span className="flex items-center justify-center gap-2">
                   <Spinner className="w-4 h-4" />
                   Verifying...
                 </span>
               ) : (
-                "Verify"
+                "Verify Code"
               )}
             </Button>
             <Button

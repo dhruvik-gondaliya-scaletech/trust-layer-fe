@@ -13,7 +13,7 @@ export function useDeclineFlow(onDeclineDeal: (reason?: string, explanation?: st
       await onDeclineDeal(declineReason, declineMessage);
       setShowDeclineModal(false);
       setShowFeedbackSuccess(true);
-    } catch (e) {
+    } catch (e: any) {
       console.error("Decline action failed:", e);
     } finally {
       setIsSubmittingDecline(false);

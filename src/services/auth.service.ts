@@ -9,6 +9,10 @@ import type {
   RegisterResponse,
   AuthTokenResponse,
   MessageResponse,
+  ForgotPasswordDto,
+  VerifyResetOtpDto,
+  VerifyResetOtpResponse,
+  ResetPasswordDto,
 } from "@/types/api.types";
 
 /**
@@ -76,6 +80,47 @@ const authService = {
     const res = await httpService.post<MessageResponse>(
       API_CONFIG.AUTH.SEND_PHONE_OTP,
       dto
+    );
+    return res.data;
+  },
+
+  /**
+   * POST /auth/forgot-password 🔓 Public
+   * Request a password reset code.
+   */
+  forgotPassword: async (dto: ForgotPasswordDto): Promise<MessageResponse> => {
+    const res = await httpService.post<MessageResponse>(
+      API_CONFIG.AUTH.FORGOT_PASSWORD,
+      dto
+    );
+    return res.data;
+  },
+
+  /**
+   * POST /auth/verify-reset-otp 🔓 Public
+   * Verify the password reset OTP code.
+   */
+  verifyResetOtp: async (dto: VerifyResetOtpDto): Promise<VerifyResetOtpResponse> => {
+    const res = await httpService.post<VerifyResetOtpResponse>(
+      API_CONFIG.AUTH.VERIFY_RESET_OTP,
+      dto
+    );
+    return res.data;
+  },
+
+  /**
+   * POST /auth/reset-password 🔓 Public (Requires resetToken in Authorization header)
+   * Reset the user password using a verified reset token.
+   */
+  resetPassword: async (dto: ResetPasswordDto, resetToken: string): Promise<MessageResponse> => {
+    const res = await httpService.post<MessageResponse>(
+      API_CONFIG.AUTH.RESET_PASSWORD,
+      dto,
+      {
+        headers: {
+          Authorization: `Bearer ${resetToken}`,
+        },
+      }
     );
     return res.data;
   },

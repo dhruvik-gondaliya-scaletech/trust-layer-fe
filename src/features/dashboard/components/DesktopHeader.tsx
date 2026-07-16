@@ -13,6 +13,7 @@ interface DesktopHeaderProps {
   role: any;
   setRole: (role: any) => void;
   unreadNotificationsCount: number;
+  isSidebarCollapsed: boolean;
 }
 
 export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
@@ -20,13 +21,17 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
   role,
   setRole,
   unreadNotificationsCount,
+  isSidebarCollapsed,
 }) => {
   const isDashboardActive = pathname === FRONTEND_ROUTES.DASHBOARD;
   const isCreateDealActive = pathname === FRONTEND_ROUTES.CREATE_DEAL;
   const isTimelineActive = pathname.startsWith(FRONTEND_ROUTES.TIMELINE);
 
   return (
-    <header className="hidden md:flex sticky top-0 z-40 w-full h-16 bg-card/95 backdrop-blur-md border-b border-border/40 shadow-sm items-center justify-between px-6 shrink-0">
+    <header className={cn(
+      "hidden md:flex sticky top-0 z-40 w-full h-16 bg-card/95 backdrop-blur-md border-b border-border/40 shadow-sm items-center justify-between pr-6 shrink-0 transition-all duration-300",
+      isSidebarCollapsed ? "pl-12" : "pl-6"
+    )}>
       {/* Left: Page title or breadcrumb */}
       <div className="flex items-center gap-2">
         <span className="text-sm font-bold text-muted-foreground uppercase tracking-widest">

@@ -2,7 +2,7 @@
 
 import { Spinner } from "@/components/ui/spinner";
 import React, { useState, useEffect, useRef } from "react";
-import { Camera, Video, Image as ImageIcon, Check, RefreshCw, AlertCircle, Award } from "lucide-react";
+import { Camera, Video, Image as ImageIcon, Check, RefreshCw, AlertCircle, Award, Info } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { TrustScoreCard, TrustScoreBreakdown } from "./TrustScoreCard";
 import { cn } from "@/lib/utils";
 import { AnimatedModal } from "@/components/shared/animated-modal";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Direct Camera Imports
 import { useCamera, usePhotoCapture, useVideoRecording } from '@/utils/camera';
@@ -272,7 +273,7 @@ const DirectCameraOverlay: React.FC<DirectCameraOverlayProps> = ({ type, title, 
                 </div>
                 <div className="w-[1px] bg-white/20 h-4"></div>
                 <div className={getStatusColor(analysisResult.coverage?.status)}>
-                  Subject: {analysisResult.coverage?.status.toUpperCase()}
+                  Item: {analysisResult.coverage?.status.toUpperCase()}
                 </div>
               </div>
             )}
@@ -378,7 +379,7 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
   const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
-    const media = window.matchMedia("(min-width: 1024px)");
+    const media = window.matchMedia("(min-width: 1280px)");
     setIsDesktop(media.matches);
     const listener = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
     media.addEventListener("change", listener);
@@ -440,10 +441,17 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
       <div className="flex-1 overflow-y-auto pr-0.5 space-y-6 scrollbar-none pb-28">
 
         {typeof trustScore === "number" && (
-          <div className="lg:hidden">
+          <div className="xl:hidden">
             <TrustScoreCard score={trustScore} nextStepName={nextStepName} breakdown={breakdown} />
           </div>
         )}
+
+        <Alert className="bg-blue-500/5 border border-blue-500/30 text-blue-500 dark:bg-blue-950/20 dark:border-blue-500/40 dark:text-blue-400 rounded-xl">
+          <Info className="h-4 w-4 shrink-0" />
+          <AlertDescription className="text-xs text-blue-800 dark:text-blue-300 font-semibold leading-relaxed">
+            Make sure to have the blank or white background for the item detection for maximum score.
+          </AlertDescription>
+        </Alert>
 
         <div className="flex flex-col gap-2">
           <h2 className="text-2xl font-extrabold text-foreground tracking-tight">Proof & Verification</h2>

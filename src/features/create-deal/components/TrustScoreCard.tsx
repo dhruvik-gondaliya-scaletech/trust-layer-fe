@@ -62,9 +62,11 @@ export const TrustScoreCard: React.FC<TrustScoreCardProps> = ({
 
   return (
     <div
+      onClick={breakdown ? () => setShowBreakdown((prev) => !prev) : undefined}
       className={cn(
         "w-full rounded-3xl text-white flex flex-col relative overflow-hidden transition-all duration-700 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 shadow-md",
-        isHeader ? "p-5 gap-3" : "p-6 gap-4"
+        isHeader ? "p-5 gap-3" : "p-6 gap-4",
+        breakdown && "cursor-pointer"
       )}
     >
       {/* Ambient glow orb */}
@@ -130,63 +132,36 @@ export const TrustScoreCard: React.FC<TrustScoreCardProps> = ({
         )}
       </AnimatePresence>
 
-      {/* Description Text (Step views only) */}
-      {isHeader && (
-        <p className="text-sm text-blue-100/80 leading-relaxed z-10">
-          {isPerfect
-            ? "Buyers trust you completely. Your deal is fully verified."
-            : score === 0
-            ? "Complete steps to increase buyer trust."
-            : `Next: ${nextStepName}`}
-        </p>
-      )}
-
       {/* Progress Bar + Breakdown Toggle */}
-      <div className="w-full flex flex-col gap-3 z-10 relative">
-        <div className="w-full h-2.5 bg-blue-950/45 rounded-full overflow-hidden">
+      <div className="w-full flex flex-col gap-2.5 z-10 relative">
+        <div className="w-full h-2 bg-blue-950/45 rounded-full overflow-hidden">
           <div
             className="h-full bg-white rounded-full transition-all duration-700 ease-out"
             style={{ width: `${score}%` }}
           />
         </div>
 
-        {isHeader ? (
-          breakdown && (
-            <button
-              onClick={() => setShowBreakdown((prev) => !prev)}
-              className="flex items-center justify-between text-xs font-extrabold text-blue-200/80 uppercase tracking-wider hover:text-white transition-colors w-full"
-            >
-              <span>
-                {isPerfect
-                  ? "All steps complete"
-                  : score > 0
-                  ? `Next: ${nextStepName}`
-                  : "Get started"}
-              </span>
-              <div className="flex items-center gap-1">
-                <span>View Breakdown</span>
-                {showBreakdown ? (
-                  <ChevronUp className="w-3.5 h-3.5" />
-                ) : (
-                  <ChevronDown className="w-3.5 h-3.5" />
-                )}
-              </div>
-            </button>
-          )
-        ) : (
-          <div
-            onClick={() => setShowBreakdown((prev) => !prev)}
-            className="flex items-center justify-center gap-1.5 cursor-pointer text-xs text-blue-100/80 font-bold hover:text-white transition-colors relative z-10 w-full pt-1"
-          >
-            <span>View Breakdown</span>
-            {showBreakdown ? (
-              <ChevronUp className="w-3.5 h-3.5" />
-            ) : (
-              <ChevronDown className="w-3.5 h-3.5" />
-            )}
+        {breakdown && (
+          <div className="flex items-center justify-between gap-2 min-w-0">
+            <span className="text-[11px] font-semibold text-blue-100/75 leading-tight truncate min-w-0">
+              {isPerfect
+                ? "✓ All steps complete"
+                : score > 0
+                ? `↑ Next: ${nextStepName}`
+                : "Get started"}
+            </span>
+            <div className="flex items-center gap-0.5 shrink-0 text-[11px] font-semibold text-blue-200/60">
+              <span>{showBreakdown ? "Hide" : "Details"}</span>
+              {showBreakdown ? (
+                <ChevronUp className="w-3 h-3" />
+              ) : (
+                <ChevronDown className="w-3 h-3" />
+              )}
+            </div>
           </div>
         )}
       </div>
+
 
       {/* Accordion Breakdown */}
       <AnimatePresence initial={false}>

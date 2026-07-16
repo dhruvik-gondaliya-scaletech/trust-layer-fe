@@ -24,6 +24,19 @@ export function DashboardLayoutContainer({
     enabled: isAuthenticated,
   });
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("sidebar-collapsed");
+    if (stored !== null) {
+      setIsCollapsed(stored === "true");
+    }
+  }, []);
+
+  const handleToggleCollapse = (collapsed: boolean) => {
+    setIsCollapsed(collapsed);
+    localStorage.setItem("sidebar-collapsed", String(collapsed));
+  };
 
   useEffect(() => {
     if (!isInitializing && !isAuthenticated) {
@@ -89,18 +102,24 @@ export function DashboardLayoutContainer({
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col md:flex-row text-left">
+    <div className="min-h-screen md:h-screen md:overflow-hidden bg-[#F8FAFC] flex flex-col md:flex-row text-left">
       {/* Sidebar Layout */}
-      <Sidebar user={user} onLogoutTrigger={() => setIsLogoutModalOpen(true)} />
+      <Sidebar
+        user={user}
+        onLogoutTrigger={() => setIsLogoutModalOpen(true)}
+        isCollapsed={isCollapsed}
+        onToggleCollapse={() => handleToggleCollapse(!isCollapsed)}
+      />
 
       {/* Main Content Pane */}
-      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen md:min-h-0 md:h-full md:overflow-y-auto">
         {/* Desktop Header */}
         <DesktopHeader
           pathname={pathname}
           role={role}
           setRole={setRole}
           unreadNotificationsCount={unreadNotificationsCount}
+          isSidebarCollapsed={isCollapsed}
         />
 
         {/* Content Children */}

@@ -9,7 +9,7 @@ import { useDealMedia } from "../../../hooks/useDealMedia";
 import { TopBar } from "./TopBar";
 import { MediaGallery } from "./MediaGallery";
 import { ProductDetailsCard } from "./ProductDetailsCard";
-import { TrustSnapshotCard } from "./TrustSnapshotCard";
+import { TrustScoreCard } from "@/features/create-deal/components/TrustScoreCard";
 import { SellerProfileSection } from "./SellerProfileSection";
 import { FeeSummaryCard } from "./FeeSummaryCard";
 import { BottomCta } from "./BottomCta";
@@ -56,11 +56,17 @@ export default function BuyerView({
 
         <ProductDetailsCard deal={deal} />
 
-        <TrustSnapshotCard
-          displayScore={displayScore}
-          verificationSteps={verificationSteps}
-          confidenceTitle={confidenceTitle}
-          confidenceMessage={confidenceMessage}
+        <TrustScoreCard
+          score={displayScore}
+          breakdown={{
+            hasItemDetails: true,
+            hasMainPhoto: deal.media?.some((m) => m.type === "main_photo") ?? false,
+            additionalPhotosCount: deal.media?.filter((m) => m.type === "additional_photo").length ?? 0,
+            hasVideo: deal.media?.some((m) => m.type === "video") ?? false,
+            hasCertPhoto: deal.media?.some((m) => m.type === "serial_cert") ?? false,
+            isGraded: deal.isGraded,
+          }}
+          variant="review"
         />
 
         <SellerProfileSection seller={deal.seller} trustScore={deal.trustScore} />

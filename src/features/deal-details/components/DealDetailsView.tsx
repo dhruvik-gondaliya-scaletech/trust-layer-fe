@@ -68,14 +68,14 @@ export function DealDetailsView({
 
       <div className={cn(
         "max-w-2xl mx-auto w-full px-4 sm:px-6 -mt-4 relative z-20",
-        hasBottomBar ? "lg:max-w-5xl pb-[150px] lg:pb-10" : "pb-10"
+        hasBottomBar ? "xl:max-w-5xl pb-[150px] xl:pb-10" : "pb-10"
       )}>
         <div className={cn(
           "flex flex-col gap-4",
-          hasBottomBar && "lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start"
+          hasBottomBar && "xl:grid xl:grid-cols-3 xl:gap-6 xl:items-start"
         )}>
           {/* Main details column */}
-          <div className={cn("flex flex-col gap-4", hasBottomBar && "lg:col-span-2")}>
+          <div className={cn("flex flex-col gap-4", hasBottomBar && "xl:col-span-2")}>
             <StatusBanner deal={deal} />
             {isSellerView && deal.status !== DealStatus.DRAFT && (
               <ShareableDealLink dealNumber={deal.dealNumber} />
@@ -89,7 +89,7 @@ export function DealDetailsView({
 
           {/* Sticky sidebar on desktop */}
           {hasBottomBar && (
-            <div className="hidden lg:block lg:col-span-1 lg:sticky lg:top-24">
+            <div className="hidden xl:block xl:col-span-1 xl:sticky xl:top-24">
               <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-4">
                 <div className="flex flex-col gap-1">
                   <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
@@ -125,7 +125,7 @@ export function DealDetailsView({
       </div>
 
       {hasBottomBar && (
-        <div className="lg:hidden">
+        <div className="xl:hidden">
           <BottomActionBar>
             {isSeller && (
               <SellerActions

@@ -8,6 +8,9 @@ export const API_CONFIG = {
         VERIFY_OTP: "/auth/verify-otp",
         RESEND_OTP: "/auth/resend-otp",
         SEND_PHONE_OTP: "/auth/send-phone-otp",
+        FORGOT_PASSWORD: "/auth/forgot-password",
+        VERIFY_RESET_OTP: "/auth/verify-reset-otp",
+        RESET_PASSWORD: "/auth/reset-password",
     },
 
     // ─── User Endpoints ───────────────────────────────────────────────────────
@@ -63,6 +66,7 @@ export const FRONTEND_ROUTES = {
     REGISTER: "/register",
     VERIFY: "/verify",
     LOGIN: "/login",
+    FORGET_PASSWORD: "/forget-password",
     DASHBOARD: "/dashboard",
     WALLET: "/wallet",
     TIMELINE: "/timeline",
