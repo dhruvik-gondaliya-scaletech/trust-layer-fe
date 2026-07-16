@@ -40,7 +40,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         </div>
       </div>
 
-      <div className="flex-1 px-5 pt-10 max-w-sm mx-auto w-full lg:flex lg:flex-col lg:justify-center lg:pt-0">
+      <div className="flex-1 px-5 max-w-sm mx-auto w-full flex flex-col justify-center">
         <h1 className="text-[28px] font-extrabold mb-8 text-foreground leading-tight tracking-tight">
           Sign In
         </h1>
@@ -87,6 +87,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
+                </div>
+                <div className="flex justify-end mt-1.5">
+                  <Link
+                    href={FRONTEND_ROUTES.FORGET_PASSWORD}
+                    className="text-[13px] font-medium text-primary hover:underline transition-colors"
+                  >
+                    Forgot Password?
+                  </Link>
                 </div>
                 <FieldError />
               </Field>

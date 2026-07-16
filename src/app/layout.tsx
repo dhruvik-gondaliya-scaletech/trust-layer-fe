@@ -1,12 +1,46 @@
 import type { Metadata } from "next";
-// import { Inter, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { Toaster } from "sonner";
 import Script from "next/script";
 import Providers from "../providers/providers";
 import "./globals.css";
 
-const inter = { variable: "font-sans" };
-const geistMono = { variable: "font-mono" };
+const matter = localFont({
+  src: [
+    {
+      path: "../../public/fonts/MatterRegular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/MatterMedium.woff2",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/MatterSemiBold.woff2",
+      weight: "600",
+      style: "normal",
+    },
+  ],
+  variable: "--font-matter",
+});
+
+const seasonMix = localFont({
+  src: [
+    {
+      path: "../../public/fonts/SeasonMix-Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/SeasonMix-Medium.woff2",
+      weight: "500",
+      style: "normal",
+    },
+  ],
+  variable: "--font-season",
+});
 
 export const metadata: Metadata = {
   title: "TrustLayer – Safe Payments for Private Deals",
@@ -36,7 +70,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${geistMono.variable} font-sans antialiased`}
+        className={`${matter.variable} ${seasonMix.variable} font-sans antialiased`}
       >
         <Providers>
           {children}

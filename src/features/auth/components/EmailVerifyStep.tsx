@@ -6,14 +6,13 @@ import { UseFormReturn } from "react-hook-form";
 import { EmailVerifyInput } from "@/lib/validations/verify";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { Label } from "@/components/ui/label";
 import { Mail, Shield, ChevronLeft, Check } from "lucide-react";
 import { BottomActionBar } from "@/components/ui/bottom-action-bar";
 import { toast } from "sonner";
 import { CODE_RESEND_TIME_OUT } from "@/lib/contants";
 import { cn } from "@/lib/utils";
 
-import { Form, FormField, FormControl, Field, FieldError } from "@/components/ui/field";
+import { Form, FormField, FormControl, Field, FieldLabel, FieldError } from "@/components/ui/field";
 
 interface EmailVerifyStepProps {
   form: UseFormReturn<EmailVerifyInput>;
@@ -152,21 +151,22 @@ export const EmailVerifyStep: React.FC<EmailVerifyStepProps> = ({
             <form id="verify-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" noValidate>
               <FormField control={form.control} name="code" render={({ field }) => (
                 <Field className="space-y-3 border-none">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">6-Digit Code</Label>
+                  <FieldLabel className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">6-Digit Code</FieldLabel>
                   <div className="flex justify-center">
                     <FormControl>
                       <InputOTP
                         maxLength={6}
                         disabled={isPending}
+                        autoFocus
                         {...field}
                       >
                         <InputOTPGroup className="gap-2 flex justify-between w-full">
-                          <InputOTPSlot index={0} className="h-16 w-12 text-xl font-extrabold" />
-                          <InputOTPSlot index={1} className="h-16 w-12 text-xl font-extrabold" />
-                          <InputOTPSlot index={2} className="h-16 w-12 text-xl font-extrabold" />
-                          <InputOTPSlot index={3} className="h-16 w-12 text-xl font-extrabold" />
-                          <InputOTPSlot index={4} className="h-16 w-12 text-xl font-extrabold" />
-                          <InputOTPSlot index={5} className="h-16 w-12 text-xl font-extrabold" />
+                          <InputOTPSlot index={0} className="h-16 w-12 text-xl font-extrabold border-blue-500 focus-within:border-blue-600" />
+                          <InputOTPSlot index={1} className="h-16 w-12 text-xl font-extrabold border-blue-500 focus-within:border-blue-600" />
+                          <InputOTPSlot index={2} className="h-16 w-12 text-xl font-extrabold border-blue-500 focus-within:border-blue-600" />
+                          <InputOTPSlot index={3} className="h-16 w-12 text-xl font-extrabold border-blue-500 focus-within:border-blue-600" />
+                          <InputOTPSlot index={4} className="h-16 w-12 text-xl font-extrabold border-blue-500 focus-within:border-blue-600" />
+                          <InputOTPSlot index={5} className="h-16 w-12 text-xl font-extrabold border-blue-500 focus-within:border-blue-600" />
                         </InputOTPGroup>
                       </InputOTP>
                     </FormControl>
@@ -174,16 +174,6 @@ export const EmailVerifyStep: React.FC<EmailVerifyStepProps> = ({
                   <FieldError className="text-center" />
                 </Field>
               )} />
-
-              <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-4 flex gap-3 shadow-inner">
-                <Shield className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-                <div className="space-y-1 text-left">
-                  <p className="text-xs font-bold text-slate-800">Why verify your email?</p>
-                  <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
-                    We need to confirm your email so we can send important payment and shipping updates securely.
-                  </p>
-                </div>
-              </div>
             </form>
           </Form>
         </div>
@@ -203,7 +193,7 @@ export const EmailVerifyStep: React.FC<EmailVerifyStepProps> = ({
             <Button
               variant="outline"
               type="button"
-              className="w-full lg:flex-1 h-14 border-slate-200 text-slate-700 hover:bg-slate-50 text-[15px] font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]"
+              className="w-full lg:flex-1 h-14 border-blue-500 text-blue-600 hover:bg-blue-50 text-[15px] font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]"
               onClick={handleResend}
               disabled={resendCountdown > 0 || isPending || isResending}
             >

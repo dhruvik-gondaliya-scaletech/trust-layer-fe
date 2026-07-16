@@ -49,7 +49,7 @@ export function SellerActions({
               </>
             )}
           </Button>
-          <div className="flex flex-row gap-3 w-full lg:flex-col lg:gap-2">
+          <div className="flex flex-row gap-3 w-full xl:flex-col xl:gap-2">
             <Button
               variant="outline"
               onClick={() => router.push(FRONTEND_ROUTES.DEAL_UPDATE(deal.id))}
@@ -78,7 +78,7 @@ export function SellerActions({
             <Spinner className="w-3 h-3 text-slate-400" />
             <span>Waiting for buyer to add shipping details & secure payment</span>
           </div>
-          <div className="flex flex-row gap-3 w-full lg:flex-col lg:gap-2">
+          <div className="flex flex-row gap-3 w-full xl:flex-col xl:gap-2">
             <Button
               variant="outline"
               onClick={() => router.push(FRONTEND_ROUTES.DEAL_UPDATE(deal.id))}

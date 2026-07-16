@@ -17,6 +17,10 @@ import type {
   ResendOtpDto,
   SendPhoneOtpDto,
   OtpType,
+  ForgotPasswordDto,
+  VerifyResetOtpDto,
+  VerifyResetOtpResponse,
+  ResetPasswordDto,
 } from "@/types/api.types";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -238,4 +242,77 @@ export function useLogout() {
     queryClient.clear();
     router.replace(FRONTEND_ROUTES.LOGIN);
   };
+}
+
+// ─── Forgot/Reset Password Mutations ──────────────────────────────────────────
+
+/**
+ * Mutation: POST /auth/forgot-password
+ * Initiates the forgot password flow by requesting an email OTP.
+ */
+export function useForgotPasswordMutation({
+  onSuccess,
+  onError,
+}: {
+  onSuccess?: (data: any) => void;
+  onError?: (error: Error) => void;
+} = {}) {
+  return useMutation({
+    mutationFn: (dto: ForgotPasswordDto) => authService.forgotPassword(dto),
+    onSuccess: (data) => {
+      onSuccess?.(data);
+    },
+    onError: (error: Error) => {
+      onError?.(error);
+    },
+  });
+}
+
+/**
+ * Mutation: POST /auth/verify-reset-otp
+ * Verifies the OTP and returns a short-lived reset token.
+ */
+export function useVerifyResetOtpMutation({
+  onSuccess,
+  onError,
+}: {
+  onSuccess?: (data: VerifyResetOtpResponse) => void;
+  onError?: (error: Error) => void;
+} = {}) {
+  return useMutation({
+    mutationFn: (dto: VerifyResetOtpDto) => authService.verifyResetOtp(dto),
+    onSuccess: (data) => {
+      onSuccess?.(data);
+    },
+    onError: (error: Error) => {
+      onError?.(error);
+    },
+  });
+}
+
+/**
+ * Mutation: POST /auth/reset-password
+ * Resets the password using the reset token.
+ */
+export function useResetPasswordMutation({
+  onSuccess,
+  onError,
+}: {
+  onSuccess?: (data: any) => void;
+  onError?: (error: Error) => void;
+} = {}) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ dto, resetToken }: { dto: ResetPasswordDto; resetToken: string }) =>
+      authService.resetPassword(dto, resetToken),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+      onSuccess?.(data);
+    },
+    onError: (error: Error) => {
+      onError?.(error);
+    },
+  });
 }

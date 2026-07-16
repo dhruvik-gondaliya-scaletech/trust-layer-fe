@@ -9,15 +9,11 @@ import { BackButton } from "@/components/shared/BackButton";
 
 interface DealDetailsHeroProps {
   deal: Deal;
+  hasBottomBar?: boolean;
 }
 
-export function DealDetailsHero({ deal }: DealDetailsHeroProps) {
+export function DealDetailsHero({ deal, hasBottomBar }: DealDetailsHeroProps) {
   const badge = getStatusBadgeMeta(deal.status);
-  const subtitleParts = [
-    deal.condition,
-    deal.isGraded && deal.serialNumber ? `Graded · ${deal.serialNumber}` : null
-  ].filter(Boolean);
-  const productCondition = subtitleParts.length > 0 ? subtitleParts.join(" · ") : "Not specified";
 
   // Use the reference badge styling logic based on our badge text
   const getBadgeStyle = () => {
@@ -30,11 +26,16 @@ export function DealDetailsHero({ deal }: DealDetailsHeroProps) {
     return "bg-orange-500/20 text-orange-300 border-orange-500/30";
   };
 
+  const containerClasses = cn(
+    "absolute left-0 right-0 mx-auto px-4 sm:px-6 w-full max-w-2xl",
+    hasBottomBar && "xl:max-w-5xl"
+  );
+
   return (
-    <div className="relative h-[280px] md:h-[320px] w-full bg-gray-900">
+    <div className="relative h-[280px] md:h-[320px] w-full bg-gray-900 shrink-0">
       <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent" />
 
-      <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10 max-w-2xl lg:max-w-5xl mx-auto">
+      <div className={cn("top-4 flex justify-between items-center z-10", containerClasses)}>
         <BackButton />
 
         <div className={cn(
@@ -45,12 +46,12 @@ export function DealDetailsHero({ deal }: DealDetailsHeroProps) {
         </div>
       </div>
 
-      <div className="absolute bottom-6 left-5 right-5 z-10 max-w-2xl lg:max-w-5xl mx-auto">
+      <div className={cn("bottom-6 z-10", containerClasses)}>
         <div className="w-full">
           <p className="text-gray-300 font-bold text-[13px] mb-1 uppercase tracking-wider">{deal.dealNumber}</p>
           <h1 className="text-white text-[24px] md:text-[28px] font-extrabold leading-tight mb-2 tracking-tight truncate">{deal.title}</h1>
           <div className="flex items-center justify-between">
-            <span className="text-white/80 text-[14px] font-medium truncate pr-4">{productCondition}</span>
+            <span className="text-white/80 text-[14px] font-medium truncate pr-4">{deal?.condition}</span>
             <div className="text-right">
               <span className="text-white text-[24px] md:text-[28px] font-black shrink-0">${formatCurrency(deal.buyerPaysAmount)}</span>
               {deal.orderType !== OrderType.IN_PERSON && (

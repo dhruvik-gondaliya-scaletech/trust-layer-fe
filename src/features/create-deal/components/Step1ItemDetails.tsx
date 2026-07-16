@@ -67,7 +67,7 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
 
           {/* Trust Score card — scrolls with content */}
           {typeof trustScore === "number" && (
-            <div className="lg:hidden">
+            <div className="xl:hidden">
               <TrustScoreCard score={trustScore} nextStepName={nextStepName} breakdown={breakdown} />
             </div>
           )}

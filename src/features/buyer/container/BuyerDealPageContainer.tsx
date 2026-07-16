@@ -9,6 +9,7 @@ import BuyerView from "../components/BuyerView";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FRONTEND_ROUTES } from "@/lib/contants";
+import { toast } from "sonner";
 
 export default function BuyerDealPageContainer() {
   const params = useParams();
@@ -16,7 +17,15 @@ export default function BuyerDealPageContainer() {
   const dealNumber = (params.id || params.dealNumber) as string;
 
   const { data: deal, isLoading, isError, error } = useDeal(dealNumber);
-  const declineMutation = useDeclineDeal({ dealNumber });
+  const declineMutation = useDeclineDeal({
+    dealNumber,
+    onSuccess: () => {
+      toast.success("Deal declined successfully.");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to decline deal.");
+    },
+  });
   const { isAuthenticated } = useAuth();
 
   if (isLoading) {
@@ -59,6 +68,7 @@ export default function BuyerDealPageContainer() {
       });
     } catch (e) {
       console.error("Failed to decline deal", e);
+      throw e;
     }
   };
 
@@ -81,12 +91,14 @@ export default function BuyerDealPageContainer() {
     feePayer: deal.feePayer,
     trustScore: deal.trustScore,
     serialNumber: deal.serialNumber || undefined,
+    isGraded: deal.isGraded,
     gradedCompany: deal.isGraded ? "PSA" : undefined,
     media: deal.media?.map((m) => ({
       id: m.id,
       url: m.url,
       mimeType: m.mimeType || "image/jpeg",
       sortOrder: m.sortOrder,
+      type: m.type,
     })) || [],
     seller: deal.seller,
   };

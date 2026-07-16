@@ -237,7 +237,7 @@ export const ProfileSetupStep: React.FC<ProfileSetupStepProps> = ({
             </div>
           ) : (
             /* Standard Profile Setup Form & Avatar Selection */
-            <div className="bg-white/80 backdrop-blur-xl rounded-[28px] p-6 shadow-[0_20px_50px_rgba(8,15,30,0.03)] border border-slate-100 space-y-6">
+            <div className="space-y-6">
               {/* Profile Avatar Selection Box */}
               <div className="flex flex-col items-center gap-4">
                 {/* Main Avatar Circle */}

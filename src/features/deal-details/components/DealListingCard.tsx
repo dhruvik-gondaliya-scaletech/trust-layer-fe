@@ -75,18 +75,6 @@ export const DealListingCard: React.FC<DealListingCardProps> = ({
               <IconComponent className="w-8 h-8 text-primary/70" />
             </div>
           )}
-
-          {/* Floating Badges */}
-          <div className="absolute top-3 left-3 pointer-events-none">
-            <span className={cn(
-              "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold tracking-wide border leading-none uppercase shadow-sm bg-background/95 backdrop-blur-xs",
-              isSeller
-                ? "bg-blue-50/95 text-blue-600 border-blue-100 dark:border-blue-900/50 dark:bg-blue-950/90 dark:text-blue-400"
-                : "bg-emerald-50/95 text-emerald-600 border-emerald-100 dark:border-emerald-900/50 dark:bg-emerald-950/90 dark:text-emerald-400"
-            )}>
-              {dealRole}
-            </span>
-          </div>
         </div>
 
         {/* Info Content */}
@@ -162,14 +150,6 @@ export const DealListingCard: React.FC<DealListingCardProps> = ({
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-[11px] font-semibold text-muted-foreground/80 leading-none">
                 {deal.dealNumber}
-              </span>
-              <span className={cn(
-                "inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-extrabold tracking-wide border leading-none uppercase shrink-0",
-                isSeller
-                  ? "bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 border-blue-100 dark:border-blue-900/50"
-                  : "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/50"
-              )}>
-                {dealRole}
               </span>
               <span className={cn(
                 "inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-extrabold tracking-wide border leading-none uppercase shrink-0",

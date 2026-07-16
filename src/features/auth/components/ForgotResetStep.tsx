@@ -1,25 +1,22 @@
 "use client";
 
-import { Spinner } from "@/components/ui/spinner";
 import React, { useState } from "react";
 import { UseFormReturn, useWatch } from "react-hook-form";
-import { RegisterInput } from "@/lib/validations/register";
+import { ForgotResetInput } from "@/lib/validations/forgot-password";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Shield, Eye, EyeOff } from "lucide-react";
-import { FRONTEND_ROUTES } from "@/lib/contants";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { cn } from "@/lib/utils";
 import { Form, FormField, FormControl, Field, FieldLabel, FieldError, FieldDescription } from "@/components/ui/field";
+import { Spinner } from "@/components/ui/spinner";
+import { Shield, Lock, Eye, EyeOff } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-interface RegisterFormProps {
-  form: UseFormReturn<RegisterInput>;
+interface ForgotResetStepProps {
+  form: UseFormReturn<ForgotResetInput>;
   isPending: boolean;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit: (data: ForgotResetInput) => void;
 }
 
-export const RegisterForm: React.FC<RegisterFormProps> = ({
+export const ForgotResetStep: React.FC<ForgotResetStepProps> = ({
   form,
   isPending,
   onSubmit,
@@ -38,15 +35,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   const hasUpper = /[A-Z]/.test(password);
   const hasLower = /[a-z]/.test(password);
   const hasNumber = /\d/.test(password);
-  const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect");
-  const loginUrl = redirect
-    ? `${FRONTEND_ROUTES.LOGIN}?redirect=${encodeURIComponent(redirect)}`
-    : FRONTEND_ROUTES.LOGIN;
 
   return (
     <div className="flex flex-col min-h-full pb-8">
-      {/* Top Header */}
+      {/* Top Header for Mobile */}
       <div className="flex items-center justify-center p-6 bg-background lg:hidden">
         <div className="flex items-center gap-2 text-primary font-bold text-lg select-none">
           <Shield className="h-6 w-6" />
@@ -55,68 +47,24 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       </div>
 
       <div className="flex-1 px-5 max-w-sm mx-auto w-full flex flex-col justify-center">
-        <h1 className="text-[28px] font-extrabold mb-2 text-foreground leading-tight tracking-tight">
-          Create Account
+        <div className="flex justify-center mb-6">
+          <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 shadow-sm">
+            <Lock className="w-6 h-6 text-blue-600" />
+          </div>
+        </div>
+
+        <h1 className="text-[28px] font-extrabold mb-2 text-foreground leading-tight tracking-tight text-center">
+          Reset Password
         </h1>
-        <p className="text-[15px] text-muted-foreground mb-8">
-          Create your account to start trusted transactions.
+        <p className="text-[15px] text-muted-foreground text-center mb-8">
+          Enter your new password below. Make sure it is secure and unique.
         </p>
 
         <Form {...form}>
-          <form id="register-form" onSubmit={onSubmit} className="space-y-4" noValidate>
-            <div className="grid grid-cols-2 gap-4">
-              <FormField control={form.control} name="firstName" render={({ field }) => (
-                <Field>
-                  <FieldLabel className="text-[13px]">First Name</FieldLabel>
-                  <FormControl>
-                    <Input
-                      autoComplete="given-name"
-                      required
-                      disabled={isPending}
-                      placeholder="John"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FieldError />
-                </Field>
-              )} />
-              <FormField control={form.control} name="lastName" render={({ field }) => (
-                <Field>
-                  <FieldLabel className="text-[13px]">Last Name</FieldLabel>
-                  <FormControl>
-                    <Input
-                      autoComplete="family-name"
-                      required
-                      disabled={isPending}
-                      placeholder="Smith"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FieldError />
-                </Field>
-              )} />
-            </div>
-
-            <FormField control={form.control} name="email" render={({ field }) => (
-              <Field>
-                <FieldLabel className="text-[13px]">Email</FieldLabel>
-                <FormControl>
-                  <Input
-                    autoComplete="email"
-                    required
-                    type="email"
-                    disabled={isPending}
-                    placeholder="john@example.com"
-                    {...field}
-                  />
-                </FormControl>
-                <FieldError />
-              </Field>
-            )} />
-
+          <form id="forgot-reset-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <FormField control={form.control} name="password" render={({ field }) => (
               <Field>
-                <FieldLabel className="text-[13px]">Password</FieldLabel>
+                <FieldLabel className="text-[13px]">New Password</FieldLabel>
                 <div className="relative">
                   <FormControl>
                     <Input
@@ -161,7 +109,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             )} />
 
             <FormField control={form.control} name="confirmPassword" render={({ field }) => (
-              <Field>
+              <Field className="pt-2">
                 <FieldLabel className="text-[13px]">Confirm Password</FieldLabel>
                 <div className="relative">
                   <FormControl>
@@ -188,63 +136,16 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
               </Field>
             )} />
 
-            <div className="mb-3 flex flex-col gap-3 pt-6">
-              <FormField control={form.control} name="agreeTerms" render={({ field }) => (
-                <Field className="flex-col gap-3 w-full border-none">
-                  <div className="flex items-start gap-3">
-                    <FormControl>
-                      <input
-                        type="checkbox"
-                        disabled={isPending}
-                        className="mt-0.5 flex-shrink-0 w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
-                        checked={field.value}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        name={field.name}
-                        ref={field.ref}
-                      />
-                    </FormControl>
-                    <FieldLabel className="block text-[13px] leading-normal text-slate-500 cursor-pointer select-none border-none p-0">
-                      I agree to the{" "}
-                      <Link href="#" className="text-primary hover:underline">
-                        Terms
-                      </Link>
-                      ,{" "}
-                      <Link href="#" className="text-primary hover:underline">
-                        Privacy Policy
-                      </Link>
-                      , and{" "}
-                      <Link href="#" className="text-primary hover:underline">
-                        Transaction Terms
-                      </Link>
-                      .
-                    </FieldLabel>
-                  </div>
-                  <FieldError />
-                </Field>
-              )} />
-              <div className="text-center mt-1">
-                <p className="text-[12px] text-slate-400 font-medium flex items-center justify-center gap-1.5">
-                  <Shield className="w-3.5 h-3.5" /> Built for secure buyer and seller transactions.
-                </p>
-              </div>
-            </div>
-            <Button type="submit" disabled={isPending} className="w-full h-14 text-[16px]">
+            <Button type="submit" disabled={isPending} className="w-full h-14 text-[16px] mt-4">
               {isPending ? (
                 <span className="flex items-center justify-center gap-2">
                   <Spinner className="w-4 h-4" />
-                  Creating Account...
+                  Resetting Password...
                 </span>
               ) : (
-                "Continue"
+                "Reset Password"
               )}
             </Button>
-            <p className="text-center text-[14px] text-muted-foreground mt-4">
-              Already have an account?{" "}
-              <Link href={loginUrl} className="text-primary font-bold hover:underline">
-                Sign In
-              </Link>
-            </p>
           </form>
         </Form>
       </div>

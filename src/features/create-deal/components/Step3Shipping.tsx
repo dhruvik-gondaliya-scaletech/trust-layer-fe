@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Info } from "lucide-react";
 import { Form, FormField, FormControl, Field, FieldLabel, FieldError } from "@/components/ui/field";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export interface Step3ShippingData {
   handlingTime: string;
@@ -43,6 +44,13 @@ export const Step3Shipping: React.FC<Step3ShippingProps> = ({
       >
       {/* Scrollable Form Content */}
       <div className="flex-1 overflow-y-auto px-0.5 space-y-5 scrollbar-none pb-28">
+        <Alert className="bg-amber-500/5 border border-amber-500/30 text-amber-500 dark:bg-amber-950/20 dark:border-amber-500/40 dark:text-amber-400 rounded-xl">
+          <Info className="h-4 w-4 shrink-0" />
+          <AlertDescription className="text-xs text-amber-800 dark:text-amber-300 font-semibold leading-relaxed">
+            If you do not ship within the selected handling time, the transaction may be automatically cancelled.
+          </AlertDescription>
+        </Alert>
+
         <div className="flex flex-col gap-1">
           <h2 className="text-2xl font-extrabold text-foreground tracking-tight">Shipping</h2>
         </div>
@@ -73,14 +81,6 @@ export const Step3Shipping: React.FC<Step3ShippingProps> = ({
               <FieldError className="text-xs font-semibold" />
             </Field>
           )} />
-
-          {/* Amber Info Box */}
-          <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-500 text-xs leading-relaxed">
-            <Info className="w-4 h-4 shrink-0 mt-0.5" />
-            <span>
-              If you do not ship within the selected handling time, the transaction may be automatically cancelled.
-            </span>
-          </div>
         </div>
 
         {/* Shipping Cost */}

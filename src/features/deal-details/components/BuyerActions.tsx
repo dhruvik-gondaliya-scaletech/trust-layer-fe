@@ -77,7 +77,7 @@ export function BuyerActions({
               </>
             )}
           </Button>
-          <div className="flex flex-row gap-3 w-full lg:flex-col lg:gap-2">
+          <div className="flex flex-row gap-3 w-full xl:flex-col xl:gap-2">
             <Button
               variant="outline"
               onClick={() => router.push(FRONTEND_ROUTES.VIEW_TRACKING(deal.id))}

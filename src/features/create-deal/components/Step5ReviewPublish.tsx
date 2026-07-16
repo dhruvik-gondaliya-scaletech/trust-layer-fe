@@ -153,7 +153,8 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
 
             <div className="w-full flex flex-col gap-3">
               <Button
-                onClick={() => router.push(FRONTEND_ROUTES.BUYER_VIEW(dealNumber!))}
+                // onClick={() => router.push(FRONTEND_ROUTES.BUYER_VIEW(dealNumber!))}
+                disabled
                 className="w-full bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/10 rounded-2xl h-14 text-base font-bold active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 border-none cursor-pointer"
               >
                 <span>Open deal as buyer</span>
@@ -189,7 +190,7 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
     <div className="flex flex-col h-full flex-1 overflow-hidden text-left select-none">
       <form id="step5-form" onSubmit={handlePublish} className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto pr-0.5 space-y-6 scrollbar-none pb-28">
-          <div className="lg:max-w-[520px] lg:mx-auto w-full space-y-6">
+          <div className="xl:max-w-[520px] xl:mx-auto w-full space-y-6">
             <div className="flex flex-col gap-1">
               <h2 className="text-xl font-extrabold text-foreground tracking-tight">
                 {isUpdateMode ? "Review updates" : "Review deal"}
@@ -197,7 +198,7 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
             </div>
 
             {/* Premium Trust Score Card */}
-            <div className="lg:hidden">
+            <div className="xl:hidden">
               <TrustScoreCard
                 score={trustScore}
                 breakdown={breakdown}
