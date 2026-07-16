@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Role } from "@/types/enums";
-import { FRONTEND_ROUTES } from "@/lib/contants";
 import { AnimatedModal } from "@/components/shared/animated-modal";
 
 interface DesktopHeaderProps {
@@ -25,9 +24,6 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
   isSidebarCollapsed,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const isDashboardActive = pathname === FRONTEND_ROUTES.DASHBOARD;
-  const isCreateDealActive = pathname === FRONTEND_ROUTES.CREATE_DEAL;
-  const isTimelineActive = pathname.startsWith(FRONTEND_ROUTES.TIMELINE);
 
   return (
     <header className={cn(
@@ -36,15 +32,6 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
     )}>
       {/* Left: Page title or breadcrumb */}
       <div className="flex items-center gap-2">
-        <span className="text-sm font-bold text-muted-foreground uppercase tracking-widest">
-          {isDashboardActive
-            ? "Dashboard"
-            : isCreateDealActive
-              ? "Create Deal"
-              : isTimelineActive
-                ? "Deals Timeline"
-                : "TrustLayer"}
-        </span>
       </div>
 
       {/* Right: Role Switcher & Notifications */}
@@ -77,8 +64,7 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
           <button
             onClick={() => {
               if (
-                (pathname.startsWith("/deal/details") ||
-                  pathname === FRONTEND_ROUTES.CREATE_DEAL) &&
+                (pathname.startsWith("/deal")) &&
                 role === Role.SELLER
               ) {
                 setIsModalOpen(true);
