@@ -32,6 +32,8 @@ export const DashboardContainer: React.FC = () => {
     user,
     { enabled: mounted && !!user }
   );
+
+  console.log(data)
   const { data: unreadNotificationsCount = 0 } = useUnreadNotificationsCount({
     enabled: mounted && !!user,
   });
@@ -168,7 +170,7 @@ export const DashboardContainer: React.FC = () => {
       </div>
 
       {/* ─── DESKTOP LAYOUT (≥ md) ─────────────────────────────────────────── */}
-      <div className="hidden md:block w-full bg-background min-h-[calc(100vh-4rem)]">
+      <div className="hidden md:block w-full bg-[#F8FAFC] min-h-[calc(100vh-4rem)]">
         <motion.div
           initial="hidden"
           animate="visible"

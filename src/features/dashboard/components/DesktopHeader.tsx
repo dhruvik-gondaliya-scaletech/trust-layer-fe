@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Role } from "@/types/enums";
 import { AnimatedModal } from "@/components/shared/animated-modal";
+import { FRONTEND_ROUTES } from "@/lib/contants";
 
 interface DesktopHeaderProps {
   pathname: string;
@@ -64,7 +65,7 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
           <button
             onClick={() => {
               if (
-                (pathname.startsWith("/deal")) &&
+                (pathname.startsWith(FRONTEND_ROUTES.DEAL_DETAILS("")) || pathname.startsWith(FRONTEND_ROUTES.CREATE_DEAL) || pathname.startsWith('/deal/update')) &&
                 role === Role.SELLER
               ) {
                 setIsModalOpen(true);

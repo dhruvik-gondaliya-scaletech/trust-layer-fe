@@ -112,7 +112,7 @@ export function DashboardLayoutContainer({
       />
 
       {/* Main Content Pane */}
-      <div className="flex-1 flex flex-col min-w-0 min-h-screen md:min-h-0 md:h-full md:overflow-y-auto">
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen md:min-h-0 md:h-full md:overflow-y-auto bg-[#F8FAFC]">
         {/* Desktop Header */}
         <DesktopHeader
           pathname={pathname}

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Shield, LogOut, Check, User as UserIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { LogOut, Check, User as UserIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { SidebarNav } from "@/features/dashboard/components/SidebarNav";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -40,14 +40,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div
         className={cn(
           "h-16 flex items-center border-b border-border/30 transition-all duration-300",
-          isCollapsed ? "px-0 justify-center" : "px-6 gap-2"
+          isCollapsed ? "px-0 justify-center" : "px-6 gap-3"
         )}
       >
-        <Shield className="w-6 h-6 text-primary fill-primary/10 stroke-[2.5] shrink-0" />
+        <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-extrabold text-[15px] tracking-tight shrink-0 shadow-sm shadow-primary/20">
+          TL
+        </div>
         {!isCollapsed && (
-          <span className="font-black text-lg text-foreground tracking-tight whitespace-nowrap animate-fade-in">
-            Trust<span className="text-primary">Layer</span>
-          </span>
+          <div className="flex flex-col min-w-0 animate-fade-in text-left">
+            <span className="font-black text-base text-foreground tracking-tight leading-none">
+              TrustLayer
+            </span>
+            <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest leading-none mt-1">
+              OPERATIONS
+            </span>
+          </div>
         )}
       </div>
 
