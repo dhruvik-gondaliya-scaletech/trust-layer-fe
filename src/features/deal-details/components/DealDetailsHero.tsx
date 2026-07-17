@@ -6,65 +6,93 @@ import { formatCurrency } from "../utils/format";
 import type { Deal } from "@/types/api.types";
 import { OrderType } from "@/types/enums";
 import { BackButton } from "@/components/shared/BackButton";
+import { mapProductTypeToCategory, getStatusBadgeStyle } from "@/utils/deal";
 
 interface DealDetailsHeroProps {
   deal: Deal;
   hasBottomBar?: boolean;
 }
 
+function formatRelativeTime(dateString: string | null | undefined): string {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return "just now";
+  if (diffMins < 60) return `${diffMins} ${diffMins === 1 ? "minute" : "minutes"} ago`;
+  if (diffHours < 24) return `${diffHours} ${diffHours === 1 ? "hour" : "hours"} ago`;
+  if (diffDays === 1) return "yesterday";
+  if (diffDays < 7) return `${diffDays} ${diffDays === 1 ? "day" : "days"} ago`;
+  
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
 export function DealDetailsHero({ deal, hasBottomBar }: DealDetailsHeroProps) {
   const badge = getStatusBadgeMeta(deal.status);
 
-  // Use the reference badge styling logic based on our badge text
-  const getBadgeStyle = () => {
-    if (badge.label === "Completed" || badge.label === "Closed") {
-      return "bg-green-500/20 text-green-300 border-green-500/30";
-    }
-    if (badge.label === "Shipped" || badge.label === "Delivered") {
-      return "bg-blue-500/20 text-blue-300 border-blue-500/30";
-    }
-    return "bg-orange-500/20 text-orange-300 border-orange-500/30";
-  };
-
   const containerClasses = cn(
-    "absolute left-0 right-0 mx-auto px-4 sm:px-6 w-full max-w-2xl",
+    "max-w-2xl mx-auto w-full px-4 sm:px-6 pt-6 md:pt-8",
     hasBottomBar && "xl:max-w-5xl"
   );
 
   return (
-    <div className="relative h-[280px] md:h-[320px] w-full bg-gray-900 shrink-0">
-      <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent" />
-
-      <div className={cn("top-4 flex justify-between items-center z-10", containerClasses)}>
-        <BackButton />
-
-        <div className={cn(
-          "px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider backdrop-blur-md border",
-          getBadgeStyle()
-        )}>
-          {badge.label}
+    <div className="w-full bg-transparent shrink-0">
+      <div className={containerClasses}>
+        {/* Back Link */}
+        <div className="flex items-center justify-between">
+          <BackButton 
+            label="Back to Deals" 
+            variant="ghost"
+            displayStyle="inline"
+            className="text-slate-500 hover:text-slate-800 p-0 h-auto hover:bg-transparent font-semibold text-[14px]" 
+          />
         </div>
-      </div>
 
-      <div className={cn("bottom-6 z-10", containerClasses)}>
-        <div className="w-full">
-          <p className="text-gray-300 font-bold text-[13px] mb-1 uppercase tracking-wider">{deal.dealNumber}</p>
-          <h1 className="text-white text-[24px] md:text-[28px] font-extrabold leading-tight mb-2 tracking-tight truncate">{deal.title}</h1>
-          <div className="flex items-center justify-between">
-            <span className="text-white/80 text-[14px] font-medium truncate pr-4">{deal?.condition}</span>
-            <div className="text-right">
-              <span className="text-white text-[24px] md:text-[28px] font-black shrink-0">${formatCurrency(deal.buyerPaysAmount)}</span>
-              {deal.orderType !== OrderType.IN_PERSON && (
-                <p className="text-[11px] font-bold text-white/60 -mt-0.5">
-                  {Number(deal.shippingCost) > 0
-                    ? `Includes $${formatCurrency(deal.shippingCost)} shipping`
-                    : "Includes free shipping"}
-                </p>
-              )}
+        {/* Title, Badge & Subtitle */}
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mt-6 pb-2">
+          {/* Left Side: Title, badge, and metadata subtitle */}
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-slate-900 text-2xl md:text-3xl font-extrabold tracking-tight leading-tight">
+                {deal.title}
+              </h1>
+              <span className={cn(
+                "px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider border",
+                getStatusBadgeStyle(deal.status)
+              )}>
+                {badge.label}
+              </span>
             </div>
+            
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-slate-400 text-[13px] font-medium mt-2">
+              <span className="text-slate-500 font-bold">{deal.dealNumber}</span>
+              <span className="text-slate-300">•</span>
+              <span>{mapProductTypeToCategory(deal.productType) || "Collectibles"}</span>
+              <span className="text-slate-300">•</span>
+              <span>Created {new Date(deal.createdAt).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" })}</span>
+              <span className="text-slate-300">•</span>
+              <span>Updated {formatRelativeTime(deal.updatedAt)}</span>
+            </div>
+          </div>
+
+          {/* Right Side: Price & Shipping */}
+          <div className="flex flex-col items-start md:items-end shrink-0">
+            <span className="text-slate-900 text-2xl md:text-3xl font-black">${formatCurrency(deal.buyerPaysAmount)}</span>
+            {deal.orderType !== OrderType.IN_PERSON && (
+              <span className="text-[11px] font-bold text-slate-400 mt-0.5">
+                {Number(deal.shippingCost) > 0
+                  ? `Includes $${formatCurrency(deal.shippingCost)} shipping`
+                  : "Includes free shipping"}
+              </span>
+            )}
           </div>
         </div>
       </div>
     </div>
   );
 }
+

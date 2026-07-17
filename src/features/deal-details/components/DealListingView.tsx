@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { AlertCircle, RefreshCw, Layers, Search } from "lucide-react";
+import { AlertCircle, RefreshCw, Layers, Search, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,6 +10,10 @@ import { DealListingCard } from "./DealListingCard";
 import { cn } from "@/lib/utils";
 import { BackButton } from "@/components/shared/BackButton";
 import { InfiniteScroll } from "@/components/shared/InfiniteScroll";
+import { useRole } from "@/providers/role-provider";
+import { Role } from "@/types/enums";
+import { useRouter } from "next/navigation";
+import { FRONTEND_ROUTES } from "@/lib/contants";
 
 interface DealListingViewProps {
   deals: Deal[];
@@ -66,25 +70,32 @@ export const DealListingView: React.FC<DealListingViewProps> = ({
   onRetry,
   hasNextPage,
   fetchNextPage,
-  isFetchingNextPage,
 }) => {
+  const { role } = useRole();
+  const router = useRouter();
+
   return (
-    <div className="w-full bg-background min-h-[calc(100vh-4rem)]">
+    <div className="w-full bg-[#F8FAFC] min-h-[calc(100vh-4rem)]">
       <div className="max-w-7xl mx-auto px-6 py-8">
 
         {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
-          <div className="flex items-start gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div className="flex items-center gap-3">
             <BackButton />
-            <div className="space-y-1">
-              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground">
-                Deals Directory
-              </h1>
-              <p className="text-[14px] text-muted-foreground font-medium">
-                Manage, monitor, and track your secure transactions.
-              </p>
-            </div>
+            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground">
+              Deals Directory
+            </h1>
           </div>
+
+          {role !== Role.BUYER && (
+            <Button
+              onClick={() => router.push(FRONTEND_ROUTES.CREATE_DEAL)}
+              className="bg-primary hover:bg-primary/95 text-primary-foreground font-extrabold rounded-2xl h-11 px-5 shadow-lg shadow-primary/15 flex items-center justify-center gap-2 active:scale-[0.98] transition-all cursor-pointer w-full sm:w-auto shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Create New Deal</span>
+            </Button>
+          )}
         </div>
 
         {/* Filters and Search Bar Container */}
