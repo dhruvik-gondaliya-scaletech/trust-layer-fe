@@ -197,6 +197,7 @@ export interface ProgressStep {
 }
 
 const STEP_DEFS: { key: string; label: string; rank: number }[] = [
+  { key: "published", label: "Published", rank: 1 },
   { key: "funded", label: "Funded", rank: 2 },
   { key: "shipped", label: "Shipped", rank: 3 },
   { key: "delivered", label: "Delivered", rank: 4 },
