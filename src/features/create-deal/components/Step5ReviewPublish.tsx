@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
-import { Check, Image as ImageIcon, PenSquare, Shield } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Check, Image as ImageIcon, PenSquare, Shield, Play } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui/carousel";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 import { TrustScoreCard } from "./TrustScoreCard";
+import { calculateEscrowFees } from "@/utils/fee";
 
 interface Step5ReviewPublishProps {
   formData: {
@@ -73,6 +75,17 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
   isUpdateMode = false,
 }) => {
   const router = useRouter();
+  const [activeMediaIdx, setActiveMediaIdx] = useState(0);
+
+  const price = Number(formData.price) || 0;
+  const shippingCost = Number(shippingData.shippingCost) || 0;
+  const { platformFee, buyerFeeShare, sellerFeeShare } = calculateEscrowFees(price, feesData.feeStructure);
+
+  const sellerReceives = Number((price - sellerFeeShare + shippingCost).toFixed(2));
+  const totalBuyerPays = Number((price + buyerFeeShare + shippingCost).toFixed(2));
+
+  const fmt = (val: number) =>
+    `$${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   const videoUrl = useMemo(() => {
     if (!verificationVideo) return null;
@@ -111,6 +124,8 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
   if (videoUrl) {
     mediaItems.push({ type: "video", url: videoUrl, label: "Product Video" });
   }
+
+  const activeItem = mediaItems[activeMediaIdx] || mediaItems[0];
 
   if (isSuccess) {
     return (
@@ -176,6 +191,9 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
   }
 
   const extraPhotosCount = Object.values(productPhotos).filter(Boolean).length;
+  const photosCount = mediaItems.filter(i => i.type === "image" && i.label !== "Certificate").length;
+  const videoCount = verificationVideo ? 1 : 0;
+  const certCount = certPhoto ? 1 : 0;
 
   const breakdown = {
     hasItemDetails: true,
@@ -187,10 +205,10 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full flex-1 overflow-hidden text-left select-none">
-      <form id="step5-form" onSubmit={handlePublish} className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-y-auto pr-0.5 space-y-6 scrollbar-none pb-28">
-          <div className="xl:max-w-[520px] xl:mx-auto w-full space-y-6">
+    <div className="flex flex-col lg:h-full lg:flex-1 lg:overflow-hidden text-left select-none">
+      <form id="step5-form" onSubmit={handlePublish} className="flex-1 flex flex-col lg:overflow-hidden">
+        <div className="flex-1 overflow-y-visible lg:overflow-y-auto pr-0.5 space-y-6 scrollbar-none pb-24 lg:pb-8">
+          <div className="w-full space-y-6">
             <div className="flex flex-col gap-1">
               <h2 className="text-xl font-extrabold text-foreground tracking-tight">
                 {isUpdateMode ? "Review updates" : "Review deal"}
@@ -198,7 +216,7 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
             </div>
 
             {/* Premium Trust Score Card */}
-            <div className="xl:hidden">
+            <div className="lg:hidden">
               <TrustScoreCard
                 score={trustScore}
                 breakdown={breakdown}
@@ -218,8 +236,8 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
                 <span>Edit Deal</span>
               </button>
 
-              {/* Carousel-based Media Display Preview */}
-              <div className="w-full aspect-square rounded-2xl overflow-hidden bg-muted/30 border border-border/40 flex items-center justify-center relative select-none">
+              {/* Carousel-based Media Display Preview (Mobile Only) */}
+              <div className="lg:hidden w-full max-w-[450px] mx-auto aspect-square rounded-2xl overflow-hidden bg-muted/30 border border-border/40 flex items-center justify-center relative select-none">
                 {mediaItems.length > 0 ? (
                   <Carousel className="w-full h-full">
                     <CarouselContent className="h-full">
@@ -227,7 +245,7 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
                         <CarouselItem key={idx} className="relative w-full h-full">
                           {item.type === "video" ? (
                             <video
-                              src={item.url}
+                               src={item.url}
                               controls
                               className="w-full h-full object-cover"
                             />
@@ -271,13 +289,87 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
                 )}
               </div>
 
+              {/* Grid/Thumbnails Media Display Preview (Desktop Only) */}
+              <div className="hidden lg:flex flex-col gap-4 w-full select-none">
+                <div className="h-[300px] w-full bg-muted/20 rounded-2xl border border-border/40 flex items-center justify-center overflow-hidden relative group">
+                  {activeItem ? (
+                    <>
+                      {activeItem.type === "video" ? (
+                        <video
+                          src={activeItem.url}
+                          controls
+                          className="w-full h-full object-contain bg-black"
+                        />
+                      ) : (
+                        <img
+                          src={activeItem.url}
+                          alt={activeItem.label}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      )}
+                      
+                      {formData.isGraded && (
+                        <div className="absolute top-4 left-4 flex flex-col gap-1.5 z-10 pointer-events-none">
+                          <span className="bg-black/75 text-white font-black text-[9px] tracking-widest uppercase px-2.5 py-1.5 rounded-lg w-fit shadow-md">
+                            {formData.gradedSerial || "PSA 10"}
+                          </span>
+                          <span className="bg-yellow-500 text-black font-black text-[9px] tracking-widest uppercase px-2.5 py-1.5 rounded-lg w-fit shadow-md">
+                            TRUST {trustScore}
+                          </span>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground/60">
+                      <ImageIcon className="w-8 h-8 stroke-[1.5]" />
+                      <span className="text-sm font-bold tracking-wider uppercase">No photo uploaded</span>
+                    </div>
+                  )}
+                </div>
+
+                {mediaItems.length > 0 && (
+                  <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
+                    {mediaItems.map((item, idx) => {
+                      const isActive = idx === activeMediaIdx;
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setActiveMediaIdx(idx)}
+                          className={cn(
+                            "h-20 w-20 shrink-0 bg-muted/15 rounded-xl border border-border/60 flex items-center justify-center overflow-hidden relative cursor-pointer select-none transition-all hover:bg-muted/25",
+                            isActive && "border-primary ring-2 ring-primary/20"
+                          )}
+                        >
+                          {item.type === "video" ? (
+                            <div className="h-full w-full flex items-center justify-center bg-primary/[0.03] text-primary">
+                              <Play className="h-6 w-6 ml-0.5" />
+                            </div>
+                          ) : item.label === "Certificate" ? (
+                            <div className="h-full w-full flex items-center justify-center bg-emerald-500/[0.03] text-emerald-500">
+                              <Shield className="h-6 w-6" />
+                            </div>
+                          ) : (
+                            <img
+                              src={item.url}
+                              alt={item.label}
+                              className="h-full w-full object-cover"
+                            />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
               {/* Media Count Status Info Bar */}
-              <div className="w-full bg-muted/40 border border-border/40 rounded-xl py-2 px-4 flex items-center justify-center text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground gap-3.5">
-                <span>{mediaItems.filter(i => i.type === "image" && i.label !== "Certificate").length} Photos</span>
+              <div className="w-full bg-muted/40 border border-border/40 rounded-xl py-2.5 px-4 flex items-center justify-center text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground gap-3.5">
+                <span>{photosCount} {photosCount === 1 ? "Photo" : "Photos"}</span>
                 <span className="text-border/80">|</span>
-                <span>{verificationVideo ? "1 Video" : "0 Video"}</span>
+                <span>{videoCount} {videoCount === 1 ? "Video" : "Video"}</span>
                 <span className="text-border/80">|</span>
-                <span>{certPhoto ? "1 Cert" : "0 Cert"}</span>
+                <span>{certCount} {certCount === 1 ? "Cert" : "Cert"}</span>
               </div>
 
               {/* Title & Price */}
@@ -339,6 +431,37 @@ export const Step5ReviewPublish: React.FC<Step5ReviewPublishProps> = ({
                   <div className="flex justify-between items-center py-0.5">
                     <span className="text-xs text-muted-foreground font-semibold">Platform Fee</span>
                     <span className="text-sm font-bold text-foreground">{feesData.feeStructure}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Estimated Earnings spec list */}
+              <div className="flex flex-col gap-3.5 pt-4 border-t border-border/20">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                  Estimated Earnings
+                </span>
+
+                <div className="flex flex-col gap-3">
+                  <div className="flex justify-between items-center py-0.5">
+                    <span className="text-xs text-muted-foreground font-semibold">Item Price</span>
+                    <span className="text-sm font-bold text-foreground">{fmt(price)}</span>
+                  </div>
+                  <div className="flex justify-between items-start py-0.5">
+                    <div className="flex flex-col text-left">
+                      <span className="text-xs text-muted-foreground font-semibold">Platform Fee</span>
+                      <span className="text-[10px] text-muted-foreground/60 font-medium">Non-refundable</span>
+                    </div>
+                    <span className="text-sm font-bold text-destructive">
+                      {sellerFeeShare > 0 ? `-${fmt(sellerFeeShare)}` : "$0.00"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-0.5">
+                    <span className="text-xs text-muted-foreground font-semibold">Buyer Pays</span>
+                    <span className="text-sm font-bold text-foreground">{fmt(totalBuyerPays)}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-0.5 pt-3 border-t border-border/10">
+                    <span className="text-xs font-bold text-foreground">Seller Receives</span>
+                    <span className="text-sm font-black text-primary">{fmt(sellerReceives)}</span>
                   </div>
                 </div>
               </div>

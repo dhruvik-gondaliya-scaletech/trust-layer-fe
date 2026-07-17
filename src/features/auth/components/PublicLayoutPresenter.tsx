@@ -18,7 +18,7 @@ export const PublicLayoutPresenter: React.FC<PublicLayoutPresenterProps> = ({
         className="flex-1 w-full lg:w-[55%] xl:w-[50%] h-dvh relative bg-background flex flex-col"
         style={{ transform: "translate3d(0, 0, 0)" }}
       >
-        <div className="w-full h-full overflow-y-auto flex flex-col">
+        <div className="w-full h-full overflow-y-auto">
           {children}
         </div>
       </div>

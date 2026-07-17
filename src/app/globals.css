@@ -61,11 +61,11 @@
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(222.2 84% 4.9%);
 
-  --primary: hsl(216 100% 50%); /* #0066FF */
-  --primary-foreground: hsl(210 40% 98%);
+  --primary: oklch(0.52 0.29 264);
+  --primary-foreground: oklch(0.98 0.005 264);
 
-  --secondary: hsl(216 100% 95%); /* #E5F0FF */
-  --secondary-foreground: hsl(216 100% 50%);
+  --secondary: oklch(0.96 0.03 264);
+  --secondary-foreground: oklch(0.52 0.29 264);
 
   --muted: hsl(210 40% 96.1%);
   --muted-foreground: hsl(215.4 16.3% 46.9%);
@@ -78,7 +78,7 @@
 
   --border: hsl(214.3 31.8% 91.4%);
   --input: hsl(214.3 31.8% 91.4%);
-  --ring: hsl(216 100% 50%);
+  --ring: oklch(0.52 0.29 264);
 
   --chart-1: hsl(12 76% 61%);
   --chart-2: hsl(173 58% 39%);
@@ -87,22 +87,22 @@
   --chart-5: hsl(27 87% 67%);
   --sidebar: hsl(210 40% 98.5%);
   --sidebar-foreground: hsl(222.2 84% 4.9%);
-  --sidebar-primary: hsl(216 100% 50%);
-  --sidebar-primary-foreground: hsl(210 40% 98%);
+  --sidebar-primary: oklch(0.52 0.29 264);
+  --sidebar-primary-foreground: oklch(0.98 0.005 264);
   --sidebar-accent: hsl(210 40% 97%);
-  --sidebar-accent-foreground: hsl(216 100% 50%);
+  --sidebar-accent-foreground: oklch(0.52 0.29 264);
   --sidebar-border: hsl(214.3 31.8% 91.4%);
-  --sidebar-ring: hsl(216 100% 50%);
+  --sidebar-ring: oklch(0.52 0.29 264);
 }
 
 html[data-role="seller"] {
-  --primary: hsl(216 100% 50%); /* #0066FF */
-  --secondary: hsl(216 100% 95%); /* #E5F0FF */
-  --secondary-foreground: hsl(216 100% 50%);
-  --ring: hsl(216 100% 50%);
-  --sidebar-primary: hsl(216 100% 50%);
-  --sidebar-accent-foreground: hsl(216 100% 50%);
-  --sidebar-ring: hsl(216 100% 50%);
+  --primary: oklch(0.52 0.29 264);
+  --secondary: oklch(0.96 0.03 264);
+  --secondary-foreground: oklch(0.52 0.29 264);
+  --ring: oklch(0.52 0.29 264);
+  --sidebar-primary: oklch(0.52 0.29 264);
+  --sidebar-accent-foreground: oklch(0.52 0.29 264);
+  --sidebar-ring: oklch(0.52 0.29 264);
 }
 
 html[data-role="buyer"] {
@@ -122,8 +122,8 @@ html[data-role="buyer"] {
   --card-foreground: hsl(210 40% 98%);
   --popover: hsl(222.2 84% 4.9%);
   --popover-foreground: hsl(210 40% 98%);
-  --primary: hsl(216 100% 50%);
-  --primary-foreground: hsl(210 40% 98%);
+  --primary: oklch(0.52 0.29 264);
+  --primary-foreground: oklch(0.98 0.005 264);
   --secondary: hsl(217.2 32.6% 17.5%);
   --secondary-foreground: hsl(210 40% 98%);
   --muted: hsl(217.2 32.6% 17.5%);
@@ -133,7 +133,7 @@ html[data-role="buyer"] {
   --destructive: hsl(0 62.8% 30.6%);
   --border: hsl(217.2 32.6% 17.5%);
   --input: hsl(217.2 32.6% 17.5%);
-  --ring: hsl(216 100% 50%);
+  --ring: oklch(0.52 0.29 264);
 }
 
 @layer base {

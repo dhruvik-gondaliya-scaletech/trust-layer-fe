@@ -23,7 +23,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <aside
       className={cn(
-        "hidden md:flex md:flex-col md:shrink-0 bg-card border-r border-border/40 h-screen sticky top-0 z-30 select-none relative transition-all duration-300 ease-in-out",
+        "hidden md:flex md:flex-col md:shrink-0 bg-card border-r border-border/50 h-screen sticky top-0 z-30 select-none relative transition-all duration-300 ease-in-out",
         isCollapsed ? "md:w-20" : "md:w-64"
       )}
     >
@@ -39,7 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Brand Header */}
       <div
         className={cn(
-          "h-16 flex items-center border-b border-border/30 transition-all duration-300",
+          "h-16 flex items-center border-b-2 border-border/80 transition-all duration-300",
           isCollapsed ? "px-0 justify-center" : "px-6 gap-3"
         )}
       >
@@ -51,9 +51,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span className="font-black text-base text-foreground tracking-tight leading-none">
               TrustLayer
             </span>
-            <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest leading-none mt-1">
-              OPERATIONS
-            </span>
           </div>
         )}
       </div>
@@ -64,7 +61,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Logout & User Card */}
       <div
         className={cn(
-          "p-4 border-t border-border/40 bg-muted/20 flex flex-col gap-4 transition-all duration-300",
+          "p-4 border-t-2 border-border/80 bg-muted/20 flex flex-col gap-4 transition-all duration-300",
           isCollapsed ? "p-2 items-center" : "p-4"
         )}
       >

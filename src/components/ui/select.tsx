@@ -116,8 +116,8 @@ export const SelectItem = React.forwardRef<
         context.setOpen(false);
       }}
       className={cn(
-        "relative flex w-full cursor-pointer select-none items-center rounded-xl py-2.5 px-3 text-sm outline-none transition-colors hover:bg-muted/15 font-semibold text-muted-foreground",
-        isSelected && "bg-primary/5 text-primary hover:bg-primary/5 font-bold",
+        "relative flex w-full cursor-pointer select-none items-center rounded-xl py-2.5 px-3 text-sm outline-none transition-all duration-150 font-semibold text-foreground/70 hover:bg-primary/8 hover:text-primary",
+        isSelected && "bg-primary/10 text-primary font-bold hover:bg-primary/10",
         className
       )}
       {...props}

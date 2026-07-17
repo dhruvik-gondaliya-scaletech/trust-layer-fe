@@ -53,7 +53,7 @@ export function SellerActions({
             <Button
               variant="outline"
               onClick={() => router.push(FRONTEND_ROUTES.DEAL_UPDATE(deal.id))}
-              className="flex-1 w-full h-12 text-[14px] font-bold rounded-2xl border-slate-200 text-slate-700 hover:bg-slate-50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              className="flex-1 w-full h-14 text-[15px] font-bold rounded-2xl border-slate-200 text-slate-700 hover:bg-slate-50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
             >
               <Edit className="w-4 h-4 text-slate-500" />
               <span>Edit Deal</span>
@@ -62,7 +62,7 @@ export function SellerActions({
               variant="outline"
               onClick={onDeleteClick}
               disabled={isDeletePending}
-              className="flex-1 w-full h-12 text-[14px] font-bold rounded-2xl border-red-200 text-red-600 hover:bg-red-50/50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              className="flex-1 w-full h-14 text-[15px] font-bold rounded-2xl border-red-200 text-red-600 hover:bg-red-50/50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
             >
               <Trash2 className="w-4 h-4 text-red-500" />
               <span>Delete Deal</span>
@@ -82,7 +82,7 @@ export function SellerActions({
             <Button
               variant="outline"
               onClick={() => router.push(FRONTEND_ROUTES.DEAL_UPDATE(deal.id))}
-              className="flex-1 w-full h-12 text-[14px] font-bold rounded-2xl border-slate-200 text-slate-700 hover:bg-slate-50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              className="flex-1 w-full h-14 text-[15px] font-bold rounded-2xl border-slate-200 text-slate-700 hover:bg-slate-50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
             >
               <Edit className="w-4 h-4 text-slate-500" />
               <span>Edit Deal</span>
@@ -91,7 +91,7 @@ export function SellerActions({
               variant="outline"
               onClick={onDeleteClick}
               disabled={isDeletePending}
-              className="flex-1 w-full h-12 text-[14px] font-bold rounded-2xl border-red-200 text-red-600 hover:bg-red-50/50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              className="flex-1 w-full h-14 text-[15px] font-bold rounded-2xl border-red-200 text-red-600 hover:bg-red-50/50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
             >
               <Trash2 className="w-4 h-4 text-red-500" />
               <span>Delete Deal</span>

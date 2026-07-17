@@ -85,7 +85,7 @@ export const PublicLayoutContainer: React.FC<PublicLayoutContainerProps> = ({
         const profileComplete = !!user.username;
         if (emailVerified && phoneVerified && profileComplete) return true;
       }
-    } else if (pathname.startsWith("/deal/") || pathname.startsWith("/open-deal/")) {
+    } else if (pathname.startsWith("/open-deal/")) {
       // Never force redirect/loading state for deals based on auth status
       return false;
     } else {

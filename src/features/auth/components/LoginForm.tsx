@@ -40,12 +40,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         </div>
       </div>
 
-      <div className="flex-1 px-5 max-w-sm mx-auto w-full flex flex-col justify-center">
-        <h1 className="text-[28px] font-extrabold mb-8 text-foreground leading-tight tracking-tight">
-          Sign In
-        </h1>
+      <div className="flex-1 px-5 max-w-sm mx-auto w-full flex flex-col py-8">
+        <div className="w-full my-auto">
+          <h1 className="text-[28px] font-extrabold mb-8 text-foreground leading-tight tracking-tight">
+            Sign In
+          </h1>
 
-        <Form {...form}>
+          <Form {...form}>
           <form id="login-form" onSubmit={onSubmit} className="space-y-4" noValidate>
             <FormField control={form.control} name="email" render={({ field }) => (
               <Field>
@@ -118,6 +119,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             </p>
           </form>
         </Form>
+        </div>
       </div>
     </div>
   );

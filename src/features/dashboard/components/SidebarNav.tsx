@@ -37,11 +37,6 @@ export function SidebarNav({ isCollapsed }: SidebarNavProps) {
     <nav className={cn("flex-1 py-6 space-y-6 transition-all duration-300", isCollapsed ? "px-2" : "px-4")}>
       {/* OVERVIEW SECTION */}
       <div className="space-y-1">
-        {!isCollapsed && (
-          <h3 className="px-4 text-[10px] font-black uppercase tracking-widest text-slate-400/80 dark:text-slate-500 mb-2">
-            Overview
-          </h3>
-        )}
         <Link
           href={FRONTEND_ROUTES.DASHBOARD}
           className={getLinkClass(isDashboardActive)}

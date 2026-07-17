@@ -13,13 +13,11 @@ import { useAuth } from "@/providers/auth-provider";
 import { fadeIn, slideUp, staggerContainer } from "@/lib/motion";
 import { FRONTEND_ROUTES } from "@/lib/contants";
 import { DashboardHeader } from "../components/DashboardHeader";
-import { QuickActions } from "../components/QuickActions";
 import { RecentDeals } from "../components/RecentDeals";
 import { QuickInsights } from "../components/QuickInsights";
 import { WalletCard } from "../components/WalletCard";
 import { DashboardSkeleton } from "../components/DashboardSkeleton";
 import { DashboardError } from "../components/DashboardError";
-import { DashboardEmpty } from "../components/DashboardEmpty";
 import { cn } from "@/lib/utils";
 
 export const DashboardContainer: React.FC = () => {
@@ -33,7 +31,6 @@ export const DashboardContainer: React.FC = () => {
     { enabled: mounted && !!user }
   );
 
-  console.log(data)
   const { data: unreadNotificationsCount = 0 } = useUnreadNotificationsCount({
     enabled: mounted && !!user,
   });
