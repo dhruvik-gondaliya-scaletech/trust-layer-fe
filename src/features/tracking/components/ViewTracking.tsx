@@ -218,7 +218,7 @@ export default function ViewTracking({
 
       {/* ─── Bottom Action Bar (Buyer actions) ─── */}
       {isBuyer && (
-        <BottomActionBar className="border-t border-slate-100/80">
+        <BottomActionBar className="border-t border-slate-100/80" staticBreakpoint="xl">
           <div className="flex gap-4 items-start w-full">
             <div className="flex-1">
               <Button

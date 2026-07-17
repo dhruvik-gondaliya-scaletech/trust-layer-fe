@@ -174,17 +174,6 @@ export const TrustScoreCard: React.FC<TrustScoreCardProps> = ({
             className="overflow-hidden"
           >
             <div className="flex flex-col gap-2.5 pt-3 border-t border-white/10 relative z-10 text-xs text-blue-100/90 font-semibold">
-              {/* Verified Seller Profile — always earned */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-white/20 border border-white flex items-center justify-center shrink-0">
-                    <Check className="w-2.5 h-2.5 stroke-[3]" />
-                  </div>
-                  <span>Verified Seller Profile</span>
-                </div>
-                <span className="text-white font-extrabold">+20 pts</span>
-              </div>
-
               {/* Item Details */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -204,7 +193,9 @@ export const TrustScoreCard: React.FC<TrustScoreCardProps> = ({
                   </div>
                   <span className={breakdown.hasMainPhoto ? "" : "opacity-50"}>Main Photo</span>
                 </div>
-                <span className={breakdown.hasMainPhoto ? "text-white font-extrabold" : "opacity-40"}>+15 pts</span>
+                <span className={breakdown.hasMainPhoto ? "text-white font-extrabold" : "opacity-40"}>
+                  +{breakdown.isGraded ? 15 : 20} pts
+                </span>
               </div>
 
               {/* Additional Photos */}
@@ -218,7 +209,7 @@ export const TrustScoreCard: React.FC<TrustScoreCardProps> = ({
                   </span>
                 </div>
                 <span className={breakdown.additionalPhotosCount > 0 ? "text-white font-extrabold" : "opacity-40"}>
-                  +{Math.round((breakdown.additionalPhotosCount / 4) * 15)} pts
+                  +{breakdown.isGraded ? 15 : 20} pts
                 </span>
               </div>
 
@@ -231,7 +222,7 @@ export const TrustScoreCard: React.FC<TrustScoreCardProps> = ({
                   <span className={breakdown.hasVideo ? "" : "opacity-50"}>Product Video</span>
                 </div>
                 <span className={breakdown.hasVideo ? "text-white font-extrabold" : "opacity-40"}>
-                  +{breakdown.isGraded ? 20 : 30} pts
+                  +{breakdown.isGraded ? 30 : 40} pts
                 </span>
               </div>
 
@@ -244,7 +235,7 @@ export const TrustScoreCard: React.FC<TrustScoreCardProps> = ({
                     </div>
                     <span className={breakdown.hasCertPhoto ? "" : "opacity-50"}>Graded Certificate</span>
                   </div>
-                  <span className={breakdown.hasCertPhoto ? "text-white font-extrabold" : "opacity-40"}>+10 pts</span>
+                  <span className={breakdown.hasCertPhoto ? "text-white font-extrabold" : "opacity-40"}>+20 pts</span>
                 </div>
               )}
             </div>

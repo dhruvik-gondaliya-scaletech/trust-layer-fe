@@ -126,7 +126,7 @@ export function DealDetailsView({
 
       {hasBottomBar && (
         <div className="xl:hidden">
-          <BottomActionBar>
+          <BottomActionBar staticBreakpoint="xl">
             {isSeller && (
               <SellerActions
                 deal={deal}

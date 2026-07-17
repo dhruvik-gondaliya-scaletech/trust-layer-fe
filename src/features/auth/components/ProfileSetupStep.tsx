@@ -129,7 +129,7 @@ export const ProfileSetupStep: React.FC<ProfileSetupStepProps> = ({
         <h1 className="text-sm font-bold text-slate-400 tracking-wide uppercase">Step 3 of 3</h1>
       </div>
 
-      <div className="flex-1 px-4 sm:px-5 pt-4 w-full max-w-xs sm:max-w-sm mx-auto flex flex-col justify-center">
+      <div className="flex-1 px-4 sm:px-5 pt-4 pb-6 w-full max-w-xs sm:max-w-sm mx-auto flex flex-col justify-center">
         {/* Progress Tracker */}
         {renderTracker?.()}
 

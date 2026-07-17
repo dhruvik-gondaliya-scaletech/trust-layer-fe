@@ -2,7 +2,7 @@
 
 import { Spinner } from "@/components/ui/spinner";
 import React, { useState, useEffect, useRef } from "react";
-import { Camera, Video, Image as ImageIcon, Check, RefreshCw, AlertCircle, Award, Info } from "lucide-react";
+import { Camera, Video, Image as ImageIcon, Check, RefreshCw, AlertCircle, Award, Info, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -46,8 +46,13 @@ interface Step2ProofVerificationProps {
   onCaptureProductPhotoSlot: (slot: "back" | "leftSide" | "rightSide" | "detail", dataUrl: string) => void;
   onCaptureVideo: (videoBlob: Blob) => void;
   onCaptureCertPhoto: (dataUrl: string) => void;
+  onDeleteMainPhoto?: () => void;
+  onDeleteProductPhotoSlot?: (slot: "back" | "leftSide" | "rightSide" | "detail") => void;
+  onDeleteVideo?: () => void;
+  onDeleteCertPhoto?: () => void;
   /** Slots with a live backend upload in flight — shows a loading overlay on that slot */
   uploadingSlots?: Partial<Record<MediaSlot, boolean>>;
+  deletingSlots?: Partial<Record<MediaSlot, boolean>>;
   onContinue: () => void;
   onBack: () => void;
   trustScore?: number;
@@ -62,11 +67,11 @@ const PHOTO_SLOTS = [
   { id: "detail", label: "Detail View", desc: "Serial or markings" },
 ] as const;
 
-// Dim + spinner shown over a media preview while its live upload is in flight
-const UploadingOverlay = () => (
+// Dim + spinner shown over a media preview while its live upload or delete is in flight
+const LoadingOverlay = ({ label }: { label: string }) => (
   <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] flex flex-col items-center justify-center gap-1.5 z-10">
     <Spinner className="w-6 h-6 text-white" />
-    <span className="text-[10px] font-bold text-white uppercase tracking-wider">Uploading</span>
+    <span className="text-[10px] font-bold text-white uppercase tracking-wider">{label}</span>
   </div>
 );
 
@@ -181,11 +186,8 @@ const DirectCameraOverlay: React.FC<DirectCameraOverlayProps> = ({ type, title, 
   const handleCaptureVideo = async () => {
     if (recordingState === 'idle') {
       startRecording(stream);
-      toast.info(`Recording started... hold for at least ${minRecordingSeconds}s`);
+      toast.info("Recording started...");
     } else {
-      // Guarded by the disabled Stop button below — defensive check in case
-      // this ever fires before the minimum duration is reached.
-      if (recordingSeconds < minRecordingSeconds) return;
       const blob = await stopRecording();
       if (blob) {
         onCaptureVideo(blob);
@@ -291,20 +293,17 @@ const DirectCameraOverlay: React.FC<DirectCameraOverlayProps> = ({ type, title, 
                     style={{ width: `${Math.min(100, (recordingSeconds / maxRecordingSeconds) * 100)}%` }}
                   />
                 </div>
-                {recordingSeconds < minRecordingSeconds && (
-                  <span className="text-[10px] text-white/80 font-semibold bg-black/50 px-2 py-0.5 rounded-full whitespace-nowrap">
-                    Minimum {minRecordingSeconds}s required
-                  </span>
-                )}
               </div>
             )}
           </div>
         )}
 
-        {/* Center Live Feedback Messages — anchored to the full camera view,
-              independent of the top pill stack above. */}
+      </div>
+
+      <div className="px-6 py-8 bg-gradient-to-t from-black/90 to-transparent flex flex-col items-center gap-4 z-20 absolute bottom-0 left-0 right-0">
+        {/* Bottom Live Feedback Messages */}
         {!error && analysisResult && (
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col gap-2 w-3/4 max-w-sm z-20 pointer-events-none">
+          <div className="flex flex-col gap-2 w-3/4 max-w-sm pointer-events-none mb-1">
             {analysisResult.coverage?.status !== 'pass' && (
               <div className="bg-black/70 backdrop-blur-md text-white text-center py-2 px-4 rounded-lg text-sm font-semibold shadow-lg border border-white/10">
                 {analysisResult.coverage?.message}
@@ -322,23 +321,16 @@ const DirectCameraOverlay: React.FC<DirectCameraOverlayProps> = ({ type, title, 
             )}
           </div>
         )}
-      </div>
 
-      <div className="px-6 py-8 bg-gradient-to-t from-black/90 to-transparent flex flex-col items-center gap-4 z-20 absolute bottom-0 left-0 right-0">
         {type === CameraMode.VIDEO ? (
           <Button
             onClick={handleCaptureVideo}
-            disabled={recordingState === 'recording' && recordingSeconds < minRecordingSeconds}
             className={cn(
               "rounded-full h-16 px-8 font-bold text-lg shadow-lg disabled:opacity-60 disabled:cursor-not-allowed",
               recordingState === 'recording' ? "bg-red-500 text-white hover:bg-red-600" : "bg-white text-black hover:bg-gray-200"
             )}
           >
-            {recordingState === 'recording'
-              ? recordingSeconds < minRecordingSeconds
-                ? `${minRecordingSeconds - recordingSeconds}s until you can stop`
-                : "Stop Recording"
-              : "Start Recording"}
+            {recordingState === 'recording' ? "Stop Recording" : "Start Recording"}
           </Button>
         ) : (
           <Button
@@ -363,7 +355,12 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
   onCaptureProductPhotoSlot,
   onCaptureVideo,
   onCaptureCertPhoto,
+  onDeleteMainPhoto,
+  onDeleteProductPhotoSlot,
+  onDeleteVideo,
+  onDeleteCertPhoto,
   uploadingSlots = {},
+  deletingSlots = {},
   trustScore,
   nextStepName,
   breakdown,
@@ -375,6 +372,36 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
 
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraType, setCameraType] = useState<MediaSlot | null>(null);
+
+  const [deleteConfirmSlot, setDeleteConfirmSlot] = useState<MediaSlot | null>(null);
+
+  const getSlotDisplayName = (slot: MediaSlot) => {
+    if (slot === "main") return "Main Photo";
+    if (slot === "video") return "Video Verification";
+    if (slot === "cert") return "Certification Photo";
+    const found = PHOTO_SLOTS.find((s) => s.id === slot);
+    return found ? `${found.label} (${found.desc})` : "Product Photo";
+  };
+
+  const handleTriggerDelete = (slot: MediaSlot) => {
+    setDeleteConfirmSlot(slot);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!deleteConfirmSlot) return;
+    const slot = deleteConfirmSlot;
+    setDeleteConfirmSlot(null);
+
+    if (slot === "main" && onDeleteMainPhoto) {
+      onDeleteMainPhoto();
+    } else if (slot === "video" && onDeleteVideo) {
+      onDeleteVideo();
+    } else if (slot === "cert" && onDeleteCertPhoto) {
+      onDeleteCertPhoto();
+    } else if (onDeleteProductPhotoSlot) {
+      onDeleteProductPhotoSlot(slot as "back" | "leftSide" | "rightSide" | "detail");
+    }
+  };
 
   const [isDesktop, setIsDesktop] = useState(false);
 
@@ -441,7 +468,7 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
       <div className="flex-1 overflow-y-auto pr-0.5 space-y-6 scrollbar-none pb-28">
 
         {typeof trustScore === "number" && (
-          <div className="xl:hidden">
+          <div className="lg:hidden">
             <TrustScoreCard score={trustScore} nextStepName={nextStepName} breakdown={breakdown} />
           </div>
         )}
@@ -476,11 +503,11 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
             <AccordionTrigger className="hover:no-underline py-3">
               <div className="flex items-center gap-3 text-left">
                 <div className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center border transition-all",
-                    mainPhoto
-                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"
-                      : "bg-muted border-border/80 text-muted-foreground"
-                  )}>
+                  "w-8 h-8 rounded-full flex items-center justify-center border transition-all",
+                  mainPhoto
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"
+                    : "bg-muted border-border/80 text-muted-foreground"
+                )}>
                   {mainPhoto ? <Check className="w-4.5 h-4.5 stroke-[2.5]" /> : <Camera className="w-4.5 h-4.5" />}
                 </div>
                 <div className="flex flex-col">
@@ -510,26 +537,41 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                 <div className="flex flex-col items-center gap-3">
                   <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-border/40 bg-muted max-w-[280px]">
                     <Image src={mainPhoto} alt="Main Preview" fill className="object-cover" />
-                    {uploadingSlots.main && <UploadingOverlay />}
+                    {uploadingSlots.main && <LoadingOverlay label="Uploading" />}
+                    {deletingSlots.main && <LoadingOverlay label="Deleting" />}
                     <div className="absolute top-2 right-2 bg-emerald-500 text-white rounded-full p-1 shadow-sm">
                       <Check className="w-3.5 h-3.5 stroke-[3]" />
                     </div>
                   </div>
                   <UploadProgressBar isUploading={!!uploadingSlots.main} />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={uploadingSlots.main}
-                    onClick={() => handleOpenGuidelines("main")}
-                    className="rounded-xl font-bold text-[11px] tracking-wider uppercase h-9 flex items-center gap-1.5 border-border/80 active:scale-[0.98] transition-all"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Retake Photo
-                  </Button>
+                  <div className="flex gap-3 justify-center w-full max-w-[280px]">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={uploadingSlots.main || deletingSlots.main}
+                      onClick={() => handleOpenGuidelines("main")}
+                      className="flex-1 rounded-xl font-bold text-[11px] tracking-wider uppercase h-9 flex items-center justify-center gap-1.5 border-border/80 active:scale-[0.98] transition-all"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" /> Retake Photo
+                    </Button>
+                    {onDeleteMainPhoto && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={uploadingSlots.main || deletingSlots.main}
+                        onClick={() => handleTriggerDelete("main")}
+                        className="flex-1 rounded-xl font-bold text-[11px] tracking-wider uppercase h-9 flex items-center justify-center gap-1.5 border-red-500/20 text-red-500 hover:bg-red-500/10 dark:text-red-400 dark:border-red-500/30 dark:hover:bg-red-950/30 active:scale-[0.98] transition-all"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Delete
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <Button
                   type="button"
                   onClick={() => handleOpenGuidelines("main")}
+                  disabled={uploadingSlots.main || deletingSlots.main}
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/10 rounded-xl h-10 text-xs font-bold active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                 >
                   <Camera className="w-4 h-4" /> Take Main Photo
@@ -546,11 +588,11 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
             <AccordionTrigger className="hover:no-underline py-3">
               <div className="flex items-center gap-3 text-left">
                 <div className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center border transition-all",
-                    isProductPhotosComplete
-                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"
-                      : "bg-muted border-border/80 text-muted-foreground"
-                  )}>
+                  "w-8 h-8 rounded-full flex items-center justify-center border transition-all",
+                  isProductPhotosComplete
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"
+                    : "bg-muted border-border/80 text-muted-foreground"
+                )}>
                   {isProductPhotosComplete ? <Check className="w-4.5 h-4.5 stroke-[2.5]" /> : <ImageIcon className="w-4.5 h-4.5" />}
                 </div>
                 <div className="flex flex-col">
@@ -562,9 +604,9 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
               </div>
               <div className="ml-auto mr-3">
                 <Badge variant="secondary" className={cn(
-                    "border-none font-bold text-[11px] px-2 py-0.5 rounded-full uppercase tracking-wider",
-                    isProductPhotosComplete ? "bg-emerald-500/10 text-emerald-500" : "bg-muted/60 text-muted-foreground"
-                  )}>
+                  "border-none font-bold text-[11px] px-2 py-0.5 rounded-full uppercase tracking-wider",
+                  isProductPhotosComplete ? "bg-emerald-500/10 text-emerald-500" : "bg-muted/60 text-muted-foreground"
+                )}>
                   {capturedPhotosCount}/4
                 </Badge>
               </div>
@@ -577,16 +619,17 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                 {PHOTO_SLOTS.map((slot) => {
                   const image = productPhotos[slot.id];
                   const isUploading = uploadingSlots[slot.id];
+                  const isDeleting = deletingSlots[slot.id];
                   return (
                     <div key={slot.id} className="flex flex-col items-center w-full">
                       <div
                         onClick={() => {
-                          if (isUploading) return;
+                          if (isUploading || isDeleting) return;
                           handleOpenGuidelines(slot.id);
                         }}
                         className={cn(
                           "w-full aspect-square rounded-xl border overflow-hidden relative group flex flex-col items-center justify-center p-2.5 transition-all",
-                          isUploading ? "cursor-wait" : "cursor-pointer",
+                          (isUploading || isDeleting) ? "cursor-wait" : "cursor-pointer",
                           image
                             ? "border-emerald-500/50 bg-background/50"
                             : "border-dashed border-border/80 hover:border-primary/50 bg-muted/20 hover:bg-primary/5"
@@ -595,14 +638,26 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                         {image ? (
                           <>
                             <Image src={image} alt={slot.label} fill className="object-cover" />
-                            {isUploading ? (
-                              <UploadingOverlay />
-                            ) : (
+                            {isUploading && <LoadingOverlay label="Uploading" />}
+                            {isDeleting && <LoadingOverlay label="Deleting" />}
+                            {!isUploading && !isDeleting && (
                               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                 <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
                                   <RefreshCw className="w-3.5 h-3.5" />
                                 </div>
                               </div>
+                            )}
+                            {onDeleteProductPhotoSlot && !isUploading && !isDeleting && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleTriggerDelete(slot.id);
+                                }}
+                                className="absolute top-1.5 left-1.5 bg-black/60 backdrop-blur-md hover:bg-red-500 text-white rounded-full p-1.5 shadow-sm transition-all border border-white/10 active:scale-90 z-20 cursor-pointer"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
                             )}
                             <div className="absolute top-1.5 right-1.5 bg-emerald-500 text-white rounded-full p-0.5 shadow-sm">
                               <Check className="w-2.5 h-2.5 stroke-[3]" />
@@ -624,7 +679,8 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                             <span className="text-[10px] text-muted-foreground text-center leading-normal mt-0.5 max-w-[100px] truncate">
                               {slot.desc}
                             </span>
-                            {isUploading && <UploadingOverlay />}
+                            {isUploading && <LoadingOverlay label="Uploading" />}
+                            {isDeleting && <LoadingOverlay label="Deleting" />}
                           </>
                         )}
                       </div>
@@ -644,17 +700,17 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
             <AccordionTrigger className="hover:no-underline py-3">
               <div className="flex items-center gap-3 text-left">
                 <div className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center border transition-all",
-                    verificationVideo
-                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"
-                      : "bg-muted border-border/80 text-muted-foreground"
-                  )}>
+                  "w-8 h-8 rounded-full flex items-center justify-center border transition-all",
+                  verificationVideo
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"
+                    : "bg-muted border-border/80 text-muted-foreground"
+                )}>
                   {verificationVideo ? <Check className="w-4.5 h-4.5 stroke-[2.5]" /> : <Video className="w-4.5 h-4.5" />}
                 </div>
                 <div className="flex flex-col">
                   <span className="text-sm font-extrabold text-foreground">3. Video Verification</span>
                   <span className={cn("text-xs font-semibold", verificationVideo ? "text-emerald-500" : "text-primary")}>
-                    {verificationVideo ? "Completed" : isGraded ? "+20 Trust Score" : "+30 Trust Score"}
+                    {verificationVideo ? "Completed" : isGraded ? "+30 Trust Score" : "+40 Trust Score"}
                   </span>
                 </div>
               </div>
@@ -665,7 +721,7 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                   </Badge>
                 ) : (
                   <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-bold text-[11px] px-2 py-0.5 rounded-full uppercase tracking-wider">
-                    {isGraded ? "+20" : "+30"}
+                    {isGraded ? "+30" : "+40"}
                   </Badge>
                 )}
               </div>
@@ -678,23 +734,38 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                 <div className="flex flex-col items-center gap-3">
                   <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-border/40 bg-black max-w-[280px]">
                     <video src={videoUrl} controls className="w-full h-full object-cover" />
-                    {uploadingSlots.video && <UploadingOverlay />}
+                    {uploadingSlots.video && <LoadingOverlay label="Uploading" />}
+                    {deletingSlots.video && <LoadingOverlay label="Deleting" />}
                   </div>
                   <UploadProgressBar isUploading={!!uploadingSlots.video} />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={uploadingSlots.video}
-                    onClick={() => handleOpenGuidelines("video")}
-                    className="rounded-xl font-bold text-[11px] tracking-wider uppercase h-9 flex items-center gap-1.5 border-border/80 active:scale-[0.98] transition-all"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Retake Video
-                  </Button>
+                  <div className="flex gap-3 justify-center w-full max-w-[280px]">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={uploadingSlots.video || deletingSlots.video}
+                      onClick={() => handleOpenGuidelines("video")}
+                      className="flex-1 rounded-xl font-bold text-[11px] tracking-wider uppercase h-9 flex items-center justify-center gap-1.5 border-border/80 active:scale-[0.98] transition-all"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" /> Retake Video
+                    </Button>
+                    {onDeleteVideo && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={uploadingSlots.video || deletingSlots.video}
+                        onClick={() => handleTriggerDelete("video")}
+                        className="flex-1 rounded-xl font-bold text-[11px] tracking-wider uppercase h-9 flex items-center justify-center gap-1.5 border-red-500/20 text-red-500 hover:bg-red-500/10 dark:text-red-400 dark:border-red-500/30 dark:hover:bg-red-950/30 active:scale-[0.98] transition-all"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Delete
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <Button
                   type="button"
                   onClick={() => handleOpenGuidelines("video")}
+                  disabled={uploadingSlots.video || deletingSlots.video}
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/10 rounded-xl h-10 text-xs font-bold active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                 >
                   <Video className="w-4 h-4" /> Start Product Video
@@ -712,17 +783,17 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
               <AccordionTrigger className="hover:no-underline py-3">
                 <div className="flex items-center gap-3 text-left">
                   <div className={cn(
-                      "w-8 h-8 rounded-full flex items-center justify-center border transition-all",
-                      certPhoto
-                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"
-                        : "bg-muted border-border/80 text-muted-foreground"
-                    )}>
+                    "w-8 h-8 rounded-full flex items-center justify-center border transition-all",
+                    certPhoto
+                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"
+                      : "bg-muted border-border/80 text-muted-foreground"
+                  )}>
                     {certPhoto ? <Check className="w-4.5 h-4.5 stroke-[2.5]" /> : <Award className="w-4.5 h-4.5" />}
                   </div>
                   <div className="flex flex-col">
                     <span className="text-sm font-extrabold text-foreground">4. Certification</span>
                     <span className={cn("text-xs font-semibold", certPhoto ? "text-emerald-500" : "text-primary")}>
-                      {certPhoto ? "Completed" : "+10 Trust Score"}
+                      {certPhoto ? "Completed" : "+20 Trust Score"}
                     </span>
                   </div>
                 </div>
@@ -733,7 +804,7 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                     </Badge>
                   ) : (
                     <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-bold text-[11px] px-2 py-0.5 rounded-full uppercase tracking-wider">
-                      +10
+                      +20
                     </Badge>
                   )}
                 </div>
@@ -746,35 +817,49 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                   <div className="flex flex-col items-center gap-3">
                     <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-border/40 bg-muted max-w-[280px]">
                       <Image src={certPhoto} alt="Certificate" fill className="object-cover" />
-                      {uploadingSlots.cert && <UploadingOverlay />}
+                      {uploadingSlots.cert && <LoadingOverlay label="Uploading" />}
+                      {deletingSlots.cert && <LoadingOverlay label="Deleting" />}
                       <div className="absolute top-2 right-2 bg-emerald-500 text-white rounded-full p-1 shadow-sm">
                         <Check className="w-3.5 h-3.5 stroke-[3]" />
                       </div>
                     </div>
                     <UploadProgressBar isUploading={!!uploadingSlots.cert} />
-                    <div className="flex gap-3 justify-center w-full max-w-[280px] mt-1">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        disabled={uploadingSlots.cert}
-                        onClick={() => handleOpenGuidelines("cert")}
-                        className="flex-1 rounded-full font-extrabold text-[11px] tracking-wider uppercase h-10 flex items-center justify-center gap-2 border-border/80 hover:bg-muted/50 active:scale-[0.98] transition-all"
-                      >
-                        <Camera className="w-4 h-4" /> CAMERA
-                      </Button>
-                      <label className={cn(
-                        "flex-1 flex items-center justify-center gap-2 rounded-full border border-border/80 bg-background hover:bg-muted/50 text-foreground font-extrabold text-[11px] tracking-wider uppercase h-10 cursor-pointer transition-all active:scale-[0.98]",
-                        uploadingSlots.cert && "pointer-events-none opacity-50"
-                      )}>
-                        <ImageIcon className="w-4 h-4" /> GALLERY
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={handleGalleryUpload}
-                          disabled={uploadingSlots.cert}
-                        />
-                      </label>
+                    <div className="flex flex-col gap-2 w-full max-w-[280px] mt-1">
+                      <div className="flex gap-3 justify-center w-full">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          disabled={uploadingSlots.cert || deletingSlots.cert}
+                          onClick={() => handleOpenGuidelines("cert")}
+                          className="flex-1 rounded-full font-extrabold text-[11px] tracking-wider uppercase h-10 flex items-center justify-center gap-2 border-border/80 hover:bg-muted/50 active:scale-[0.98] transition-all"
+                        >
+                          <Camera className="w-4 h-4" /> CAMERA
+                        </Button>
+                        <label className={cn(
+                          "flex-1 flex items-center justify-center gap-2 rounded-full border border-border/80 bg-background hover:bg-muted/50 text-foreground font-extrabold text-[11px] tracking-wider uppercase h-10 cursor-pointer transition-all active:scale-[0.98]",
+                          (uploadingSlots.cert || deletingSlots.cert) && "pointer-events-none opacity-50"
+                        )}>
+                          <ImageIcon className="w-4 h-4" /> GALLERY
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleGalleryUpload}
+                            disabled={uploadingSlots.cert || deletingSlots.cert}
+                          />
+                        </label>
+                      </div>
+                      {onDeleteCertPhoto && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          disabled={uploadingSlots.cert || deletingSlots.cert}
+                          onClick={() => handleTriggerDelete("cert")}
+                          className="w-full rounded-full font-extrabold text-[11px] tracking-wider uppercase h-10 flex items-center justify-center gap-2 border-red-500/20 text-red-500 hover:bg-red-500/10 dark:text-red-400 dark:border-red-500/30 dark:hover:bg-red-950/30 active:scale-[0.98] transition-all"
+                        >
+                          <Trash2 className="w-4 h-4" /> DELETE
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ) : (
@@ -782,17 +867,22 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
                     <Button
                       type="button"
                       onClick={() => handleOpenGuidelines("cert")}
+                      disabled={uploadingSlots.cert || deletingSlots.cert}
                       className="flex-1 bg-background border border-border/80 text-foreground hover:bg-muted/50 shadow-xs rounded-full h-10 text-[11px] font-extrabold uppercase tracking-wider active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                     >
                       <Camera className="w-4 h-4" /> CAMERA
                     </Button>
-                    <label className="flex-1 flex items-center justify-center gap-2 bg-background border border-border/80 text-foreground hover:bg-muted/50 shadow-xs rounded-full h-10 text-[11px] font-extrabold uppercase tracking-wider cursor-pointer active:scale-[0.98] transition-all">
+                    <label className={cn(
+                      "flex-1 flex items-center justify-center gap-2 bg-background border border-border/80 text-foreground hover:bg-muted/50 shadow-xs rounded-full h-10 text-[11px] font-extrabold uppercase tracking-wider cursor-pointer active:scale-[0.98] transition-all",
+                      (uploadingSlots.cert || deletingSlots.cert) && "pointer-events-none opacity-50"
+                    )}>
                       <ImageIcon className="w-4 h-4" /> GALLERY
                       <input
                         type="file"
                         accept="image/*"
                         className="hidden"
                         onChange={handleGalleryUpload}
+                        disabled={uploadingSlots.cert || deletingSlots.cert}
                       />
                     </label>
                   </div>
@@ -1160,6 +1250,48 @@ export const Step2ProofVerification: React.FC<Step2ProofVerificationProps> = ({
           />
         );
       })()}
+
+      {/* Delete Confirmation Modal */}
+      <AnimatedModal
+        isOpen={deleteConfirmSlot !== null}
+        onClose={() => setDeleteConfirmSlot(null)}
+        title={
+          <div className="flex items-center gap-2 text-destructive">
+            <Trash2 className="w-5 h-5" />
+            <span>Confirm Deletion</span>
+          </div>
+        }
+        className="max-w-sm p-4 sm:p-6 bg-card border border-border/40"
+      >
+        <div className="flex flex-col items-center text-center p-1 sm:p-2">
+          <div className="w-12 h-12 rounded-full bg-destructive/10 border border-destructive/20 flex items-center justify-center text-destructive mb-4">
+            <Trash2 className="w-6 h-6" />
+          </div>
+
+          <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-5 sm:mb-6 leading-relaxed px-1 sm:px-2">
+            Are you sure you want to delete the <span className="font-extrabold text-foreground">{deleteConfirmSlot && getSlotDisplayName(deleteConfirmSlot)}</span>? This action cannot be undone.
+          </p>
+
+          <div className="flex gap-3 w-full">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDeleteConfirmSlot(null)}
+              className="flex-1 rounded-xl h-10 sm:h-11 px-3 text-[11px] sm:text-xs font-bold transition-all uppercase tracking-wider border-border/80"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              className="flex-1 bg-destructive text-white hover:bg-destructive/90 shadow-md rounded-xl h-10 sm:h-11 px-3 text-[11px] sm:text-xs font-bold transition-all uppercase tracking-wider"
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+      </AnimatedModal>
     </div>
   );
 };

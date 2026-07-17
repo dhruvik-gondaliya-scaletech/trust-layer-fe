@@ -102,7 +102,10 @@ export function DashboardLayoutContainer({
   };
 
   return (
-    <div className="min-h-screen md:h-screen md:overflow-hidden bg-[#F8FAFC] flex flex-col md:flex-row text-left">
+    <div 
+      className="group/layout min-h-screen md:h-screen md:overflow-hidden bg-[#F8FAFC] flex flex-col md:flex-row text-left"
+      data-sidebar-collapsed={isCollapsed}
+    >
       {/* Sidebar Layout */}
       <Sidebar
         user={user}

@@ -28,15 +28,11 @@ export const RegisterContainer: React.FC = () => {
   });
 
   const mutation = useRegisterMutation({
-    onSuccess: (data, variables) => {
-      toast.success("Account created successfully!", {
-        description: `Welcome to TrustLayer, ${variables.firstName}! Let's verify your email.`,
-      });
+    onSuccess: (_, variables) => {
       form.reset();
       // Redirect to verification wizard
-      const verifyUrl = `${FRONTEND_ROUTES.VERIFY}?email=${encodeURIComponent(variables.email)}${
-        redirect ? `&redirect=${encodeURIComponent(redirect)}` : ""
-      }`;
+      const verifyUrl = `${FRONTEND_ROUTES.VERIFY}?email=${encodeURIComponent(variables.email)}${redirect ? `&redirect=${encodeURIComponent(redirect)}` : ""
+        }`;
       router.push(verifyUrl);
     },
     onError: (error) => {
@@ -50,7 +46,7 @@ export const RegisterContainer: React.FC = () => {
 
   const handlePreSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     // Sync browser-autofilled values that might not have triggered react-hook-form change events
     const fields: Array<keyof RegisterInput> = [
       "firstName",

@@ -121,7 +121,7 @@ export const PhoneInputStep: React.FC<PhoneInputStepProps> = ({
           </p>
         </div>
 
-        <div className="bg-white/80 backdrop-blur-xl rounded-[28px] p-6 shadow-[0_20px_50px_rgba(8,15,30,0.03)] border border-slate-100">
+        <div>
           <Form {...form}>
             <form id="phone-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" noValidate>
               <FormField control={form.control} name="phoneNumber" render={({ field }) => (

@@ -32,21 +32,22 @@ export const ForgotEmailStep: React.FC<ForgotEmailStepProps> = ({
         </div>
       </div>
 
-      <div className="flex-1 px-5 max-w-sm mx-auto w-full flex flex-col justify-center">
-        <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 shadow-sm">
-            <Mail className="w-6 h-6 text-blue-600" />
+      <div className="flex-1 px-5 max-w-sm mx-auto w-full flex flex-col py-8">
+        <div className="w-full my-auto">
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 shadow-sm">
+              <Mail className="w-6 h-6 text-blue-600" />
+            </div>
           </div>
-        </div>
 
-        <h1 className="text-[28px] font-extrabold mb-2 text-foreground leading-tight tracking-tight text-center">
-          Forgot Password?
-        </h1>
-        <p className="text-[15px] text-muted-foreground text-center mb-8">
-          Enter your email address and we&apos;ll send you an OTP to reset your password.
-        </p>
+          <h1 className="text-[28px] font-extrabold mb-2 text-foreground leading-tight tracking-tight text-center">
+            Forgot Password?
+          </h1>
+          <p className="text-[15px] text-muted-foreground text-center mb-8">
+            Enter your email address and we&apos;ll send you an OTP to reset your password.
+          </p>
 
-        <Form {...form}>
+          <Form {...form}>
           <form id="forgot-email-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <FormField control={form.control} name="email" render={({ field }) => (
               <Field>
@@ -87,6 +88,7 @@ export const ForgotEmailStep: React.FC<ForgotEmailStepProps> = ({
             </div>
           </form>
         </Form>
+        </div>
       </div>
     </div>
   );

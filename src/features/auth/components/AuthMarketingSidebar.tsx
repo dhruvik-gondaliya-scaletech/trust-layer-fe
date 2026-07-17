@@ -24,10 +24,10 @@ export const AuthMarketingSidebar: React.FC = () => {
       {/* Hero section */}
       <div className="my-auto relative z-10 max-w-lg">
         <h2 className="text-4xl xl:text-5xl font-black tracking-tight leading-[1.1] pb-4">
-          Experience the future of trust.
+          You found the deal. We make it safe.
         </h2>
         <p className="text-slate-400 text-[15px] leading-relaxed">
-          Verify item condition, lock payments, and transact with absolute confidence.
+          Met on Marketplace, Instagram, or Discord? Send your transaction through TrustLayer. You make the deal, we protect that deal! Everyone wins.
         </p>
       </div>
 

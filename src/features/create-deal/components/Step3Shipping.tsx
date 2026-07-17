@@ -43,7 +43,7 @@ export const Step3Shipping: React.FC<Step3ShippingProps> = ({
         className="flex flex-col h-full flex-1 overflow-hidden text-left"
       >
       {/* Scrollable Form Content */}
-      <div className="flex-1 overflow-y-auto px-0.5 space-y-5 scrollbar-none pb-28">
+      <div className="flex-1 overflow-y-auto px-0.5 space-y-5 scrollbar-none">
         <Alert className="bg-amber-500/5 border border-amber-500/30 text-amber-500 dark:bg-amber-950/20 dark:border-amber-500/40 dark:text-amber-400 rounded-xl">
           <Info className="h-4 w-4 shrink-0" />
           <AlertDescription className="text-xs text-amber-800 dark:text-amber-300 font-semibold leading-relaxed">

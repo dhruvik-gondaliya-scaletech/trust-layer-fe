@@ -208,6 +208,10 @@ export const CreateDealContainer: React.FC = () => {
   const [uploadingSlots, setUploadingSlots] = useState<Partial<Record<MediaSlot, boolean>>>({});
   const isUploadingMedia = Object.values(uploadingSlots).some(Boolean);
 
+  // Step 2 live deletions — which slots currently have a deletion in flight
+  const [deletingSlots, setDeletingSlots] = useState<Partial<Record<MediaSlot, boolean>>>({});
+  const isDeletingMedia = Object.values(deletingSlots).some(Boolean);
+
   const uploadMediaMutation = useUploadDealMedia();
   const deleteMediaMutation = useDeleteDealMedia();
 
@@ -249,17 +253,42 @@ export const CreateDealContainer: React.FC = () => {
     }
   };
 
+  const deleteSlotMedia = async (slot: MediaSlot) => {
+    if (!dealId) return;
+
+    setDeletingSlots((prev) => ({ ...prev, [slot]: true }));
+    try {
+      const mediaId = mediaIds[slot];
+      if (mediaId) {
+        await deleteMediaMutation.mutateAsync({ dealId, mediaId });
+        setMediaIds((prev) => {
+          const next = { ...prev };
+          delete next[slot];
+          return next;
+        });
+      }
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } }; message?: string };
+      toast.error(
+        err.response?.data?.message || "Failed to delete media."
+      );
+    } finally {
+      setDeletingSlots((prev) => ({ ...prev, [slot]: false }));
+    }
+  };
+
   // Dynamic Trust Score Calculation
   const hasItemDetails = step > 1 || !!formData.title;
   const extraPhotosCount = Object.values(productPhotos).filter(Boolean).length;
 
-  let trustScore = 20; // Verified Seller Profile — always +20
+  let trustScore = 0;
   if (hasItemDetails) trustScore += 20;
-  if (mainPhoto) trustScore += 15;
-  if (extraPhotosCount > 0) trustScore += Math.round((extraPhotosCount / 4) * 15);
-  // When graded: video worth 20 pts + cert photo worth 10 pts (same total max)
-  if (verificationVideo) trustScore += formData.isGraded ? 20 : 30;
-  if (certPhoto && formData.isGraded) trustScore += 10;
+  if (mainPhoto) trustScore += formData.isGraded ? 15 : 20;
+  if (extraPhotosCount > 0) {
+    trustScore += Math.round((extraPhotosCount / 4) * (formData.isGraded ? 15 : 20));
+  }
+  if (verificationVideo) trustScore += formData.isGraded ? 30 : 40;
+  if (certPhoto && formData.isGraded) trustScore += 20;
 
   const nextStepName = !mainPhoto
     ? "Take Main Photo"
@@ -344,6 +373,28 @@ export const CreateDealContainer: React.FC = () => {
   const handleCaptureCertPhoto = (dataUrl: string) => {
     setCertPhoto(dataUrl);
     void uploadSlotMedia("cert", dataURLtoBlob(dataUrl));
+  };
+
+  const handleDeleteMainPhoto = () => {
+    setMainPhoto(null);
+    void deleteSlotMedia("main");
+  };
+
+  const handleDeleteProductPhotoSlot = (
+    slot: "back" | "leftSide" | "rightSide" | "detail"
+  ) => {
+    setProductPhotos((prev) => ({ ...prev, [slot]: null }));
+    void deleteSlotMedia(slot);
+  };
+
+  const handleDeleteVideo = () => {
+    setVerificationVideo(null);
+    void deleteSlotMedia("video");
+  };
+
+  const handleDeleteCertPhoto = () => {
+    setCertPhoto(null);
+    void deleteSlotMedia("cert");
   };
 
   const handleStep3Submit = (data: Step3ShippingData) => {
@@ -476,7 +527,7 @@ export const CreateDealContainer: React.FC = () => {
 
         deal = await dealsService.updateDeal(dealId, {
           ...dealFields,
-          ...(publish && dealStatus === "draft" ? { publish: true } : {}),
+          ...(!isUpdateMode && publish && dealStatus === "draft" ? { publish: true } : {}),
         });
       } else {
         // 3b. No backend draft (draft saved before Step 1 created deals) —
@@ -528,7 +579,7 @@ export const CreateDealContainer: React.FC = () => {
 
       if (publish) {
         setIsSubmitting(false);
-        if (isUpdateMode && dealStatus !== "draft") {
+        if (isUpdateMode) {
           toast.success("Deal updated successfully!");
           router.push(FRONTEND_ROUTES.DEAL_DETAILS(deal.id));
         } else {
@@ -596,7 +647,7 @@ export const CreateDealContainer: React.FC = () => {
       </Button>
     );
 
-    const saveDraftButton = step === 5 && (!isUpdateMode || dealStatus === "draft") && (
+    const saveDraftButton = step === 5 && !isUpdateMode && (
       <Button
         type="button"
         onClick={handleSaveDraft}
@@ -604,7 +655,7 @@ export const CreateDealContainer: React.FC = () => {
         disabled={isSubmitting || isSavingDraft}
         className="flex-1 border-primary/40 text-primary hover:text-primary hover:bg-primary/5 rounded-2xl h-14 text-base font-bold active:scale-[0.98] transition-all"
       >
-        {isSavingDraft ? "Saving..." : (isUpdateMode ? "Save as Draft" : "Save Draft")}
+        {isSavingDraft ? "Saving..." : "Save Draft"}
       </Button>
     );
 
@@ -633,20 +684,20 @@ export const CreateDealContainer: React.FC = () => {
             }
             : isSuccess ? () => router.push(FRONTEND_ROUTES.DASHBOARD) : undefined
         }
-        disabled={(step === 5 && (isSubmitting || isSavingDraft)) || (step === 2 && isUploadingMedia)}
+        disabled={(step === 5 && (isSubmitting || isSavingDraft)) || (step === 2 && (isUploadingMedia || isDeletingMedia))}
         className={`${step === 5 && saveDraftButton ? "w-full" : "flex-1"} bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/10 rounded-2xl h-14 text-base font-bold active:scale-[0.98] transition-all`}
       >
         {step === 5 && !isSuccess
           ? (isSubmitting
             ? (isUpdateMode ? "Saving..." : "Publishing...")
-            : (isUpdateMode
-              ? (dealStatus === "draft" ? "Publish" : "Save Changes")
-              : "Publish"))
+            : (isUpdateMode ? "Save Changes" : "Publish"))
           : isSuccess
             ? "Go to Dashboard"
             : step === 2 && isUploadingMedia
               ? "Uploading..."
-              : "Continue"}
+              : step === 2 && isDeletingMedia
+                ? "Deleting..."
+                : "Continue"}
       </Button>
     );
 
@@ -703,14 +754,14 @@ export const CreateDealContainer: React.FC = () => {
   }
 
   return (
-    <div className="w-full flex-1 flex flex-col gap-6 max-w-6xl mx-auto py-4 xl:py-8 select-none">
-      <div className="w-full flex-1 grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-8 min-h-0">
+    <div className="w-full flex-1 flex flex-col gap-6 max-w-6xl mx-auto py-4 lg:p-8 select-none">
+      <div className="w-full flex-1 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 min-h-0">
 
         {/* Left Column - Form Card and Desktop Header */}
         <div className="w-full flex flex-col gap-6">
           {/* Desktop Header & Progress Bar (Desktop only) */}
           {!isSuccess && (
-            <div className="hidden xl:flex flex-col gap-3 w-full">
+            <div className="hidden lg:flex flex-col gap-3 w-full">
               <div className="flex items-center gap-3">
                 <BackButton />
                 <span className="font-extrabold text-2xl text-foreground">
@@ -722,9 +773,9 @@ export const CreateDealContainer: React.FC = () => {
           )}
 
           {/* Form Card Layout */}
-          <div className="w-full flex flex-col bg-card xl:bg-transparent xl:border-0 xl:shadow-none xl:rounded-none relative overflow-hidden xl:overflow-visible min-h-[600px] xl:min-h-0 xl:max-h-none xl:h-auto">
+          <div className="w-full flex flex-col bg-card lg:bg-transparent lg:border-0 lg:shadow-none lg:rounded-none relative overflow-hidden lg:overflow-visible min-h-[600px] lg:min-h-0 lg:max-h-none lg:h-auto">
             {/* Mobile Header (Hidden on Desktop) */}
-            <div className="xl:hidden flex items-center justify-between w-full p-6 pb-2 shrink-0 select-none">
+            <div className="lg:hidden flex items-center justify-between w-full p-6 pb-2 shrink-0 select-none">
               {!isSuccess && (
                 <BackButton />
               )}
@@ -738,13 +789,13 @@ export const CreateDealContainer: React.FC = () => {
 
             {/* Mobile Step Indicator (Hidden on Desktop) */}
             {!isSuccess && (
-              <div className="xl:hidden px-6 py-2 shrink-0">
+              <div className="lg:hidden px-6 py-2 shrink-0">
                 <StepIndicator currentStep={getVisualStep(step)} totalSteps={isInPerson ? 4 : 5} />
               </div>
             )}
 
             {/* Render Steps with scroll and slide animation */}
-            <div className="flex-1 flex flex-col overflow-y-auto xl:overflow-y-visible scrollbar-none px-6 xl:px-0 pt-4 pb-36 xl:pb-8 min-h-0 xl:min-h-0">
+            <div className="flex-1 flex flex-col overflow-y-auto lg:overflow-y-visible scrollbar-none px-6 lg:px-0 pt-4 pb-36 lg:pb-8 min-h-0 lg:min-h-0">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={step}
@@ -774,7 +825,12 @@ export const CreateDealContainer: React.FC = () => {
                       onCaptureProductPhotoSlot={handleCaptureProductPhotosSlot}
                       onCaptureVideo={handleCaptureVideo}
                       onCaptureCertPhoto={handleCaptureCertPhoto}
+                      onDeleteMainPhoto={handleDeleteMainPhoto}
+                      onDeleteProductPhotoSlot={handleDeleteProductPhotoSlot}
+                      onDeleteVideo={handleDeleteVideo}
+                      onDeleteCertPhoto={handleDeleteCertPhoto}
                       uploadingSlots={uploadingSlots}
+                      deletingSlots={deletingSlots}
                       onContinue={() => setStep(isInPerson ? 4 : 3)}
                       onBack={handleBack}
                       trustScore={trustScore}
@@ -826,7 +882,7 @@ export const CreateDealContainer: React.FC = () => {
 
             {/* Central Persistent Sticky Footer inside Form Card */}
             {!isSuccess && (
-              <div className={`fixed bottom-0 left-0 md:left-64 right-0 xl:hidden py-4 px-6 bg-card border-t border-border/40 flex flex-col gap-3 z-30 shadow-lg ${step === 5 ? "max-w-[520px] mx-auto w-full" : ""}`}>
+              <div className="fixed bottom-0 left-0 right-0 lg:hidden py-4 px-6 bg-card border-t border-border/40 flex flex-col gap-3 z-30 shadow-lg transition-all duration-200 group-data-[sidebar-collapsed=false]/layout:md:left-64 group-data-[sidebar-collapsed=true]/layout:md:left-20">
                 {renderButtons(false)}
               </div>
             )}
@@ -835,7 +891,7 @@ export const CreateDealContainer: React.FC = () => {
 
         {/* Right Column - Floating Trust Score Card (Desktop only) */}
         {!isSuccess && typeof trustScore === "number" && (
-          <div className="hidden xl:block xl:w-80 shrink-0 h-full">
+          <div className="hidden lg:block lg:w-80 shrink-0 h-full">
             <div className="sticky top-20 flex flex-col gap-4">
               <TrustScoreCard score={trustScore} nextStepName={nextStepName} breakdown={breakdown} />
               {renderButtons(true)}

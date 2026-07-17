@@ -63,11 +63,11 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
         noValidate
       >
         {/* Scrollable Form Content */}
-        <div className="flex-1 overflow-y-auto px-0.5 space-y-5 scrollbar-none pb-28">
+        <div className="flex-1 overflow-y-auto px-0.5 space-y-5 scrollbar-none">
 
           {/* Trust Score card — scrolls with content */}
           {typeof trustScore === "number" && (
-            <div className="xl:hidden">
+            <div className="lg:hidden">
               <TrustScoreCard score={trustScore} nextStepName={nextStepName} breakdown={breakdown} />
             </div>
           )}
@@ -230,7 +230,7 @@ export const Step1ItemDetails: React.FC<Step1ItemDetailsProps> = ({
                   animate={{ height: "auto", opacity: 1, marginTop: 16 }}
                   exit={{ height: 0, opacity: 0, marginTop: 0 }}
                   transition={{ duration: 0.22, ease: "easeInOut" }}
-                  className="overflow-hidden flex flex-col gap-1.5"
+                  className="overflow-hidden flex flex-col gap-1.5 px-0.5 pb-0.5"
                 >
                   <FormField control={form.control} name="gradedSerial" rules={{ required: isGraded ? "Serial number is required" : false }} render={({ field }) => (
                     <Field className="flex flex-col gap-1.5 border-none p-0">
