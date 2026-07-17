@@ -29,7 +29,7 @@ export default function FundEscrowWizard({
   onAddAddressClick,
   onSubmitPayment,
   isSubmittingPayment,
-  onGoToTimeline,
+  onGoToDetails,
 }: FundEscrowWizardProps) {
   const [agreementChecked, setAgreementChecked] = useState<AgreementChecked>({
     details: false,
@@ -156,7 +156,7 @@ export default function FundEscrowWizard({
         onSubmitPayment={onSubmitPayment}
         onSaveBillingAddress={payment.handleSaveBillingAddress}
         isBillingFormValid={payment.isBillingFormValid}
-        onGoToTimeline={onGoToTimeline}
+        onGoToDetails={onGoToDetails}
       />
 
       {/* Processing Overlay — matches reference Step 7 */}

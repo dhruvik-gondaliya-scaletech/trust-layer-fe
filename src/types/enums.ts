@@ -79,3 +79,16 @@ export enum CameraMode {
     DETAIL = "detail",
     VIDEO = "video",
 }
+
+export enum DisputeStatus {
+    CREATED = 'created',
+    SELLER_RESPONDED = 'seller_responded',
+    ESCALATED = 'escalated',
+    RESOLVED = 'resolved',
+}
+
+export enum DisputeAction {
+    REFUND = 'refund',
+    RETURN = 'return',
+    DECLINE = 'decline',
+}

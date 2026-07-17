@@ -26,22 +26,22 @@ export const QuickInsights: React.FC<QuickInsightsProps> = ({
     {
       value: activeListings,
       label: isBuyer ? "Active Orders" : "Active Deals",
-      route: `${FRONTEND_ROUTES.TIMELINE}?status=Active`,
+      route: `${FRONTEND_ROUTES.DEAL_LISTING}?status=Active`,
     },
     {
       value: awaitingFunds,
       label: isBuyer ? "Awaiting Deposit" : "Awaiting Funds",
-      route: `${FRONTEND_ROUTES.TIMELINE}?status=Awaiting+Delivery`,
+      route: `${FRONTEND_ROUTES.DEAL_LISTING}?status=Awaiting+Delivery`,
     },
     {
       value: inTransit,
       label: "In Transit",
-      route: `${FRONTEND_ROUTES.TIMELINE}?status=In+Transit`,
+      route: `${FRONTEND_ROUTES.DEAL_LISTING}?status=In+Transit`,
     },
     {
       value: completedDeals,
       label: "Completed",
-      route: `${FRONTEND_ROUTES.TIMELINE}?status=Completed`,
+      route: `${FRONTEND_ROUTES.DEAL_LISTING}?status=Completed`,
     },
   ];
 

@@ -31,7 +31,7 @@ export interface FundEscrowWizardProps {
     onAddAddressClick: () => void;
     onSubmitPayment: (paymentMethod: PaymentMethodType) => Promise<void>;
     isSubmittingPayment: boolean;
-    onGoToTimeline: () => void;
+    onGoToDetails: () => void;
 }
 
 export type CheckoutSubView = "main" | "add-billing";

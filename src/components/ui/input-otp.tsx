@@ -10,6 +10,7 @@ type OTPContextValue = {
   maxLength: number
   isFocused: boolean
   activeSlotIndex: number
+  inputRef: React.RefObject<HTMLInputElement | null>
 }
 
 const OTPContext = React.createContext<OTPContextValue | null>(null)
@@ -26,6 +27,10 @@ const InputOTP = React.forwardRef<
 >(({ className, containerClassName, maxLength, value: controlledValue, defaultValue, onChange, children, ...props }, ref) => {
   const [localValue, setLocalValue] = React.useState(defaultValue || "")
   const [isFocused, setIsFocused] = React.useState(false)
+  const internalRef = React.useRef<HTMLInputElement>(null)
+
+  // Support both forwarded ref and internal ref
+  const inputRef = (ref as React.RefObject<HTMLInputElement | null>) ?? internalRef
 
   const isControlled = controlledValue !== undefined
   const value = isControlled ? controlledValue : localValue
@@ -40,11 +45,19 @@ const InputOTP = React.forwardRef<
     onChange?.(val)
   }
 
+  // Clicking anywhere on the container focuses the hidden input
+  const handleContainerClick = () => {
+    inputRef.current?.focus()
+  }
+
   return (
-    <OTPContext.Provider value={{ value, maxLength, isFocused, activeSlotIndex }}>
-      <div className={cn("relative flex items-center gap-2", containerClassName)}>
+    <OTPContext.Provider value={{ value, maxLength, isFocused, activeSlotIndex, inputRef }}>
+      <div
+        className={cn("relative flex items-center gap-2 cursor-text", containerClassName)}
+        onClick={handleContainerClick}
+      >
         <input
-          ref={ref}
+          ref={inputRef}
           type="text"
           inputMode="numeric"
           pattern="[0-9]*"
@@ -53,7 +66,9 @@ const InputOTP = React.forwardRef<
           onChange={handleInputChange}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          className="absolute inset-0 z-10 w-full h-full opacity-0 cursor-default select-none pointer-events-auto"
+          // Keep it invisible but above everything else so native focus/click works
+          className="absolute inset-0 z-20 w-full h-full opacity-0 cursor-text select-none"
+          aria-label="OTP input"
           {...props}
         />
         {children}
@@ -70,6 +85,8 @@ const InputOTPGroup = React.forwardRef<
   <div
     ref={ref}
     className={cn("flex items-center gap-1.5", className)}
+    // Let clicks fall through to the hidden input above
+    style={{ pointerEvents: "none" }}
     {...props}
   />
 ))
@@ -92,7 +109,7 @@ const InputOTPSlot = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "relative flex h-14 w-11 items-center justify-center rounded-xl border border-slate-200 bg-slate-50/30 text-lg font-bold text-slate-800 transition-all duration-200 ease-out",
+        "relative flex h-14 w-11 items-center justify-center rounded-xl border border-slate-200 bg-slate-50/30 text-lg font-bold text-slate-800 transition-all duration-200 ease-out select-none",
         isActive && "z-20 border-blue-600 ring-4 ring-blue-500/10 scale-105 shadow-[0_0_14px_rgba(59,130,246,0.18)] bg-white",
         className
       )}

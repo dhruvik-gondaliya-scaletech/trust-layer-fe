@@ -29,7 +29,7 @@ interface WizardFooterProps {
   isBillingFormValid: boolean;
 
   // Step 4
-  onGoToTimeline: () => void;
+  onGoToDetails: () => void;
 }
 
 export function WizardFooter({
@@ -46,7 +46,7 @@ export function WizardFooter({
   onSubmitPayment,
   onSaveBillingAddress,
   isBillingFormValid,
-  onGoToTimeline,
+  onGoToDetails,
 }: WizardFooterProps) {
   if (currentStep === 1) {
     return (
@@ -141,7 +141,7 @@ export function WizardFooter({
     return (
       <BottomActionBar>
         <Button
-          onClick={onGoToTimeline}
+          onClick={onGoToDetails}
           className="w-full h-14 text-[16px] font-bold rounded-2xl bg-primary text-white shadow-lg flex items-center justify-center gap-2"
         >
           Go to Dashboard <ArrowRight className="w-5 h-5" />

@@ -59,6 +59,17 @@ export const API_CONFIG = {
         MARK_READ: (id: string) => `/notifications/${id}/read`,
         MARK_ALL_READ: "/notifications/read-all",
     },
+
+    // ─── Disputes Endpoints ───────────────────────────────────────────────────
+    DISPUTES: {
+        CREATE: "/disputes",
+        BY_DEAL_ID: (dealId: string) => `/disputes/deal/${dealId}`,
+        RESPOND: (id: string) => `/disputes/${id}/respond`,
+        ESCALATE: (id: string) => `/disputes/${id}/escalate`,
+        ACCEPT_DECLINE: (id: string) => `/disputes/${id}/accept-decline`,
+        SHIP_RETURN: (id: string) => `/disputes/${id}/ship-return`,
+        CONFIRM_RETURN: (id: string) => `/disputes/${id}/confirm-return`,
+    },
 }
 
 export const FRONTEND_ROUTES = {
@@ -69,13 +80,15 @@ export const FRONTEND_ROUTES = {
     FORGET_PASSWORD: "/forget-password",
     DASHBOARD: "/dashboard",
     WALLET: "/wallet",
-    TIMELINE: "/timeline",
+    TIMELINE: "/deal/details",
     NOTIFICATIONS: "/notifications",
     ADD_SHIPPING_ADDRESS: "/add-shipping-address",
     FUND_ESCROW: (id: string) => `/fund-escrow/${id}`,
-    DISPUTE_FLOW: (id: string) => `/dispute-flow/${id}`,
+    DISPUTE_FLOW: (id: string) => `/dispute/create/${id}`,
+    DISPUTE_DETAILS: (dealId: string) => `/dispute/details/${dealId}`,
+    DISPUTE_LISTING: "/dispute/listing",
     REVIEW_SELLER: (id: string) => `/review-seller/${id}`,
-    DEAL_TIMELINE: (id: string) => `/timeline/${id}`,
+    DEAL_TIMELINE: (id: string) => `/deal/details/${id}`,
     BUYER_VIEW: (id: string) => `/open-deal/${id}`,
     CREATE_DEAL: "/deal/create",
     DEAL_LISTING: `/deal/details`,

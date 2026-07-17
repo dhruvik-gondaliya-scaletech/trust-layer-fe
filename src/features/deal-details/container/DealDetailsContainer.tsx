@@ -111,7 +111,7 @@ export default function DealDetailsContainer() {
       action={action}
       onPrimaryAction={handlePrimaryAction}
       onReportIssue={
-        action?.type === DealDetailsActionType.CONFIRM_DELIVERY ? () => router.push(FRONTEND_ROUTES.DISPUTE_FLOW(deal.dealNumber)) : undefined
+        action?.type === DealDetailsActionType.CONFIRM_DELIVERY ? () => router.push(FRONTEND_ROUTES.DISPUTE_FLOW(deal.id)) : undefined
       }
       onPublish={() => publishDealMutation.mutate(deal.id)}
       isPublishPending={publishDealMutation.isPending}

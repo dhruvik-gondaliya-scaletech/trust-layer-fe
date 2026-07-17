@@ -27,7 +27,7 @@ export default function ReviewSellerContainer() {
       toast.success("Review submitted successfully.");
       setIsSubmitting(false);
       // Redirect back to dashboard or timeline
-      router.push(FRONTEND_ROUTES.DEAL_TIMELINE(deal.dealNumber));
+      router.push(FRONTEND_ROUTES.DEAL_DETAILS(deal.dealNumber));
     } catch (e) {
       console.error("Seller review submission failed", e);
       setIsSubmitting(false);

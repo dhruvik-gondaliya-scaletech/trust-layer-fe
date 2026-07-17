@@ -15,10 +15,10 @@ export const PublicLayoutPresenter: React.FC<PublicLayoutPresenterProps> = ({
 
       {/* Right side: form area */}
       <div
-        className="flex-1 w-full lg:w-[55%] xl:w-[50%] h-dvh relative bg-background flex flex-col justify-center items-center select-text"
+        className="flex-1 w-full lg:w-[55%] xl:w-[50%] h-dvh relative bg-background flex flex-col"
         style={{ transform: "translate3d(0, 0, 0)" }}
       >
-        <div className="w-full h-full overflow-y-auto">
+        <div className="w-full h-full overflow-y-auto flex flex-col">
           {children}
         </div>
       </div>
