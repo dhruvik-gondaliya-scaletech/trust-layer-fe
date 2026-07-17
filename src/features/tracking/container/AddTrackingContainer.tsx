@@ -23,7 +23,7 @@ export default function AddTrackingContainer() {
     dealId,
     onSuccess: () => {
       toast.success("Tracking details uploaded successfully!");
-      router.push(FRONTEND_ROUTES.DEAL_TIMELINE(dealId));
+      router.push(FRONTEND_ROUTES.DEAL_DETAILS(dealId));
     },
     onError: (err) => {
       toast.error("Failed to mark as shipped: " + err.message);

@@ -99,8 +99,7 @@ export default function ViewTracking({
   const carrierLabel =
     deal.carrier === "Other" ? deal.carrierOther || "Other Carrier" : deal.carrier || "N/A";
 
-  const trackingUrl =
-    getCarrierTrackingUrl(deal.carrier, deal.trackingNumber) || deal.trackingUrl || "";
+  const trackingUrl = deal.trackingUrl;
 
   const canConfirm =
     isBuyer &&

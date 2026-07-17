@@ -15,7 +15,6 @@ export function SidebarNav({ isCollapsed }: SidebarNavProps) {
   const pathname = usePathname();
 
   const isDashboardActive = pathname === FRONTEND_ROUTES.DASHBOARD;
-  const isTimelineActive = pathname.startsWith(FRONTEND_ROUTES.TIMELINE);
   const isDealsActive = pathname.startsWith("/deal/details");
 
   return (
@@ -25,7 +24,7 @@ export function SidebarNav({ isCollapsed }: SidebarNavProps) {
         className={cn(
           "w-full flex items-center rounded-2xl text-sm font-bold transition-all",
           isCollapsed ? "justify-center px-0 py-3" : "gap-3 px-4 py-3",
-          isDashboardActive || isTimelineActive
+          isDashboardActive
             ? "bg-primary/10 text-primary"
             : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
         )}

@@ -6,11 +6,9 @@ import { UseFormReturn } from "react-hook-form";
 import { PhoneVerifyInput } from "@/lib/validations/verify";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { Smartphone, Check, ChevronLeft } from "lucide-react";
+import { Smartphone, ChevronLeft } from "lucide-react";
 import { BottomActionBar } from "@/components/ui/bottom-action-bar";
-import { toast } from "sonner";
 import { CODE_RESEND_TIME_OUT } from "@/lib/contants";
-import { cn } from "@/lib/utils";
 import { Form, FormField, FormControl, Field, FieldLabel, FieldError } from "@/components/ui/field";
 
 interface PhoneVerifyStepProps {
@@ -49,7 +47,6 @@ export const PhoneVerifyStep: React.FC<PhoneVerifyStepProps> = ({
     }
   };
 
-
   return (
     <div className="flex flex-col min-h-full pb-[140px] lg:pb-0 justify-center">
       {/* Top Header */}
@@ -64,7 +61,7 @@ export const PhoneVerifyStep: React.FC<PhoneVerifyStepProps> = ({
         <h1 className="text-sm font-bold text-slate-400 tracking-wide uppercase">Step 2 of 3</h1>
       </div>
 
-      <div className="flex-1 px-5 pt-4 max-w-sm mx-auto w-full flex flex-col justify-center">
+      <div className="flex-1 px-4 sm:px-5 pt-4 w-full max-w-xs sm:max-w-sm mx-auto flex flex-col justify-center">
         {/* Progress Tracker */}
         {renderTracker?.()}
 
@@ -84,41 +81,45 @@ export const PhoneVerifyStep: React.FC<PhoneVerifyStepProps> = ({
           </p>
         </div>
 
-        {/* Premium Card Container */}
+        {/* OTP Form */}
         <div>
           <Form {...form}>
             <form id="verify-phone-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" noValidate>
               <FormField control={form.control} name="code" render={({ field }) => (
                 <Field className="space-y-3 border-none">
                   <FieldLabel className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">6-Digit Code</FieldLabel>
-                  <div className="flex justify-center">
-                    <FormControl>
-                      <InputOTP
-                        maxLength={6}
-                        disabled={isPending}
-                        autoFocus
-                        {...field}
-                      >
-                        <InputOTPGroup className="gap-2 flex justify-between w-full">
-                          <InputOTPSlot index={0} className="h-16 w-12 text-xl font-extrabold border-blue-500 focus-within:border-blue-600" />
-                          <InputOTPSlot index={1} className="h-16 w-12 text-xl font-extrabold border-blue-500 focus-within:border-blue-600" />
-                          <InputOTPSlot index={2} className="h-16 w-12 text-xl font-extrabold border-blue-500 focus-within:border-blue-600" />
-                          <InputOTPSlot index={3} className="h-16 w-12 text-xl font-extrabold border-blue-500 focus-within:border-blue-600" />
-                          <InputOTPSlot index={4} className="h-16 w-12 text-xl font-extrabold border-blue-500 focus-within:border-blue-600" />
-                          <InputOTPSlot index={5} className="h-16 w-12 text-xl font-extrabold border-blue-500 focus-within:border-blue-600" />
-                        </InputOTPGroup>
-                      </InputOTP>
-                    </FormControl>
-                  </div>
+                  <FormControl>
+                    <InputOTP
+                      maxLength={6}
+                      disabled={isPending}
+                      autoFocus
+                      {...field}
+                    >
+                      <InputOTPGroup className="flex w-full gap-1.5 sm:gap-2">
+                        <InputOTPSlot index={0} className="flex-1 min-w-0 h-14 sm:h-16 text-lg sm:text-xl font-extrabold rounded-xl sm:rounded-2xl border-blue-500 focus-within:border-blue-600" />
+                        <InputOTPSlot index={1} className="flex-1 min-w-0 h-14 sm:h-16 text-lg sm:text-xl font-extrabold rounded-xl sm:rounded-2xl border-blue-500 focus-within:border-blue-600" />
+                        <InputOTPSlot index={2} className="flex-1 min-w-0 h-14 sm:h-16 text-lg sm:text-xl font-extrabold rounded-xl sm:rounded-2xl border-blue-500 focus-within:border-blue-600" />
+                        <InputOTPSlot index={3} className="flex-1 min-w-0 h-14 sm:h-16 text-lg sm:text-xl font-extrabold rounded-xl sm:rounded-2xl border-blue-500 focus-within:border-blue-600" />
+                        <InputOTPSlot index={4} className="flex-1 min-w-0 h-14 sm:h-16 text-lg sm:text-xl font-extrabold rounded-xl sm:rounded-2xl border-blue-500 focus-within:border-blue-600" />
+                        <InputOTPSlot index={5} className="flex-1 min-w-0 h-14 sm:h-16 text-lg sm:text-xl font-extrabold rounded-xl sm:rounded-2xl border-blue-500 focus-within:border-blue-600" />
+                      </InputOTPGroup>
+                    </InputOTP>
+                  </FormControl>
                   <FieldError className="text-center" />
                 </Field>
               )} />
             </form>
           </Form>
         </div>
+
         <BottomActionBar>
-          <div className="flex flex-col lg:flex-row gap-3 w-full">
-            <Button form="verify-phone-form" type="submit" disabled={isPending} className="w-full lg:flex-1 h-14 text-[15px] font-bold rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/10 transition-all duration-200 active:scale-[0.98]">
+          <div className="flex flex-col sm:flex-row gap-3 w-full">
+            <Button
+              form="verify-phone-form"
+              type="submit"
+              disabled={isPending}
+              className="w-full sm:flex-1 h-14 text-[15px] font-bold rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/10 transition-all duration-200 active:scale-[0.98]"
+            >
               {isPending ? (
                 <span className="flex items-center justify-center gap-2">
                   <Spinner className="w-4 h-4" />
@@ -131,7 +132,7 @@ export const PhoneVerifyStep: React.FC<PhoneVerifyStepProps> = ({
             <Button
               variant="outline"
               type="button"
-              className="w-full lg:flex-1 h-14 border-blue-500 text-blue-600 hover:bg-blue-50 text-[15px] font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]"
+              className="w-full sm:flex-1 h-14 border-blue-500 text-blue-600 hover:bg-blue-50 text-[15px] font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]"
               onClick={handleResend}
               disabled={resendCountdown > 0 || isPending || isResending}
             >

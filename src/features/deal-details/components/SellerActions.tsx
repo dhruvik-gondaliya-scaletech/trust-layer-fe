@@ -147,6 +147,30 @@ export function SellerActions({
         </div>
       );
 
+    case DealStatus.DISPUTED:
+    case DealStatus.RETURN_APPROVED:
+    case DealStatus.RETURN_SHIPPED:
+    case DealStatus.RETURN_DELIVERED:
+    case DealStatus.RETURN_COMPLETED:
+      return (
+        <div className="flex flex-col gap-3 w-full">
+          <div className="text-center text-xs font-semibold text-rose-600 bg-rose-50 rounded-xl py-3 px-4 border border-rose-100 flex flex-col gap-1 items-center">
+            <div className="flex items-center gap-1.5">
+              <ShieldAlert className="w-3.5 h-3.5 text-rose-500" />
+              <span className="capitalize">Status: {deal.status.replace("_", " ")}</span>
+            </div>
+            <span className="text-[11px] text-rose-600/80 font-normal">This deal has an active dispute.</span>
+          </div>
+          <Button
+            onClick={() => router.push(FRONTEND_ROUTES.DISPUTE_DETAILS(deal.id))}
+            className="w-full h-14 text-[15px] font-bold rounded-2xl bg-rose-500 hover:bg-rose-600 text-white shadow-md shadow-rose-500/10 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+          >
+            <ShieldAlert className="w-4 h-4" />
+            <span>View Dispute Details</span>
+          </Button>
+        </div>
+      );
+
     default:
       return (
         <div className="flex flex-col gap-3 w-full">

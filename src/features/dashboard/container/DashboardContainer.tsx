@@ -47,7 +47,7 @@ export const DashboardContainer: React.FC = () => {
     if (action.type === "fund_escrow") {
       router.push(FRONTEND_ROUTES.FUND_ESCROW(action.id));
     } else if (action.type === "upload_tracking" || action.type === "release_funds") {
-      router.push(FRONTEND_ROUTES.DEAL_TIMELINE(action.id));
+      router.push(FRONTEND_ROUTES.DEAL_DETAILS(action.id));
     } else {
       toast.info("Opening Action Window", {
         description: `Resolving task: ${action.title}.`,

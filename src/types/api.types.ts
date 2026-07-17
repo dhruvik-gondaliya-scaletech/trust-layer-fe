@@ -343,4 +343,55 @@ export interface ResetPasswordDto {
   newPassword: string;
 }
 
+// ─── Dispute DTOs & Models ────────────────────────────────────────────────────
+
+export type DisputeStatus = 'created' | 'seller_responded' | 'escalated' | 'resolved';
+export type DisputeAction = 'refund' | 'return' | 'decline';
+
+export interface Dispute {
+  id: string;
+  dealId: string;
+  status: DisputeStatus;
+  reason: string;
+  explanation: string;
+  sellerExplanation: string | null;
+  action: DisputeAction | null;
+  returnShippingFeeSplit: FeePayer | null;
+  returnAddressId: string | null;
+  buyerEscalated: boolean;
+  carrier: string | null;
+  shippingType: ShippingType | null;
+  trackingNumber: string | null;
+  estimatedDeliveryAt: string | null;
+  trackingUrl: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  deal?: Deal;
+}
+
+export interface CreateDisputeDto {
+  dealId: string;
+  reason: string;
+  explanation: string;
+}
+
+export interface RespondDisputeDto {
+  action: DisputeAction;
+  sellerExplanation: string;
+  returnShippingFeeSplit?: FeePayer;
+  returnAddressId?: string;
+}
+
+export interface ShipReturnDto {
+  carrier: string;
+  shippingType: ShippingType;
+  trackingNumber: string;
+  estimatedDeliveryAt: string;
+  trackingUrl?: string;
+  notes?: string;
+}
+
+
 

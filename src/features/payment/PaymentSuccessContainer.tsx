@@ -112,7 +112,7 @@ export default function PaymentSuccessContainer() {
       </div>
       <BottomActionBar>
         <Button
-          onClick={() => router.push(FRONTEND_ROUTES.DEAL_TIMELINE(dealNumber))}
+          onClick={() => router.push(FRONTEND_ROUTES.DEAL_DETAILS(dealNumber))}
           className="w-full h-14 text-[16px] font-bold rounded-2xl bg-primary text-white shadow-lg flex items-center justify-center gap-2"
         >
           Go to Dashboard <ArrowRight className="w-5 h-5" />

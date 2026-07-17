@@ -33,7 +33,7 @@ export default function ShipmentProgress({
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between relative px-2">
           {/* Connector line behind circles */}
-          <div className="absolute top-[15px] left-8 right-8 h-[2px] bg-slate-100 -z-0">
+          <div className="absolute top-[16px] left-[10%] right-[10%] h-[2px] bg-slate-100 z-0">
             <div
               className="h-full bg-primary transition-all duration-500 ease-out"
               style={{ width: `${progressPercent}%` }}
@@ -46,9 +46,9 @@ export default function ShipmentProgress({
               <div key={item.step} className="flex flex-col items-center gap-2 z-10 flex-1">
                 <div
                   className={cn(
-                    "w-7.5 h-7.5 rounded-full flex items-center justify-center text-[11px] font-bold transition-all duration-300 shadow-sm",
+                    "w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold transition-all duration-300 shadow-sm",
                     isCompleted
-                      ? "bg-primary text-white scale-105"
+                      ? "bg-primary text-white scale-105 shadow-sm shadow-primary/20"
                       : "bg-white border-2 border-slate-200 text-slate-400"
                   )}
                 >
@@ -60,8 +60,8 @@ export default function ShipmentProgress({
                 </div>
                 <span
                   className={cn(
-                    "text-[9px] font-black text-center max-w-[65px] leading-tight transition-colors duration-300",
-                    isCompleted ? "text-slate-800" : "text-slate-400"
+                    "text-[10px] font-bold text-center max-w-[65px] leading-tight transition-colors duration-300",
+                    isCompleted ? "text-slate-800 font-extrabold" : "text-slate-400"
                   )}
                 >
                   {item.label}

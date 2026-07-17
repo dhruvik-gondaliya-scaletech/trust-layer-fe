@@ -190,7 +190,7 @@ export default function FundEscrowContainer() {
       isSubmittingPayment={
         createCheckoutSessionMutation.isPending || isRedirecting
       }
-      onGoToTimeline={() => router.push(FRONTEND_ROUTES.DEAL_TIMELINE(deal.dealNumber))}
+      onGoToDetails={() => router.push(FRONTEND_ROUTES.DEAL_DETAILS(deal.dealNumber))}
     />
   );
 }

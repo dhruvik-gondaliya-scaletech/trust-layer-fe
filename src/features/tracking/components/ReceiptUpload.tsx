@@ -15,6 +15,24 @@ export default function ReceiptUpload({
   onChange,
 }: ReceiptUploadProps) {
   const [dragActive, setDragActive] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!receiptFile) {
+      setPreviewUrl(null);
+      return;
+    }
+
+    if (receiptFile.type.startsWith("image/")) {
+      const url = URL.createObjectURL(receiptFile);
+      setPreviewUrl(url);
+      return () => {
+        URL.revokeObjectURL(url);
+      };
+    } else {
+      setPreviewUrl(null);
+    }
+  }, [receiptFile]);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -91,32 +109,46 @@ export default function ReceiptUpload({
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
-            className="bg-white rounded-[16px] p-3 flex items-center justify-between border border-emerald-100 shadow-sm mt-1"
+            className="bg-white rounded-[16px] p-3 flex flex-col gap-3 border border-emerald-100 shadow-sm mt-1"
           >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-10 h-10 rounded-[10px] bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0 overflow-hidden">
-                {receiptFile.type.startsWith("image/") ? (
-                  <ImageIcon size={18} />
-                ) : (
-                  <FileText size={18} />
-                )}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-10 h-10 rounded-[10px] bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0 overflow-hidden border border-slate-100">
+                  {previewUrl ? (
+                    <img src={previewUrl} alt="Receipt preview" className="w-full h-full object-cover" />
+                  ) : receiptFile.type.startsWith("image/") ? (
+                    <ImageIcon size={18} />
+                  ) : (
+                    <FileText size={18} />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[12px] font-bold text-slate-700 truncate">{receiptFile.name}</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">
+                    {(receiptFile.size / (1024 * 1024)).toFixed(2)} MB
+                  </p>
+                </div>
               </div>
-              <div className="min-w-0">
-                <p className="text-[12px] font-bold text-slate-700 truncate">{receiptFile.name}</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">
-                  {(receiptFile.size / (1024 * 1024)).toFixed(2)} MB
-                </p>
-              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={removeFile}
+                className="h-8 w-8 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-50"
+              >
+                <X size={16} />
+              </Button>
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={removeFile}
-              className="h-8 w-8 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-50"
-            >
-              <X size={16} />
-            </Button>
+
+            {previewUrl && (
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center">
+                <img
+                  src={previewUrl}
+                  alt="Receipt Preview"
+                  className="max-w-full max-h-64 object-contain rounded-lg"
+                />
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

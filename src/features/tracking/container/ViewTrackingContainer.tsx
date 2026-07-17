@@ -50,7 +50,7 @@ export default function ViewTrackingContainer() {
         queryClient.invalidateQueries({ queryKey: dealKeys.byId(deal.id) });
         queryClient.invalidateQueries({ queryKey: dealKeys.byDealNumber(deal.dealNumber) });
       }
-      router.push(FRONTEND_ROUTES.DEAL_TIMELINE(deal?.dealNumber ?? ""));
+      router.push(FRONTEND_ROUTES.DEAL_DETAILS(deal?.dealNumber ?? ""));
     },
     onError: (err) => {
       toast.error("Failed to confirm delivery: " + err.message);
@@ -68,7 +68,7 @@ export default function ViewTrackingContainer() {
 
   const handleReportIssue = () => {
     if (!deal) return;
-    router.push(FRONTEND_ROUTES.DISPUTE_FLOW(deal.dealNumber));
+    router.push(FRONTEND_ROUTES.DISPUTE_FLOW(deal.id));
   };
 
   if (isLoading) {
