@@ -223,7 +223,7 @@ export const DashboardContainer: React.FC = () => {
                 />
               </motion.div>
 
-              {data.quickActions.length > 0 && (
+              {/* {data.quickActions.length > 0 && (
                 <motion.div variants={slideUp} className="max-h-[420px] overflow-y-auto pr-1 scrollbar-none">
                   <QuickActions
                     actions={data.quickActions}
@@ -231,7 +231,7 @@ export const DashboardContainer: React.FC = () => {
                     onActionClick={handleQuickActionClick}
                   />
                 </motion.div>
-              )}
+              )} */}
             </div>
           </div>
         </motion.div>
